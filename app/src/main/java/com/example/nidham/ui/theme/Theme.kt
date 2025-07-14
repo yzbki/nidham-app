@@ -17,16 +17,21 @@ private val DarkColorScheme = darkColorScheme(
     secondary = PurpleGrey80,
     tertiary = Pink80,
 
-    background = Color(0xFFBBDEFB),      // light blue background
-    surface = Color(0xFF0D47A1),         // deep blue surface (for text fields)
-    onBackground = Color.White,          // white text on blue background
-    onSurface = Color.White,       // white text on dark blue surface
+    background = Color.DarkGray,
+    surface = Color.LightGray,
+    onBackground = Color.White,
+    onSurface = Color.Black,
 )
 
 private val LightColorScheme = lightColorScheme(
     primary = Purple40,
     secondary = PurpleGrey40,
-    tertiary = Pink40
+    tertiary = Pink40,
+
+    background = Color.LightGray,
+    surface = Color.DarkGray,
+    onBackground = Color.Black,
+    onSurface = Color.White,
 )
 
 @Composable

@@ -14,6 +14,7 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.example.nidham.ui.theme.NidhamTheme
@@ -70,7 +71,7 @@ fun ToDoListScreen() {
 
     Surface(
         modifier = Modifier.fillMaxSize(),
-        color = colorScheme.background // <- uses the red you defined
+        color = colorScheme.background
     ) {
         Column(
             modifier = Modifier
@@ -78,6 +79,16 @@ fun ToDoListScreen() {
                 .padding(WindowInsets.safeDrawing.asPaddingValues())
                 .padding(horizontal = 16.dp, vertical = 24.dp)
         ) {
+            Text(
+                text = "Nidham",
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onBackground,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp),
+                textAlign = TextAlign.Center
+            )
+
             TextField(
                 value = listTitle,
                 onValueChange = { listTitle = it },
@@ -86,6 +97,8 @@ fun ToDoListScreen() {
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
                 colors = TextFieldDefaults.colors(
+                    focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 1.0f),
                     focusedContainerColor = colorScheme.surface,
                     unfocusedContainerColor = colorScheme.surface,
                     focusedTextColor = colorScheme.onSurface,
@@ -132,6 +145,8 @@ fun ToDoListScreen() {
                                         null
                                 ),
                                 colors = TextFieldDefaults.colors(
+                                    focusedLabelColor = MaterialTheme.colorScheme.onSurface,
+                                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 1.0f),
                                     focusedContainerColor = MaterialTheme.colorScheme.surface,
                                     unfocusedContainerColor = MaterialTheme.colorScheme.surface,
                                     focusedTextColor = MaterialTheme.colorScheme.onSurface,
