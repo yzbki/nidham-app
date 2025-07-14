@@ -18,10 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.example.nidham.ui.theme.NidhamTheme
-import org.burnoutcrew.reorderable.ReorderableItem
-import org.burnoutcrew.reorderable.detectReorderAfterLongPress
-import org.burnoutcrew.reorderable.rememberReorderableLazyListState
-import org.burnoutcrew.reorderable.reorderable
+import org.burnoutcrew.reorderable.*
 import java.util.UUID
 
 class MainActivity : ComponentActivity() {
@@ -58,6 +55,7 @@ fun ToDoListScreen() {
         while (checkedStates.size > tasks.size) checkedStates.removeAt(checkedStates.lastIndex)
     }
 
+    // Handle dynamic reordering of tasks
     val state = rememberReorderableLazyListState(
         onMove = { from, to ->
             tasks.apply {
@@ -79,16 +77,17 @@ fun ToDoListScreen() {
                 .padding(WindowInsets.safeDrawing.asPaddingValues())
                 .padding(horizontal = 16.dp, vertical = 24.dp)
         ) {
+            // App title text
             Text(
                 text = "Nidham",
                 style = MaterialTheme.typography.headlineMedium,
-                color = MaterialTheme.colorScheme.onBackground,
+                color = colorScheme.onBackground,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
                 textAlign = TextAlign.Center
             )
-
+            // List title text
             TextField(
                 value = listTitle,
                 onValueChange = { listTitle = it },
@@ -97,8 +96,8 @@ fun ToDoListScreen() {
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
                 colors = TextFieldDefaults.colors(
-                    focusedLabelColor = MaterialTheme.colorScheme.onSurface,
-                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 1.0f),
+                    focusedLabelColor = colorScheme.onSurface,
+                    unfocusedLabelColor = colorScheme.onSurface.copy(alpha = 1.0f),
                     focusedContainerColor = colorScheme.surface,
                     unfocusedContainerColor = colorScheme.surface,
                     focusedTextColor = colorScheme.onSurface,
@@ -107,7 +106,7 @@ fun ToDoListScreen() {
                     unfocusedIndicatorColor = colorScheme.primary
                 )
             )
-
+            // Task list
             LazyColumn(
                 state = state.listState,
                 modifier = Modifier
@@ -123,6 +122,7 @@ fun ToDoListScreen() {
                                 .padding(bottom = 8.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
+                            // Checkbox button
                             Checkbox(
                                 checked = checkedStates.getOrElse(index) { false },
                                 onCheckedChange = { checkedStates[index] = it }
@@ -136,26 +136,26 @@ fun ToDoListScreen() {
                                 label = { Text("Task ${index + 1}") },
                                 textStyle = MaterialTheme.typography.bodyLarge.copy(
                                     color = if (checkedStates.getOrElse(index) { false })
-                                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f)
+                                        colorScheme.onSurface.copy(alpha = 0.4f)
                                     else
-                                        MaterialTheme.colorScheme.onSurface,
+                                        colorScheme.onSurface,
                                     textDecoration = if (checkedStates.getOrElse(index) { false })
                                         TextDecoration.LineThrough
                                     else
                                         null
                                 ),
                                 colors = TextFieldDefaults.colors(
-                                    focusedLabelColor = MaterialTheme.colorScheme.onSurface,
-                                    unfocusedLabelColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 1.0f),
-                                    focusedContainerColor = MaterialTheme.colorScheme.surface,
-                                    unfocusedContainerColor = MaterialTheme.colorScheme.surface,
-                                    focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                    unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                                    focusedIndicatorColor = MaterialTheme.colorScheme.primary,
-                                    unfocusedIndicatorColor = MaterialTheme.colorScheme.primary
+                                    focusedLabelColor = colorScheme.onSurface,
+                                    unfocusedLabelColor = colorScheme.onSurface.copy(alpha = 1.0f),
+                                    focusedContainerColor = colorScheme.surface,
+                                    unfocusedContainerColor = colorScheme.surface,
+                                    focusedTextColor = colorScheme.onSurface,
+                                    unfocusedTextColor = colorScheme.onSurface,
+                                    focusedIndicatorColor = colorScheme.primary,
+                                    unfocusedIndicatorColor = colorScheme.primary
                                 )
                             )
-
+                            // Remove task button
                             IconButton(onClick = {
                                 tasks.removeAt(index)
                                 checkedStates.removeAt(index)
@@ -165,6 +165,7 @@ fun ToDoListScreen() {
                                     contentDescription = "Delete Task"
                                 )
                             }
+                            // Drag task button
                             Icon(
                                 imageVector = Icons.Default.MoreVert,
                                 contentDescription = "Drag Handle",
@@ -174,7 +175,7 @@ fun ToDoListScreen() {
                     }
                 }
             }
-
+            // Add task button
             Button(
                 onClick = {
                     tasks.add(TaskItem(textState = mutableStateOf("")))
