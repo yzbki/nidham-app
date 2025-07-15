@@ -85,6 +85,7 @@ fun ToDoListScreen() {
 
     // Load autosave list
     LaunchedEffect(Unit) {
+        autoSaveEnabled.value = true
         val loadedData = dataStore.loadListData("autosave")
         listData.title.value = loadedData.title.value
         listData.tasks.clear()
@@ -350,6 +351,7 @@ fun ToDoListScreen() {
                                     snackbarHostState.currentSnackbarData?.dismiss()
                                     snackbarHostState.showSnackbar("Please enter a valid name.")
                                 }
+                                autoSaveEnabled.value = true
                             }
                             showSaveDialog = false
                         }
@@ -403,6 +405,7 @@ fun ToDoListScreen() {
                                                     listData.checkedStates.add(false)
                                                 snackbarHostState.currentSnackbarData?.dismiss()
                                                 snackbarHostState.showSnackbar("Loaded \"$name\"")
+                                                autoSaveEnabled.value = true
                                             }
                                             showLoadDialog = false
                                         },
