@@ -4,23 +4,55 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.icons.*
+import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.*
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.IconButtonDefaults
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.runtime.*
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
+import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.example.nidham.ui.theme.NidhamTheme
-import org.burnoutcrew.reorderable.*
+import org.burnoutcrew.reorderable.ReorderableItem
+import org.burnoutcrew.reorderable.detectReorderAfterLongPress
+import org.burnoutcrew.reorderable.rememberReorderableLazyListState
+import org.burnoutcrew.reorderable.reorderable
 import java.util.UUID
 
 class MainActivity : ComponentActivity() {
@@ -39,33 +71,40 @@ data class TaskItem(
     val textState: MutableState<String> = mutableStateOf("")
 )
 
+class ListData {
+    val title = mutableStateOf("To-Do List")
+    val tasks = mutableStateListOf(TaskItem())
+    val checkedStates = mutableStateListOf(false)
+
+    fun reset() {
+        title.value = "To-Do List"
+        tasks.clear()
+        checkedStates.clear()
+        tasks.add(TaskItem())
+        checkedStates.add(false)
+    }
+}
+
 @Composable
 fun ToDoListScreen() {
-    var listTitle by remember { mutableStateOf("My To-Do List") }
-
-    val tasks = remember {
-        mutableStateListOf(
-            TaskItem(textState = mutableStateOf("First task")),
-            TaskItem(textState = mutableStateOf("Second task"))
-        )
-    }
-    val checkedStates = remember { mutableStateListOf(false, false) }
-
+    val listData = remember { ListData() }
     var menuExpanded by remember { mutableStateOf(false) }
 
     // Keep checkedStates size in sync with tasks size
-    LaunchedEffect(tasks.size) {
-        while (checkedStates.size < tasks.size) checkedStates.add(false)
-        while (checkedStates.size > tasks.size) checkedStates.removeAt(checkedStates.lastIndex)
+    LaunchedEffect(listData.tasks.size) {
+        while (listData.checkedStates.size < listData.tasks.size)
+            listData.checkedStates.add(false)
+        while (listData.checkedStates.size > listData.tasks.size)
+            listData.checkedStates.removeAt(listData.checkedStates.lastIndex)
     }
 
     // Handle dynamic reordering of tasks
     val state = rememberReorderableLazyListState(
         onMove = { from, to ->
-            tasks.apply {
+            listData.tasks.apply {
                 add(to.index, removeAt(from.index))
             }
-            checkedStates.apply {
+            listData.checkedStates.apply {
                 add(to.index, removeAt(from.index))
             }
         }
@@ -128,16 +167,7 @@ fun ToDoListScreen() {
                                 )
                             },
                             onClick = {
-                                tasks.clear()
-                                checkedStates.clear()
-                                tasks.addAll(
-                                    listOf(
-                                        TaskItem(textState = mutableStateOf("First task")),
-                                        TaskItem(textState = mutableStateOf("Second task"))
-                                    )
-                                )
-                                checkedStates.addAll(listOf(false, false))
-                                listTitle = "My To-Do List"
+                                listData.reset()
                                 menuExpanded = false
                             }
                         )
@@ -146,8 +176,8 @@ fun ToDoListScreen() {
             }
             // List title text
             TextField(
-                value = listTitle,
-                onValueChange = { listTitle = it },
+                value = listData.title.value,
+                onValueChange = { listData.title.value = it },
                 label = { Text("List Title") },
                 modifier = Modifier
                     .fillMaxWidth()
@@ -171,7 +201,7 @@ fun ToDoListScreen() {
                     .reorderable(state)
                     .detectReorderAfterLongPress(state)
             ) {
-                itemsIndexed(tasks, key = { _, taskItem -> taskItem.id }) { index, taskItem ->
+                itemsIndexed(listData.tasks, key = { _, taskItem -> taskItem.id }) { index, taskItem ->
                     ReorderableItem(state, key = taskItem.id) { _ ->
                         Row(
                             modifier = Modifier
@@ -181,8 +211,8 @@ fun ToDoListScreen() {
                         ) {
                             // Checkbox button
                             Checkbox(
-                                checked = checkedStates.getOrElse(index) { false },
-                                onCheckedChange = { checkedStates[index] = it }
+                                checked = listData.checkedStates.getOrElse(index) { false },
+                                onCheckedChange = { listData.checkedStates[index] = it }
                             )
                             TextField(
                                 value = taskItem.textState.value,
@@ -192,11 +222,11 @@ fun ToDoListScreen() {
                                 modifier = Modifier.weight(1f),
                                 label = { Text("Task ${index + 1}") },
                                 textStyle = MaterialTheme.typography.bodyLarge.copy(
-                                    color = if (checkedStates.getOrElse(index) { false })
+                                    color = if (listData.checkedStates.getOrElse(index) { false })
                                         colorScheme.onSurface.copy(alpha = 0.4f)
                                     else
                                         colorScheme.onSurface,
-                                    textDecoration = if (checkedStates.getOrElse(index) { false })
+                                    textDecoration = if (listData.checkedStates.getOrElse(index) { false })
                                         TextDecoration.LineThrough
                                     else
                                         null
@@ -215,8 +245,8 @@ fun ToDoListScreen() {
                             // Remove task button
                             IconButton(
                                 onClick = {
-                                    tasks.removeAt(index)
-                                    checkedStates.removeAt(index)
+                                    listData.tasks.removeAt(index)
+                                    listData.checkedStates.removeAt(index)
                                 },
                                 colors = IconButtonDefaults.iconButtonColors(
                                     contentColor = colorScheme.secondary
@@ -241,8 +271,8 @@ fun ToDoListScreen() {
             // Add task button
             Button(
                 onClick = {
-                    tasks.add(TaskItem(textState = mutableStateOf("")))
-                    checkedStates.add(false)
+                    listData.tasks.add(TaskItem())
+                    listData.checkedStates.add(false)
                 },
                 modifier = Modifier
                     .fillMaxWidth()
