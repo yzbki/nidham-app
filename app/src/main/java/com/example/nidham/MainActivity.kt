@@ -31,29 +31,31 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.example.nidham.ui.theme.NidhamTheme
+import kotlinx.coroutines.launch
 import org.burnoutcrew.reorderable.ReorderableItem
 import org.burnoutcrew.reorderable.detectReorderAfterLongPress
 import org.burnoutcrew.reorderable.rememberReorderableLazyListState
 import org.burnoutcrew.reorderable.reorderable
-import java.util.UUID
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -66,29 +68,32 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-data class TaskItem(
-    val id: String = UUID.randomUUID().toString(),
-    val textState: MutableState<String> = mutableStateOf("")
-)
-
-class ListData {
-    val title = mutableStateOf("To-Do List")
-    val tasks = mutableStateListOf(TaskItem())
-    val checkedStates = mutableStateListOf(false)
-
-    fun reset() {
-        title.value = "To-Do List"
-        tasks.clear()
-        checkedStates.clear()
-        tasks.add(TaskItem())
-        checkedStates.add(false)
-    }
-}
-
 @Composable
 fun ToDoListScreen() {
+    val context = LocalContext.current
+    val dataStore = remember { DataStoreManager(context) }
+    val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
     val listData = remember { ListData() }
+    val autoSaveEnabled = remember { mutableStateOf(true) }
     var menuExpanded by remember { mutableStateOf(false) }
+
+    // Auto-load on launch
+    LaunchedEffect(Unit) {
+        val loadedData = dataStore.loadListData()
+        listData.title.value = loadedData.title.value
+        listData.tasks.clear()
+        listData.tasks.addAll(loadedData.tasks)
+        listData.checkedStates.clear()
+        listData.checkedStates.addAll(loadedData.checkedStates)
+    }
+
+    // Auto-save on any change
+    LaunchedEffect(listData.title.value, listData.tasks.size, listData.checkedStates) {
+        if (autoSaveEnabled.value) {
+            dataStore.saveListData(listData)
+        }
+    }
 
     // Keep checkedStates size in sync with tasks size
     LaunchedEffect(listData.tasks.size) {
@@ -110,14 +115,34 @@ fun ToDoListScreen() {
         }
     )
 
-    Surface(
-        modifier = Modifier.fillMaxSize(),
-        color = colorScheme.background
-    ) {
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        containerColor = colorScheme.background,
+        contentColor = colorScheme.onBackground,
+        bottomBar = {
+            // Add task button
+            Button(
+                onClick = {
+                    listData.tasks.add(TaskItem())
+                    listData.checkedStates.add(false)
+                },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                    .padding(WindowInsets.safeDrawing.asPaddingValues()),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorScheme.primary,
+                    contentColor = colorScheme.secondary
+                )
+            ) {
+                Text("Add Task")
+            }
+        }
+    ) { innerPadding ->
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(WindowInsets.safeDrawing.asPaddingValues())
+                .padding(innerPadding)
                 .padding(horizontal = 16.dp, vertical = 24.dp)
         ) {
             // Taskbar row
@@ -158,16 +183,53 @@ fun ToDoListScreen() {
                         onDismissRequest = { menuExpanded = false },
                         modifier = Modifier.background(colorScheme.tertiary)
                     ) {
-                        // Reset list
+                        // Reset List
                         DropdownMenuItem(
                             text = {
-                                Text(
-                                    "Reset List",
-                                    color = colorScheme.onSurface
-                                )
+                                Text("Reset List", color = colorScheme.onSurface)
                             },
                             onClick = {
+                                scope.launch {
+                                    snackbarHostState.showSnackbar("List reset!")
+                                }
                                 listData.reset()
+                                menuExpanded = false
+                            }
+                        )
+                        // Save List
+                        DropdownMenuItem(
+                            text = {
+                                Text("Save List", color = colorScheme.onSurface)
+                            },
+                            onClick = {
+                                scope.launch {
+                                    dataStore.saveListData(listData)
+                                    snackbarHostState.showSnackbar("List saved!")
+                                }
+                                menuExpanded = false
+                            }
+                        )
+                        // Load List
+                        DropdownMenuItem(
+                            text = {
+                                Text("Load List", color = colorScheme.onSurface)
+                            },
+                            onClick = {
+                                scope.launch {
+                                    autoSaveEnabled.value = false
+                                    val loadedData = dataStore.loadListData()
+                                    listData.title.value = loadedData.title.value
+                                    listData.tasks.clear()
+                                    listData.tasks.addAll(loadedData.tasks)
+                                    listData.checkedStates.clear()
+                                    listData.checkedStates.addAll(loadedData.checkedStates)
+
+                                    // Pad checkedStates if mismatched
+                                    while (listData.checkedStates.size < listData.tasks.size)
+                                        listData.checkedStates.add(false)
+
+                                    snackbarHostState.showSnackbar("List loaded!")
+                                }
                                 menuExpanded = false
                             }
                         )
@@ -214,6 +276,7 @@ fun ToDoListScreen() {
                                 checked = listData.checkedStates.getOrElse(index) { false },
                                 onCheckedChange = { listData.checkedStates[index] = it }
                             )
+                            // Task text field
                             TextField(
                                 value = taskItem.textState.value,
                                 onValueChange = { newValue ->
@@ -268,20 +331,7 @@ fun ToDoListScreen() {
                     }
                 }
             }
-            // Add task button
-            Button(
-                onClick = {
-                    listData.tasks.add(TaskItem())
-                    listData.checkedStates.add(false)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colorScheme.primary,
-                    contentColor = colorScheme.secondary
-                )
-            ) { Text("Add Task") }
+
         }
     }
 }
