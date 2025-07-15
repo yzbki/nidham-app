@@ -21,6 +21,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
@@ -77,10 +78,14 @@ fun ToDoListScreen() {
     val listData = remember { ListData() }
     val autoSaveEnabled = remember { mutableStateOf(true) }
     var menuExpanded by remember { mutableStateOf(false) }
+    var showSaveDialog by remember { mutableStateOf(false) }
+    var showLoadDialog by remember { mutableStateOf(false) }
+    var inputListName by remember { mutableStateOf("") }
+    var savedListNames by remember { mutableStateOf(listOf<String>()) }
 
-    // Auto-load on launch
+    // Load autosave list
     LaunchedEffect(Unit) {
-        val loadedData = dataStore.loadListData()
+        val loadedData = dataStore.loadListData("autosave")
         listData.title.value = loadedData.title.value
         listData.tasks.clear()
         listData.tasks.addAll(loadedData.tasks)
@@ -91,7 +96,7 @@ fun ToDoListScreen() {
     // Auto-save on any change
     LaunchedEffect(listData.title.value, listData.tasks.size, listData.checkedStates) {
         if (autoSaveEnabled.value) {
-            dataStore.saveListData(listData)
+            dataStore.saveListData("autosave", listData)
         }
     }
 
@@ -161,7 +166,7 @@ fun ToDoListScreen() {
                     modifier = Modifier.weight(2f),
                     textAlign = TextAlign.Center
                 )
-                // Dropdown menu box
+                // Dropdown menu button box
                 Box(
                     modifier = Modifier
                         .wrapContentSize(Alignment.TopEnd)
@@ -183,52 +188,33 @@ fun ToDoListScreen() {
                         onDismissRequest = { menuExpanded = false },
                         modifier = Modifier.background(colorScheme.tertiary)
                     ) {
-                        // Reset List
+                        // Reset list button
                         DropdownMenuItem(
-                            text = {
-                                Text("Reset List", color = colorScheme.onSurface)
-                            },
+                            text = { Text("Reset List", color = colorScheme.onSurface) },
                             onClick = {
                                 scope.launch {
+                                    snackbarHostState.currentSnackbarData?.dismiss()
                                     snackbarHostState.showSnackbar("List reset!")
                                 }
                                 listData.reset()
                                 menuExpanded = false
                             }
                         )
-                        // Save List
+                        // Save list button
                         DropdownMenuItem(
-                            text = {
-                                Text("Save List", color = colorScheme.onSurface)
-                            },
+                            text = { Text("Save List", color = colorScheme.onSurface) },
                             onClick = {
-                                scope.launch {
-                                    dataStore.saveListData(listData)
-                                    snackbarHostState.showSnackbar("List saved!")
-                                }
+                                showSaveDialog = true
                                 menuExpanded = false
                             }
                         )
-                        // Load List
+                        // Load list button
                         DropdownMenuItem(
-                            text = {
-                                Text("Load List", color = colorScheme.onSurface)
-                            },
+                            text = { Text("Load List", color = colorScheme.onSurface) },
                             onClick = {
                                 scope.launch {
-                                    autoSaveEnabled.value = false
-                                    val loadedData = dataStore.loadListData()
-                                    listData.title.value = loadedData.title.value
-                                    listData.tasks.clear()
-                                    listData.tasks.addAll(loadedData.tasks)
-                                    listData.checkedStates.clear()
-                                    listData.checkedStates.addAll(loadedData.checkedStates)
-
-                                    // Pad checkedStates if mismatched
-                                    while (listData.checkedStates.size < listData.tasks.size)
-                                        listData.checkedStates.add(false)
-
-                                    snackbarHostState.showSnackbar("List loaded!")
+                                    savedListNames = dataStore.getSavedListNames()
+                                    showLoadDialog = true
                                 }
                                 menuExpanded = false
                             }
@@ -331,7 +317,127 @@ fun ToDoListScreen() {
                     }
                 }
             }
+        }
+        // Save dialog box
+        if (showSaveDialog) {
+            AlertDialog(
+                onDismissRequest = {
+                    showSaveDialog = false
+                    inputListName = ""
+                },
+                title = {
+                    Text(
+                        "Save List",
+                        color = colorScheme.secondary
+                    )
+                },
+                text = {
+                    TextField(
+                        value = inputListName,
+                        onValueChange = { inputListName = it },
+                        label = { Text("List Name") }
+                    )
+                },
+                confirmButton = {
+                    Button(
+                        onClick = {
+                            scope.launch {
+                                if (inputListName.isNotBlank()) {
+                                    dataStore.saveListData(inputListName, listData)
+                                    snackbarHostState.currentSnackbarData?.dismiss()
+                                    snackbarHostState.showSnackbar("List '$inputListName' saved!")
+                                } else {
+                                    snackbarHostState.currentSnackbarData?.dismiss()
+                                    snackbarHostState.showSnackbar("Please enter a valid name.")
+                                }
+                            }
+                            showSaveDialog = false
+                        }
+                    ) { Text("Save") }
+                },
+                dismissButton = {
+                    Button(
+                        onClick = {
+                            showSaveDialog = false
+                            inputListName = ""
+                        }
+                    ) { Text("Cancel") }
+                }
+            )
 
+        }
+        // Load dialog box
+        if (showLoadDialog) {
+            AlertDialog(
+                onDismissRequest = { showLoadDialog = false },
+                confirmButton = {},
+                title = {
+                    Text(
+                        "Load List",
+                        color = colorScheme.secondary
+                    )
+                },
+                text = {
+                    Column {
+                        if (savedListNames.isEmpty()) {
+                            Text("No saved lists found.")
+                        } else {
+                            savedListNames.forEach() { name ->
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(vertical = 4.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Button(
+                                        onClick = {
+                                            scope.launch {
+                                                autoSaveEnabled.value = false
+                                                val loaded = dataStore.loadListData(name)
+                                                listData.title.value = loaded.title.value
+                                                listData.tasks.clear()
+                                                listData.tasks.addAll(loaded.tasks)
+                                                listData.checkedStates.clear()
+                                                listData.checkedStates.addAll(loaded.checkedStates)
+                                                while (listData.checkedStates.size < listData.tasks.size)
+                                                    listData.checkedStates.add(false)
+                                                snackbarHostState.currentSnackbarData?.dismiss()
+                                                snackbarHostState.showSnackbar("Loaded \"$name\"")
+                                            }
+                                            showLoadDialog = false
+                                        },
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .padding(end = 8.dp)
+                                    ) {
+                                        Text(
+                                            name,
+                                            color = colorScheme.secondary
+                                        )
+                                    }
+                                    if (name != "autosave") {
+                                        IconButton(
+                                            onClick = {
+                                                scope.launch {
+                                                    dataStore.deleteListByName(name)
+                                                    savedListNames = savedListNames - name
+                                                    snackbarHostState.currentSnackbarData?.dismiss()
+                                                    snackbarHostState.showSnackbar("Deleted \"$name\"")
+                                                }
+                                            }
+                                        ) {
+                                            Icon(
+                                                imageVector = Icons.Default.Delete,
+                                                contentDescription = "Delete $name"
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            )
         }
     }
 }
