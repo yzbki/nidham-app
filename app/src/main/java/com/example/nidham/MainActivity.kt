@@ -3,10 +3,12 @@ package com.example.nidham
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.material.icons.*
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.*
@@ -49,6 +51,8 @@ fun ToDoListScreen() {
     }
     val checkedStates = remember { mutableStateListOf(false, false) }
 
+    var menuExpanded by remember { mutableStateOf(false) }
+
     // Keep checkedStates size in sync with tasks size
     LaunchedEffect(tasks.size) {
         while (checkedStates.size < tasks.size) checkedStates.add(false)
@@ -77,16 +81,69 @@ fun ToDoListScreen() {
                 .padding(WindowInsets.safeDrawing.asPaddingValues())
                 .padding(horizontal = 16.dp, vertical = 24.dp)
         ) {
-            // App title text
-            Text(
-                text = "Nidham",
-                style = MaterialTheme.typography.headlineMedium,
-                color = colorScheme.onBackground,
+            // Taskbar row
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
-                textAlign = TextAlign.Center
-            )
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Spacer(modifier = Modifier.weight(1f))
+                // App title text
+                Text(
+                    text = "Nidham",
+                    style = MaterialTheme.typography.headlineMedium,
+                    color = colorScheme.onBackground,
+                    modifier = Modifier.weight(2f),
+                    textAlign = TextAlign.Center
+                )
+                // Dropdown menu box
+                Box(
+                    modifier = Modifier
+                        .wrapContentSize(Alignment.TopEnd)
+                        .weight(1f)
+                        .background(colorScheme.primary),
+                    contentAlignment = Alignment.TopEnd
+                ) {
+                    // Menu button
+                    IconButton(onClick = { menuExpanded = true }) {
+                        Icon(
+                            imageVector = Icons.Default.MoreVert,
+                            contentDescription = "Menu",
+                            tint = colorScheme.secondary
+                        )
+                    }
+                    // Dropdown menu items
+                    DropdownMenu(
+                        expanded = menuExpanded,
+                        onDismissRequest = { menuExpanded = false },
+                        modifier = Modifier.background(colorScheme.tertiary)
+                    ) {
+                        // Reset list
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    "Reset List",
+                                    color = colorScheme.onSurface
+                                )
+                            },
+                            onClick = {
+                                tasks.clear()
+                                checkedStates.clear()
+                                tasks.addAll(
+                                    listOf(
+                                        TaskItem(textState = mutableStateOf("First task")),
+                                        TaskItem(textState = mutableStateOf("Second task"))
+                                    )
+                                )
+                                checkedStates.addAll(listOf(false, false))
+                                listTitle = "My To-Do List"
+                                menuExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
             // List title text
             TextField(
                 value = listTitle,
@@ -156,10 +213,15 @@ fun ToDoListScreen() {
                                 )
                             )
                             // Remove task button
-                            IconButton(onClick = {
-                                tasks.removeAt(index)
-                                checkedStates.removeAt(index)
-                            }) {
+                            IconButton(
+                                onClick = {
+                                    tasks.removeAt(index)
+                                    checkedStates.removeAt(index)
+                                },
+                                colors = IconButtonDefaults.iconButtonColors(
+                                    contentColor = colorScheme.secondary
+                                )
+                            ) {
                                 Icon(
                                     imageVector = Icons.Default.Delete,
                                     contentDescription = "Delete Task"
@@ -167,8 +229,9 @@ fun ToDoListScreen() {
                             }
                             // Drag task button
                             Icon(
-                                imageVector = Icons.Default.MoreVert,
+                                imageVector = Icons.Default.ArrowDropDown,
                                 contentDescription = "Drag Handle",
+                                tint = colorScheme.secondary,
                                 modifier = Modifier.padding(start = 8.dp)
                             )
                         }
@@ -183,10 +246,12 @@ fun ToDoListScreen() {
                 },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 16.dp)
-            ) {
-                Text("Add Task")
-            }
+                    .padding(top = 16.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorScheme.primary,
+                    contentColor = colorScheme.secondary
+                )
+            ) { Text("Add Task") }
         }
     }
 }
