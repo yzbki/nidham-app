@@ -6,7 +6,7 @@ import androidx.compose.runtime.mutableStateOf
 class ListData {
     val title = mutableStateOf("To-Do List")
     val tasks = mutableStateListOf(TaskItem())
-    val checkedStates = mutableStateListOf(false)
+    val checkedStates = mutableStateListOf<Boolean>()
 
     fun reset() {
         title.value = "To-Do List"

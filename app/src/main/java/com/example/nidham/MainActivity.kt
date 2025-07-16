@@ -25,6 +25,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -47,6 +48,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -76,7 +78,6 @@ fun ToDoListScreen() {
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
     val listData = remember { ListData() }
-    val autoSaveEnabled = remember { mutableStateOf(true) }
     var menuExpanded by remember { mutableStateOf(false) }
     var showSaveDialog by remember { mutableStateOf(false) }
     var showLoadDialog by remember { mutableStateOf(false) }
@@ -85,8 +86,7 @@ fun ToDoListScreen() {
 
     // Load autosave list
     LaunchedEffect(Unit) {
-        autoSaveEnabled.value = true
-        val loadedData = dataStore.loadListData("autosave")
+        val loadedData = dataStore.loadListData("AUTOSAVE")
         listData.title.value = loadedData.title.value
         listData.tasks.clear()
         listData.tasks.addAll(loadedData.tasks)
@@ -96,9 +96,7 @@ fun ToDoListScreen() {
 
     // Auto-save on any change
     LaunchedEffect(listData.title.value, listData.tasks.size, listData.checkedStates) {
-        if (autoSaveEnabled.value) {
-            dataStore.saveListData("autosave", listData)
-        }
+        dataStore.saveListData("AUTOSAVE", listData)
     }
 
     // Keep checkedStates size in sync with tasks size
@@ -172,7 +170,7 @@ fun ToDoListScreen() {
                     modifier = Modifier
                         .wrapContentSize(Alignment.TopEnd)
                         .weight(1f)
-                        .background(colorScheme.primary),
+                        .background(colorScheme.background),
                     contentAlignment = Alignment.TopEnd
                 ) {
                     // Menu button
@@ -233,13 +231,11 @@ fun ToDoListScreen() {
                     .padding(bottom = 16.dp),
                 colors = TextFieldDefaults.colors(
                     focusedLabelColor = colorScheme.onSurface,
-                    unfocusedLabelColor = colorScheme.onSurface.copy(alpha = 1.0f),
+                    unfocusedLabelColor = colorScheme.onSurface,
                     focusedContainerColor = colorScheme.surface,
-                    unfocusedContainerColor = colorScheme.surface,
+                    unfocusedContainerColor = colorScheme.background,
                     focusedTextColor = colorScheme.onSurface,
                     unfocusedTextColor = colorScheme.onSurface,
-                    focusedIndicatorColor = colorScheme.primary,
-                    unfocusedIndicatorColor = colorScheme.primary
                 )
             )
             // Task list
@@ -261,35 +257,53 @@ fun ToDoListScreen() {
                             // Checkbox button
                             Checkbox(
                                 checked = listData.checkedStates.getOrElse(index) { false },
-                                onCheckedChange = { listData.checkedStates[index] = it }
+                                onCheckedChange = {
+                                    listData.checkedStates[index] = it
+                                    scope.launch {
+                                        dataStore.saveListData("AUTOSAVE", listData)
+                                    }
+                                },
+                                colors = CheckboxDefaults.colors(
+                                    uncheckedColor = colorScheme.surface,
+                                    checkedColor = colorScheme.onSurface
+                                )
                             )
                             // Task text field
                             TextField(
                                 value = taskItem.textState.value,
                                 onValueChange = { newValue ->
                                     taskItem.textState.value = newValue
+                                    scope.launch {
+                                        dataStore.saveListData("AUTOSAVE", listData)
+                                    }
                                 },
                                 modifier = Modifier.weight(1f),
                                 label = { Text("Task ${index + 1}") },
                                 textStyle = MaterialTheme.typography.bodyLarge.copy(
                                     color = if (listData.checkedStates.getOrElse(index) { false })
-                                        colorScheme.onSurface.copy(alpha = 0.4f)
+                                        colorScheme.inverseSurface.copy(alpha = 0.4f)
                                     else
-                                        colorScheme.onSurface,
+                                        colorScheme.inverseSurface,
                                     textDecoration = if (listData.checkedStates.getOrElse(index) { false })
                                         TextDecoration.LineThrough
                                     else
                                         null
                                 ),
                                 colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = if (listData.checkedStates.getOrElse(index) { false })
+                                        colorScheme.surface.copy(alpha = 0.8f)
+                                    else
+                                        colorScheme.surface,
+                                    unfocusedContainerColor = if (listData.checkedStates.getOrElse(index) { false })
+                                        colorScheme.surface.copy(alpha = 0.8f)
+                                    else
+                                        colorScheme.surface,
                                     focusedLabelColor = colorScheme.onSurface,
-                                    unfocusedLabelColor = colorScheme.onSurface.copy(alpha = 1.0f),
-                                    focusedContainerColor = colorScheme.surface,
-                                    unfocusedContainerColor = colorScheme.surface,
+                                    unfocusedLabelColor = colorScheme.onSurface,
                                     focusedTextColor = colorScheme.onSurface,
                                     unfocusedTextColor = colorScheme.onSurface,
                                     focusedIndicatorColor = colorScheme.primary,
-                                    unfocusedIndicatorColor = colorScheme.primary
+                                    unfocusedIndicatorColor = colorScheme.primary,
                                 )
                             )
                             // Remove task button
@@ -321,22 +335,26 @@ fun ToDoListScreen() {
         }
         // Save dialog box
         if (showSaveDialog) {
+            inputListName = listData.title.value
             AlertDialog(
                 onDismissRequest = {
                     showSaveDialog = false
                     inputListName = ""
                 },
-                title = {
-                    Text(
-                        "Save List",
-                        color = colorScheme.secondary
-                    )
+                title = { Text("Save List",
+                    color = colorScheme.secondary)
                 },
                 text = {
                     TextField(
                         value = inputListName,
                         onValueChange = { inputListName = it },
-                        label = { Text("List Name") }
+                        label = { Text("List Name",
+                            color = colorScheme.secondary)
+                        },
+                        colors = TextFieldDefaults.colors(
+                            focusedContainerColor = colorScheme.surface,
+                            unfocusedContainerColor = colorScheme.surface,
+                        )
                     )
                 },
                 confirmButton = {
@@ -351,7 +369,6 @@ fun ToDoListScreen() {
                                     snackbarHostState.currentSnackbarData?.dismiss()
                                     snackbarHostState.showSnackbar("Please enter a valid name.")
                                 }
-                                autoSaveEnabled.value = true
                             }
                             showSaveDialog = false
                         }
@@ -394,7 +411,6 @@ fun ToDoListScreen() {
                                     Button(
                                         onClick = {
                                             scope.launch {
-                                                autoSaveEnabled.value = false
                                                 val loaded = dataStore.loadListData(name)
                                                 listData.title.value = loaded.title.value
                                                 listData.tasks.clear()
@@ -405,7 +421,6 @@ fun ToDoListScreen() {
                                                     listData.checkedStates.add(false)
                                                 snackbarHostState.currentSnackbarData?.dismiss()
                                                 snackbarHostState.showSnackbar("Loaded \"$name\"")
-                                                autoSaveEnabled.value = true
                                             }
                                             showLoadDialog = false
                                         },
@@ -418,7 +433,7 @@ fun ToDoListScreen() {
                                             color = colorScheme.secondary
                                         )
                                     }
-                                    if (name != "autosave") {
+                                    if (name != "AUTOSAVE") {
                                         IconButton(
                                             onClick = {
                                                 scope.launch {
