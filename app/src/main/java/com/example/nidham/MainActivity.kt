@@ -4,6 +4,8 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -34,6 +36,7 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -48,8 +51,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -83,6 +86,7 @@ fun ToDoListScreen() {
     var showLoadDialog by remember { mutableStateOf(false) }
     var inputListName by remember { mutableStateOf("") }
     var savedListNames by remember { mutableStateOf(listOf<String>()) }
+    val focusManager = LocalFocusManager.current
 
     // Load autosave list
     LaunchedEffect(Unit) {
@@ -120,7 +124,19 @@ fun ToDoListScreen() {
     )
 
     Scaffold(
-        snackbarHost = { SnackbarHost(snackbarHostState) },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                snackbar = { data ->
+                    Snackbar(
+                        containerColor = colorScheme.surface,
+                        contentColor = colorScheme.inverseSurface,
+                        actionColor = colorScheme.onSurface,
+                        snackbarData = data
+                    )
+                }
+            )
+        },
         containerColor = colorScheme.background,
         contentColor = colorScheme.onBackground,
         bottomBar = {
@@ -148,6 +164,12 @@ fun ToDoListScreen() {
                 .fillMaxSize()
                 .padding(innerPadding)
                 .padding(horizontal = 16.dp, vertical = 24.dp)
+                .clickable(
+                    indication = null,
+                    interactionSource = remember { MutableInteractionSource() }
+                ) {
+                    focusManager.clearFocus()
+                }
         ) {
             // Taskbar row
             Row(
@@ -232,7 +254,7 @@ fun ToDoListScreen() {
                 colors = TextFieldDefaults.colors(
                     focusedLabelColor = colorScheme.onSurface,
                     unfocusedLabelColor = colorScheme.onSurface,
-                    focusedContainerColor = colorScheme.surface,
+                    focusedContainerColor = colorScheme.surface.copy(alpha=0.8f),
                     unfocusedContainerColor = colorScheme.background,
                     focusedTextColor = colorScheme.onSurface,
                     unfocusedTextColor = colorScheme.onSurface,
@@ -401,39 +423,39 @@ fun ToDoListScreen() {
                         if (savedListNames.isEmpty()) {
                             Text("No saved lists found.")
                         } else {
-                            savedListNames.forEach() { name ->
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Button(
-                                        onClick = {
-                                            scope.launch {
-                                                val loaded = dataStore.loadListData(name)
-                                                listData.title.value = loaded.title.value
-                                                listData.tasks.clear()
-                                                listData.tasks.addAll(loaded.tasks)
-                                                listData.checkedStates.clear()
-                                                listData.checkedStates.addAll(loaded.checkedStates)
-                                                while (listData.checkedStates.size < listData.tasks.size)
-                                                    listData.checkedStates.add(false)
-                                                snackbarHostState.currentSnackbarData?.dismiss()
-                                                snackbarHostState.showSnackbar("Loaded \"$name\"")
-                                            }
-                                            showLoadDialog = false
-                                        },
+                            savedListNames.forEach { name ->
+                                if (name != "AUTOSAVE") {
+                                    Row(
                                         modifier = Modifier
-                                            .weight(1f)
-                                            .padding(end = 8.dp)
+                                            .fillMaxWidth()
+                                            .padding(vertical = 4.dp),
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Text(
-                                            name,
-                                            color = colorScheme.secondary
-                                        )
-                                    }
-                                    if (name != "AUTOSAVE") {
+                                        Button(
+                                            onClick = {
+                                                scope.launch {
+                                                    val loaded = dataStore.loadListData(name)
+                                                    listData.title.value = loaded.title.value
+                                                    listData.tasks.clear()
+                                                    listData.tasks.addAll(loaded.tasks)
+                                                    listData.checkedStates.clear()
+                                                    listData.checkedStates.addAll(loaded.checkedStates)
+                                                    while (listData.checkedStates.size < listData.tasks.size)
+                                                        listData.checkedStates.add(false)
+                                                    snackbarHostState.currentSnackbarData?.dismiss()
+                                                    snackbarHostState.showSnackbar("Loaded \"$name\"")
+                                                }
+                                                showLoadDialog = false
+                                            },
+                                            modifier = Modifier
+                                                .weight(1f)
+                                                .padding(end = 8.dp)
+                                        ) {
+                                            Text(
+                                                name,
+                                                color = colorScheme.secondary
+                                            )
+                                        }
                                         IconButton(
                                             onClick = {
                                                 scope.launch {
