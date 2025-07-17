@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.example.nidham.DataStoreManager
@@ -51,7 +52,8 @@ fun TopBarSection(
         // App title text
         Text(
             text = "NIDHAM",
-            style = MaterialTheme.typography.headlineMedium,
+            style = MaterialTheme.typography.headlineLarge,
+            fontWeight = FontWeight.Bold,
             color = colorScheme.onBackground,
             modifier = Modifier.weight(2f),
             textAlign = TextAlign.Center
@@ -72,18 +74,28 @@ fun TopBarSection(
                     tint = colorScheme.onBackground
                 )
             }
-
             DropdownMenu(
                 expanded = menuExpanded,
                 onDismissRequest = { onMenuExpandChange(false) },
                 modifier = Modifier.background(colorScheme.surface)
             ) {
                 DropdownMenuItem(
-                    text = { Text("Reset List", color = colorScheme.onSurface) },
+                    text = { Text("Quicksave", color = colorScheme.onSurface) },
+                    onClick = {
+                        scope.launch {
+                            dataStore.saveListData(listData.title.value, listData)
+                            snackbarHostState.currentSnackbarData?.dismiss()
+                            snackbarHostState.showSnackbar("List saved as \"${listData.title.value}\"")
+                        }
+                        onMenuExpandChange(false)
+                    }
+                )
+                DropdownMenuItem(
+                    text = { Text("New List", color = colorScheme.onSurface) },
                     onClick = {
                         scope.launch {
                             snackbarHostState.currentSnackbarData?.dismiss()
-                            snackbarHostState.showSnackbar("List reset!")
+                            snackbarHostState.showSnackbar("New list!")
                         }
                         listData.reset()
                         onMenuExpandChange(false)
