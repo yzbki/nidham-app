@@ -3,8 +3,10 @@ package com.example.nidham
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
@@ -21,6 +23,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
@@ -29,6 +32,7 @@ import com.example.nidham.ui.components.LoadDialogBox
 import com.example.nidham.ui.components.SaveDialogBox
 import com.example.nidham.ui.components.TaskListSection
 import com.example.nidham.ui.components.TopBarSection
+import com.example.nidham.ui.theme.GradientBrush
 import com.example.nidham.ui.theme.NidhamTheme
 import org.burnoutcrew.reorderable.rememberReorderableLazyListState
 
@@ -56,6 +60,7 @@ fun ToDoListScreen() {
     var inputListName by remember { mutableStateOf("") }
     var savedListNames by remember { mutableStateOf(listOf<String>()) }
     val focusManager = LocalFocusManager.current
+
 
     // Load autosave list
     LaunchedEffect(Unit) {
@@ -100,94 +105,100 @@ fun ToDoListScreen() {
     )
 
     // User interface structure
-    Scaffold(
-        snackbarHost = {
-            SnackbarHost(
-                hostState = snackbarHostState,
-                snackbar = { data ->
-                    Snackbar(
-                        containerColor = colorScheme.surface,
-                        contentColor = colorScheme.onSurface,
-                        actionColor = colorScheme.onBackground,
-                        snackbarData = data
-                    )
-                }
-            )
-        },
-        containerColor = colorScheme.background,
-        contentColor = colorScheme.onBackground,
-        bottomBar = {
-            BottomRowSection(
-                listData = listData,
-                colorScheme = colorScheme
-            )
-        }
-    ) { innerPadding ->
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding)
-                .padding(horizontal = 16.dp, vertical = 24.dp)
-                .clickable(
-                    indication = null,
-                    interactionSource = remember { MutableInteractionSource() }
-                ) {
-                    focusManager.clearFocus()
-                }
-        ) {
-            TopBarSection(
-                colorScheme = colorScheme,
-                scope = scope,
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .background(GradientBrush)
+    ) {
+        Scaffold(
+            snackbarHost = {
+                SnackbarHost(
+                    hostState = snackbarHostState,
+                    snackbar = { data ->
+                        Snackbar(
+                            containerColor = colorScheme.surface,
+                            contentColor = colorScheme.onSurface,
+                            actionColor = colorScheme.onBackground,
+                            snackbarData = data
+                        )
+                    }
+                )
+            },
+            containerColor = Color.Transparent,
+            contentColor = colorScheme.onBackground,
+            bottomBar = {
+                BottomRowSection(
+                    listData = listData,
+                    colorScheme = colorScheme
+                )
+            }
+        ) { innerPadding ->
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(innerPadding)
+                    .padding(horizontal = 16.dp, vertical = 24.dp)
+                    .clickable(
+                        indication = null,
+                        interactionSource = remember { MutableInteractionSource() }
+                    ) {
+                        focusManager.clearFocus()
+                    }
+            ) {
+                TopBarSection(
+                    colorScheme = colorScheme,
+                    scope = scope,
+                    snackbarHostState = snackbarHostState,
+                    listData = listData,
+                    dataStore = dataStore,
+                    menuExpanded = menuExpanded,
+                    onMenuExpandChange = { menuExpanded = it },
+                    onShowSaveDialog = { showSaveDialog = true },
+                    onShowLoadDialog = { showLoadDialog = true },
+                    updateSavedListNames = { savedListNames = it }
+                )
+                TaskListSection(
+                    listData = listData,
+                    scope = scope,
+                    dataStore = dataStore,
+                    state = state
+                )
+            }
+            SaveDialogBox(
+                showDialog = showSaveDialog,
+                onDismiss = {
+                    showSaveDialog = false
+                    inputListName = ""
+                },
+                inputListName = inputListName,
+                onInputChange = { inputListName = it },
+                onSave = { listName ->
+                    dataStore.saveListData(listName, listData)
+                },
                 snackbarHostState = snackbarHostState,
-                listData = listData,
-                dataStore = dataStore,
-                menuExpanded = menuExpanded,
-                onMenuExpandChange = { menuExpanded = it },
-                onShowSaveDialog = { showSaveDialog = true },
-                onShowLoadDialog = { showLoadDialog = true },
-                updateSavedListNames = { savedListNames = it }
+                scope = scope
             )
-            TaskListSection(
-                listData = listData,
-                scope = scope,
-                dataStore = dataStore,
-                state = state
+            LoadDialogBox(
+                showDialog = showLoadDialog,
+                onDismiss = { showLoadDialog = false },
+                savedListNames = savedListNames,
+                onLoad = { name ->
+                    val loaded = dataStore.loadListData(name)
+                    listData.title.value = loaded.title.value
+                    listData.tasks.clear()
+                    listData.tasks.addAll(loaded.tasks)
+                    listData.checkedStates.clear()
+                    listData.checkedStates.addAll(loaded.checkedStates)
+                    while (listData.checkedStates.size < listData.tasks.size)
+                        listData.checkedStates.add(false)
+                },
+                onDelete = { name ->
+                    dataStore.deleteListByName(name)
+                    savedListNames = savedListNames - name
+                },
+                snackbarHostState = snackbarHostState,
+                scope = scope
             )
         }
-        SaveDialogBox(
-            showDialog = showSaveDialog,
-            onDismiss = {
-                showSaveDialog = false
-                inputListName = ""
-            },
-            inputListName = inputListName,
-            onInputChange = { inputListName = it },
-            onSave = { listName ->
-                dataStore.saveListData(listName, listData)
-            },
-            snackbarHostState = snackbarHostState,
-            scope = scope
-        )
-        LoadDialogBox(
-            showDialog = showLoadDialog,
-            onDismiss = { showLoadDialog = false },
-            savedListNames = savedListNames,
-            onLoad = { name ->
-                val loaded = dataStore.loadListData(name)
-                listData.title.value = loaded.title.value
-                listData.tasks.clear()
-                listData.tasks.addAll(loaded.tasks)
-                listData.checkedStates.clear()
-                listData.checkedStates.addAll(loaded.checkedStates)
-                while (listData.checkedStates.size < listData.tasks.size)
-                    listData.checkedStates.add(false)
-            },
-            onDelete = { name ->
-                dataStore.deleteListByName(name)
-                savedListNames = savedListNames - name
-            },
-            snackbarHostState = snackbarHostState,
-            scope = scope
-        )
     }
 }

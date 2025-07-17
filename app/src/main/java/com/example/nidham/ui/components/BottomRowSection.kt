@@ -1,5 +1,6 @@
 package com.example.nidham.ui.components
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -7,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.ui.graphics.Color
 import com.example.nidham.ListData
 import com.example.nidham.TaskItem
 
@@ -23,7 +25,8 @@ fun BottomRowSection(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp)
-            .padding(WindowInsets.safeDrawing.asPaddingValues()),
+            .padding(WindowInsets.safeDrawing.asPaddingValues())
+            .background(Color.Transparent),
         colors = ButtonDefaults.buttonColors(
             containerColor = colorScheme.surface,
             contentColor = colorScheme.onSurface
