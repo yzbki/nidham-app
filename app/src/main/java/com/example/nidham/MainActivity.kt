@@ -3,45 +3,16 @@ package com.example.nidham
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.safeDrawing
-import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.AlertDialog
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Checkbox
-import androidx.compose.material3.CheckboxDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
-import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -49,19 +20,17 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
+import com.example.nidham.ui.components.BottomRowSection
+import com.example.nidham.ui.components.LoadDialogBox
+import com.example.nidham.ui.components.SaveDialogBox
+import com.example.nidham.ui.components.TaskListSection
+import com.example.nidham.ui.components.TopBarSection
 import com.example.nidham.ui.theme.NidhamTheme
-import kotlinx.coroutines.launch
-import org.burnoutcrew.reorderable.ReorderableItem
-import org.burnoutcrew.reorderable.detectReorderAfterLongPress
 import org.burnoutcrew.reorderable.rememberReorderableLazyListState
-import org.burnoutcrew.reorderable.reorderable
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -111,6 +80,13 @@ fun ToDoListScreen() {
             listData.checkedStates.removeAt(listData.checkedStates.lastIndex)
     }
 
+    // Set default list title when saving
+    LaunchedEffect(showSaveDialog) {
+        if (showSaveDialog) {
+            inputListName = listData.title.value
+        }
+    }
+
     // Handle dynamic reordering of tasks
     val state = rememberReorderableLazyListState(
         onMove = { from, to ->
@@ -123,6 +99,7 @@ fun ToDoListScreen() {
         }
     )
 
+    // User interface structure
     Scaffold(
         snackbarHost = {
             SnackbarHost(
@@ -140,23 +117,10 @@ fun ToDoListScreen() {
         containerColor = colorScheme.background,
         contentColor = colorScheme.onBackground,
         bottomBar = {
-            // Add task button
-            Button(
-                onClick = {
-                    listData.tasks.add(TaskItem())
-                    listData.checkedStates.add(false)
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp)
-                    .padding(WindowInsets.safeDrawing.asPaddingValues()),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = colorScheme.surface,
-                    contentColor = colorScheme.onSurface
-                )
-            ) {
-                Text("Add Task")
-            }
+            BottomRowSection(
+                listData = listData,
+                colorScheme = colorScheme
+            )
         }
     ) { innerPadding ->
         Column(
@@ -171,324 +135,59 @@ fun ToDoListScreen() {
                     focusManager.clearFocus()
                 }
         ) {
-            // Taskbar row
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Spacer(modifier = Modifier.weight(1f))
-                // App title text
-                Text(
-                    text = "Nidham",
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = colorScheme.onBackground,
-                    modifier = Modifier.weight(2f),
-                    textAlign = TextAlign.Center
-                )
-                // Dropdown menu button box
-                Box(
-                    modifier = Modifier
-                        .wrapContentSize(Alignment.TopEnd)
-                        .weight(1f)
-                        .background(colorScheme.background),
-                    contentAlignment = Alignment.TopEnd
-                ) {
-                    // Menu button
-                    IconButton(onClick = { menuExpanded = true }) {
-                        Icon(
-                            imageVector = Icons.Default.MoreVert,
-                            contentDescription = "Menu",
-                            tint = colorScheme.onBackground
-                        )
-                    }
-                    // Dropdown menu items
-                    DropdownMenu(
-                        expanded = menuExpanded,
-                        onDismissRequest = { menuExpanded = false },
-                        modifier = Modifier.background(colorScheme.surface)
-                    ) {
-                        // Reset list button
-                        DropdownMenuItem(
-                            text = { Text("Reset List", color = colorScheme.onSurface) },
-                            onClick = {
-                                scope.launch {
-                                    snackbarHostState.currentSnackbarData?.dismiss()
-                                    snackbarHostState.showSnackbar("List reset!")
-                                }
-                                listData.reset()
-                                menuExpanded = false
-                            }
-                        )
-                        // Save list button
-                        DropdownMenuItem(
-                            text = { Text("Save List", color = colorScheme.onSurface) },
-                            onClick = {
-                                showSaveDialog = true
-                                menuExpanded = false
-                            }
-                        )
-                        // Load list button
-                        DropdownMenuItem(
-                            text = { Text("Load List", color = colorScheme.onSurface) },
-                            onClick = {
-                                scope.launch {
-                                    savedListNames = dataStore.getSavedListNames()
-                                    showLoadDialog = true
-                                }
-                                menuExpanded = false
-                            }
-                        )
-                    }
-                }
-            }
-            // List title text
-            TextField(
-                value = listData.title.value,
-                onValueChange = { listData.title.value = it },
-                label = { Text("List Title") },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                colors = TextFieldDefaults.colors(
-                    focusedLabelColor = colorScheme.onBackground,
-                    unfocusedLabelColor = colorScheme.onBackground,
-                    focusedContainerColor = colorScheme.surface.copy(alpha=0.8f),
-                    unfocusedContainerColor = colorScheme.background,
-                    focusedTextColor = colorScheme.onBackground,
-                    unfocusedTextColor = colorScheme.onBackground,
-                )
+            TopBarSection(
+                colorScheme = colorScheme,
+                scope = scope,
+                snackbarHostState = snackbarHostState,
+                listData = listData,
+                dataStore = dataStore,
+                menuExpanded = menuExpanded,
+                onMenuExpandChange = { menuExpanded = it },
+                onShowSaveDialog = { showSaveDialog = true },
+                onShowLoadDialog = { showLoadDialog = true },
+                updateSavedListNames = { savedListNames = it }
             )
-            // Task list
-            LazyColumn(
-                state = state.listState,
-                modifier = Modifier
-                    .weight(1f)
-                    .reorderable(state)
-                    .detectReorderAfterLongPress(state)
-            ) {
-                itemsIndexed(listData.tasks, key = { _, taskItem -> taskItem.id }) { index, taskItem ->
-                    ReorderableItem(state, key = taskItem.id) { _ ->
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            // Checkbox button
-                            Checkbox(
-                                checked = listData.checkedStates.getOrElse(index) { false },
-                                onCheckedChange = {
-                                    listData.checkedStates[index] = it
-                                    scope.launch {
-                                        dataStore.saveListData("AUTOSAVE", listData)
-                                    }
-                                },
-                                colors = CheckboxDefaults.colors(
-                                    uncheckedColor = colorScheme.surface,
-                                    checkedColor = colorScheme.onBackground
-                                )
-                            )
-                            // Task text field
-                            TextField(
-                                value = taskItem.textState.value,
-                                onValueChange = { newValue ->
-                                    taskItem.textState.value = newValue
-                                    scope.launch {
-                                        dataStore.saveListData("AUTOSAVE", listData)
-                                    }
-                                },
-                                modifier = Modifier.weight(1f),
-                                label = { Text("Task ${index + 1}") },
-                                textStyle = MaterialTheme.typography.bodyLarge.copy(
-                                    color = if (listData.checkedStates.getOrElse(index) { false })
-                                        colorScheme.onSurface.copy(alpha = 0.4f)
-                                    else
-                                        colorScheme.onSurface,
-                                    textDecoration = if (listData.checkedStates.getOrElse(index) { false })
-                                        TextDecoration.LineThrough
-                                    else
-                                        null
-                                ),
-                                colors = TextFieldDefaults.colors(
-                                    focusedContainerColor = if (listData.checkedStates.getOrElse(index) { false })
-                                        colorScheme.surface.copy(alpha = 0.8f)
-                                    else
-                                        colorScheme.surface,
-                                    unfocusedContainerColor = if (listData.checkedStates.getOrElse(index) { false })
-                                        colorScheme.surface.copy(alpha = 0.8f)
-                                    else
-                                        colorScheme.surface,
-                                    focusedLabelColor = colorScheme.onBackground,
-                                    unfocusedLabelColor = colorScheme.onBackground,
-                                    focusedTextColor = colorScheme.onSurface,
-                                    unfocusedTextColor = colorScheme.onSurface,
-                                    focusedIndicatorColor = colorScheme.background,
-                                    unfocusedIndicatorColor = colorScheme.background,
-                                )
-                            )
-                            // Remove task button
-                            IconButton(
-                                onClick = {
-                                    listData.tasks.removeAt(index)
-                                    listData.checkedStates.removeAt(index)
-                                },
-                                colors = IconButtonDefaults.iconButtonColors(
-                                    contentColor = colorScheme.onBackground
-                                )
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Default.Delete,
-                                    contentDescription = "Delete Task"
-                                )
-                            }
-                            // Drag task button
-                            Icon(
-                                imageVector = Icons.Default.ArrowDropDown,
-                                contentDescription = "Drag Handle",
-                                tint = colorScheme.onBackground,
-                                modifier = Modifier.padding(start = 8.dp)
-                            )
-                        }
-                    }
-                }
-            }
-        }
-        // Save dialog box
-        if (showSaveDialog) {
-            inputListName = listData.title.value
-            AlertDialog(
-                containerColor = colorScheme.background,
-                onDismissRequest = {
-                    showSaveDialog = false
-                    inputListName = ""
-                },
-                title = { Text("Save List",
-                    color = colorScheme.onBackground)
-                },
-                text = {
-                    TextField(
-                        value = inputListName,
-                        onValueChange = { inputListName = it },
-                        label = { Text("List Name",
-                            color = colorScheme.onBackground)
-                        },
-                        colors = TextFieldDefaults.colors(
-                            focusedTextColor = colorScheme.onSurface,
-                            unfocusedTextColor = colorScheme.onSurface,
-                            focusedContainerColor = colorScheme.surface,
-                            unfocusedContainerColor = colorScheme.surface,
-                        )
-                    )
-                },
-                confirmButton = {
-                    Button(
-                        onClick = {
-                            scope.launch {
-                                if (inputListName.isNotBlank()) {
-                                    dataStore.saveListData(inputListName, listData)
-                                    snackbarHostState.currentSnackbarData?.dismiss()
-                                    snackbarHostState.showSnackbar("List '$inputListName' saved!")
-                                } else {
-                                    snackbarHostState.currentSnackbarData?.dismiss()
-                                    snackbarHostState.showSnackbar("Please enter a valid name.")
-                                }
-                            }
-                            showSaveDialog = false
-                        }
-                    ) { Text("Save", color = colorScheme.onBackground) }
-                },
-                dismissButton = {
-                    Button(
-                        onClick = {
-                            showSaveDialog = false
-                            inputListName = ""
-                        }
-                    ) { Text("Cancel", color = colorScheme.onBackground) }
-                }
-            )
-
-        }
-        // Load dialog box
-        if (showLoadDialog) {
-            AlertDialog(
-                containerColor = colorScheme.background,
-                onDismissRequest = { showLoadDialog = false },
-                confirmButton = {},
-                title = {
-                    Text(
-                        "Load List",
-                        color = colorScheme.secondary
-                    )
-                },
-                text = {
-                    Column {
-                        if (savedListNames.isEmpty()) {
-                            Text("No saved lists found.")
-                        } else {
-                            savedListNames.forEach { name ->
-                                if (name != "AUTOSAVE") {
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-                                        Button(
-                                            onClick = {
-                                                scope.launch {
-                                                    val loaded = dataStore.loadListData(name)
-                                                    listData.title.value = loaded.title.value
-                                                    listData.tasks.clear()
-                                                    listData.tasks.addAll(loaded.tasks)
-                                                    listData.checkedStates.clear()
-                                                    listData.checkedStates.addAll(loaded.checkedStates)
-                                                    while (listData.checkedStates.size < listData.tasks.size)
-                                                        listData.checkedStates.add(false)
-                                                    snackbarHostState.currentSnackbarData?.dismiss()
-                                                    snackbarHostState.showSnackbar("Loaded \"$name\"")
-                                                }
-                                                showLoadDialog = false
-                                            },
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .padding(end = 8.dp),
-                                            colors = ButtonDefaults.buttonColors(
-                                                containerColor = colorScheme.surface,
-                                                contentColor = colorScheme.onSurface
-                                            )
-                                        ) {
-                                            Text(
-                                                name,
-                                                color = colorScheme.onSurface
-                                            )
-                                        }
-                                        IconButton(
-                                            onClick = {
-                                                scope.launch {
-                                                    dataStore.deleteListByName(name)
-                                                    savedListNames = savedListNames - name
-                                                    snackbarHostState.currentSnackbarData?.dismiss()
-                                                    snackbarHostState.showSnackbar("Deleted \"$name\"")
-                                                }
-                                            },
-                                            colors = IconButtonDefaults.iconButtonColors(
-                                                contentColor = colorScheme.onBackground
-                                            )
-                                        ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Delete,
-                                                contentDescription = "Delete $name"
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+            TaskListSection(
+                listData = listData,
+                scope = scope,
+                dataStore = dataStore,
+                state = state
             )
         }
+        SaveDialogBox(
+            showDialog = showSaveDialog,
+            onDismiss = {
+                showSaveDialog = false
+                inputListName = ""
+            },
+            inputListName = inputListName,
+            onInputChange = { inputListName = it },
+            onSave = { listName ->
+                dataStore.saveListData(listName, listData)
+            },
+            snackbarHostState = snackbarHostState,
+            scope = scope
+        )
+        LoadDialogBox(
+            showDialog = showLoadDialog,
+            onDismiss = { showLoadDialog = false },
+            savedListNames = savedListNames,
+            onLoad = { name ->
+                val loaded = dataStore.loadListData(name)
+                listData.title.value = loaded.title.value
+                listData.tasks.clear()
+                listData.tasks.addAll(loaded.tasks)
+                listData.checkedStates.clear()
+                listData.checkedStates.addAll(loaded.checkedStates)
+                while (listData.checkedStates.size < listData.tasks.size)
+                    listData.checkedStates.add(false)
+            },
+            onDelete = { name ->
+                dataStore.deleteListByName(name)
+                savedListNames = savedListNames - name
+            },
+            snackbarHostState = snackbarHostState,
+            scope = scope
+        )
     }
 }
