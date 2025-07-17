@@ -130,8 +130,8 @@ fun ToDoListScreen() {
                 snackbar = { data ->
                     Snackbar(
                         containerColor = colorScheme.surface,
-                        contentColor = colorScheme.inverseSurface,
-                        actionColor = colorScheme.onSurface,
+                        contentColor = colorScheme.onSurface,
+                        actionColor = colorScheme.onBackground,
                         snackbarData = data
                     )
                 }
@@ -151,8 +151,8 @@ fun ToDoListScreen() {
                     .padding(horizontal = 16.dp, vertical = 12.dp)
                     .padding(WindowInsets.safeDrawing.asPaddingValues()),
                 colors = ButtonDefaults.buttonColors(
-                    containerColor = colorScheme.primary,
-                    contentColor = colorScheme.secondary
+                    containerColor = colorScheme.surface,
+                    contentColor = colorScheme.onSurface
                 )
             ) {
                 Text("Add Task")
@@ -200,14 +200,14 @@ fun ToDoListScreen() {
                         Icon(
                             imageVector = Icons.Default.MoreVert,
                             contentDescription = "Menu",
-                            tint = colorScheme.secondary
+                            tint = colorScheme.onBackground
                         )
                     }
                     // Dropdown menu items
                     DropdownMenu(
                         expanded = menuExpanded,
                         onDismissRequest = { menuExpanded = false },
-                        modifier = Modifier.background(colorScheme.tertiary)
+                        modifier = Modifier.background(colorScheme.surface)
                     ) {
                         // Reset list button
                         DropdownMenuItem(
@@ -252,12 +252,12 @@ fun ToDoListScreen() {
                     .fillMaxWidth()
                     .padding(bottom = 16.dp),
                 colors = TextFieldDefaults.colors(
-                    focusedLabelColor = colorScheme.onSurface,
-                    unfocusedLabelColor = colorScheme.onSurface,
+                    focusedLabelColor = colorScheme.onBackground,
+                    unfocusedLabelColor = colorScheme.onBackground,
                     focusedContainerColor = colorScheme.surface.copy(alpha=0.8f),
                     unfocusedContainerColor = colorScheme.background,
-                    focusedTextColor = colorScheme.onSurface,
-                    unfocusedTextColor = colorScheme.onSurface,
+                    focusedTextColor = colorScheme.onBackground,
+                    unfocusedTextColor = colorScheme.onBackground,
                 )
             )
             // Task list
@@ -287,7 +287,7 @@ fun ToDoListScreen() {
                                 },
                                 colors = CheckboxDefaults.colors(
                                     uncheckedColor = colorScheme.surface,
-                                    checkedColor = colorScheme.onSurface
+                                    checkedColor = colorScheme.onBackground
                                 )
                             )
                             // Task text field
@@ -303,9 +303,9 @@ fun ToDoListScreen() {
                                 label = { Text("Task ${index + 1}") },
                                 textStyle = MaterialTheme.typography.bodyLarge.copy(
                                     color = if (listData.checkedStates.getOrElse(index) { false })
-                                        colorScheme.inverseSurface.copy(alpha = 0.4f)
+                                        colorScheme.onSurface.copy(alpha = 0.4f)
                                     else
-                                        colorScheme.inverseSurface,
+                                        colorScheme.onSurface,
                                     textDecoration = if (listData.checkedStates.getOrElse(index) { false })
                                         TextDecoration.LineThrough
                                     else
@@ -320,12 +320,12 @@ fun ToDoListScreen() {
                                         colorScheme.surface.copy(alpha = 0.8f)
                                     else
                                         colorScheme.surface,
-                                    focusedLabelColor = colorScheme.onSurface,
-                                    unfocusedLabelColor = colorScheme.onSurface,
+                                    focusedLabelColor = colorScheme.onBackground,
+                                    unfocusedLabelColor = colorScheme.onBackground,
                                     focusedTextColor = colorScheme.onSurface,
                                     unfocusedTextColor = colorScheme.onSurface,
-                                    focusedIndicatorColor = colorScheme.primary,
-                                    unfocusedIndicatorColor = colorScheme.primary,
+                                    focusedIndicatorColor = colorScheme.background,
+                                    unfocusedIndicatorColor = colorScheme.background,
                                 )
                             )
                             // Remove task button
@@ -335,7 +335,7 @@ fun ToDoListScreen() {
                                     listData.checkedStates.removeAt(index)
                                 },
                                 colors = IconButtonDefaults.iconButtonColors(
-                                    contentColor = colorScheme.secondary
+                                    contentColor = colorScheme.onBackground
                                 )
                             ) {
                                 Icon(
@@ -347,7 +347,7 @@ fun ToDoListScreen() {
                             Icon(
                                 imageVector = Icons.Default.ArrowDropDown,
                                 contentDescription = "Drag Handle",
-                                tint = colorScheme.secondary,
+                                tint = colorScheme.onBackground,
                                 modifier = Modifier.padding(start = 8.dp)
                             )
                         }
@@ -359,21 +359,24 @@ fun ToDoListScreen() {
         if (showSaveDialog) {
             inputListName = listData.title.value
             AlertDialog(
+                containerColor = colorScheme.background,
                 onDismissRequest = {
                     showSaveDialog = false
                     inputListName = ""
                 },
                 title = { Text("Save List",
-                    color = colorScheme.secondary)
+                    color = colorScheme.onBackground)
                 },
                 text = {
                     TextField(
                         value = inputListName,
                         onValueChange = { inputListName = it },
                         label = { Text("List Name",
-                            color = colorScheme.secondary)
+                            color = colorScheme.onBackground)
                         },
                         colors = TextFieldDefaults.colors(
+                            focusedTextColor = colorScheme.onSurface,
+                            unfocusedTextColor = colorScheme.onSurface,
                             focusedContainerColor = colorScheme.surface,
                             unfocusedContainerColor = colorScheme.surface,
                         )
@@ -394,7 +397,7 @@ fun ToDoListScreen() {
                             }
                             showSaveDialog = false
                         }
-                    ) { Text("Save") }
+                    ) { Text("Save", color = colorScheme.onBackground) }
                 },
                 dismissButton = {
                     Button(
@@ -402,7 +405,7 @@ fun ToDoListScreen() {
                             showSaveDialog = false
                             inputListName = ""
                         }
-                    ) { Text("Cancel") }
+                    ) { Text("Cancel", color = colorScheme.onBackground) }
                 }
             )
 
@@ -410,6 +413,7 @@ fun ToDoListScreen() {
         // Load dialog box
         if (showLoadDialog) {
             AlertDialog(
+                containerColor = colorScheme.background,
                 onDismissRequest = { showLoadDialog = false },
                 confirmButton = {},
                 title = {
@@ -449,11 +453,15 @@ fun ToDoListScreen() {
                                             },
                                             modifier = Modifier
                                                 .weight(1f)
-                                                .padding(end = 8.dp)
+                                                .padding(end = 8.dp),
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = colorScheme.surface,
+                                                contentColor = colorScheme.onSurface
+                                            )
                                         ) {
                                             Text(
                                                 name,
-                                                color = colorScheme.secondary
+                                                color = colorScheme.onSurface
                                             )
                                         }
                                         IconButton(
@@ -464,7 +472,10 @@ fun ToDoListScreen() {
                                                     snackbarHostState.currentSnackbarData?.dismiss()
                                                     snackbarHostState.showSnackbar("Deleted \"$name\"")
                                                 }
-                                            }
+                                            },
+                                            colors = IconButtonDefaults.iconButtonColors(
+                                                contentColor = colorScheme.onBackground
+                                            )
                                         ) {
                                             Icon(
                                                 imageVector = Icons.Default.Delete,
