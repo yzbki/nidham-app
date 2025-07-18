@@ -1,6 +1,9 @@
 package com.example.nidham
 
+import android.app.Activity
+import android.content.pm.PackageManager
 import android.os.Bundle
+import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
@@ -27,6 +30,8 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.unit.dp
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import com.example.nidham.ui.components.BottomRowSection
 import com.example.nidham.ui.components.LoadDialogBox
 import com.example.nidham.ui.components.SaveDialogBox
@@ -60,6 +65,7 @@ fun ToDoListScreen() {
     var inputListName by remember { mutableStateOf("") }
     var savedListNames by remember { mutableStateOf(listOf<String>()) }
     val focusManager = LocalFocusManager.current
+    var isRecording by remember { mutableStateOf(false) }
 
 
     // Load autosave list
@@ -104,6 +110,12 @@ fun ToDoListScreen() {
         }
     )
 
+    // Voice manager
+    val activity = LocalContext.current as Activity
+    val voiceResult = remember { mutableStateOf("") }
+    val voiceManager = remember { VoiceRecognitionManager(activity) }
+
+
     // User interface structure
     Box(
         modifier = Modifier
@@ -129,7 +141,27 @@ fun ToDoListScreen() {
             bottomBar = {
                 BottomRowSection(
                     listData = listData,
-                    colorScheme = colorScheme
+                    colorScheme = colorScheme,
+                    onVoiceInputClick = {
+                        val permission = android.Manifest.permission.RECORD_AUDIO
+                        if (ContextCompat.checkSelfPermission(activity, permission) != PackageManager.PERMISSION_GRANTED) {
+                            ActivityCompat.requestPermissions(activity, arrayOf(permission), 101)
+                        } else {
+                            isRecording = true
+                            voiceManager.startListening(
+                                onResult = { text ->
+                                    voiceResult.value = text
+                                    Toast.makeText(activity, "Heard: $text", Toast.LENGTH_LONG).show()
+                                    isRecording = false
+                                },
+                                onError = { errorMsg ->
+                                    Toast.makeText(activity, errorMsg, Toast.LENGTH_SHORT).show()
+                                    isRecording = false
+                                }
+                            )
+                        }
+                    },
+                    isRecording = isRecording
                 )
             }
         ) { innerPadding ->
@@ -137,7 +169,7 @@ fun ToDoListScreen() {
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding)
-                    .padding(horizontal = 16.dp, vertical = 24.dp)
+                    .padding(horizontal = 16.dp)
                     .clickable(
                         indication = null,
                         interactionSource = remember { MutableInteractionSource() }

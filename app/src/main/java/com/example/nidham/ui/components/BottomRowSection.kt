@@ -1,37 +1,63 @@
 package com.example.nidham.ui.components
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.*
-import androidx.compose.material3.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.WindowInsetsSides
+import androidx.compose.foundation.layout.asPaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawing
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import androidx.compose.foundation.layout.WindowInsets
-import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.unit.dp
 import com.example.nidham.ListData
 import com.example.nidham.TaskItem
 
 @Composable
 fun BottomRowSection(
     listData: ListData,
-    colorScheme: ColorScheme
+    colorScheme: ColorScheme,
+    onVoiceInputClick: () -> Unit,
+    isRecording: Boolean
 ) {
-    Button(
-        onClick = {
-            listData.tasks.add(TaskItem())
-            listData.checkedStates.add(false)
-        },
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp)
-            .padding(WindowInsets.safeDrawing.asPaddingValues())
-            .background(Color.Transparent),
-        colors = ButtonDefaults.buttonColors(
-            containerColor = colorScheme.surface,
-            contentColor = colorScheme.onSurface
-        )
+            .padding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom).asPaddingValues())
     ) {
-        Text("Add Task")
+        Button(
+            onClick = onVoiceInputClick,
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = if (isRecording) Color.Red else colorScheme.surface,
+                contentColor = colorScheme.onSurface
+            )
+        ) {
+            Text("Voice Input")
+        }
+        Spacer(modifier = Modifier.height(8.dp))
+        Button(
+            onClick = {
+                listData.tasks.add(TaskItem())
+                listData.checkedStates.add(false)
+            },
+            modifier = Modifier.fillMaxWidth(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = colorScheme.surface,
+                contentColor = colorScheme.onSurface
+            )
+
+        ) {
+            Text("Add Task")
+        }
     }
 }
