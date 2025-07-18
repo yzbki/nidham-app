@@ -1,6 +1,5 @@
 package com.example.nidham.ui.components
 
-import android.app.Activity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -22,14 +21,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.nidham.VoiceRecognitionManager
 import com.example.nidham.ui.theme.GradientBrush
 
 @Composable
 fun VoiceDialogBox(
     showDialog: Boolean,
-    activity: Activity,
-    voiceManager: VoiceRecognitionManager,
     isRecording: Boolean,
     onDismiss: () -> Unit,
     onStartRecording: () -> Unit,
@@ -45,6 +41,7 @@ fun VoiceDialogBox(
             onDismissRequest = {
                 onDismiss()
                 onStopRecording()
+                transcribedText.value = ""
             },
             confirmButton = {
                 Button(
@@ -69,6 +66,7 @@ fun VoiceDialogBox(
                     onClick = {
                         onDismiss()
                         onStopRecording()
+                        transcribedText.value = ""
                     },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = colorScheme.primary

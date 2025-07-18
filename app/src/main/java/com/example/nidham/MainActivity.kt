@@ -189,8 +189,6 @@ fun ToDoListScreen() {
             }
             VoiceDialogBox(
                 showDialog = showVoiceDialog,
-                activity = activity,
-                voiceManager = voiceManager,
                 isRecording = isRecording,
                 onDismiss = {
                     showVoiceDialog = false
