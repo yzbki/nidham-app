@@ -71,7 +71,7 @@ fun VoiceDialogBox(
                         onStopRecording()
                     },
                     colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.primary
+                        containerColor = colorScheme.primary
                     )) {
                     Text("Cancel", color = colorScheme.onBackground)
                 }

@@ -3,11 +3,11 @@ package com.example.nidham.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.ColorScheme
@@ -62,7 +62,16 @@ fun TopBarSection(
             textAlign = TextAlign.Center,
             modifier = Modifier.align(Alignment.Center)
         )
-
+        // Quicksave button
+        IconButton(onClick = {
+            scope.launch {
+                dataStore.saveListData(listData.title.value, listData)
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar("List saved as \"${listData.title.value}\"")
+            }
+        }, modifier = Modifier.align(Alignment.CenterStart)) {
+            Icon(Icons.Default.Lock, contentDescription = "Quicksave")
+        }
         // Grouped dropdown menus aligned to the end
         Row(
             modifier = Modifier.align(Alignment.CenterEnd),
@@ -107,7 +116,6 @@ fun TopBarSection(
                     )
                 }
             }
-
             // Settings Dropdown
             Box(
                 modifier = Modifier.wrapContentSize(Alignment.TopEnd),
@@ -125,17 +133,6 @@ fun TopBarSection(
                     onDismissRequest = { onMenuExpandChange(false) },
                     modifier = Modifier.background(colorScheme.surface)
                 ) {
-                    DropdownMenuItem(
-                        text = { Text("Quicksave", color = colorScheme.onSurface) },
-                        onClick = {
-                            scope.launch {
-                                dataStore.saveListData(listData.title.value, listData)
-                                snackbarHostState.currentSnackbarData?.dismiss()
-                                snackbarHostState.showSnackbar("List saved as \"${listData.title.value}\"")
-                            }
-                            onMenuExpandChange(false)
-                        }
-                    )
                     DropdownMenuItem(
                         text = { Text("New List", color = colorScheme.onSurface) },
                         onClick = {
