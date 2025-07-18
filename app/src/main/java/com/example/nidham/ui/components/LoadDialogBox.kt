@@ -45,7 +45,7 @@ fun LoadDialogBox(
             onDismissRequest = onDismiss,
             confirmButton = {},
             title = {
-                Text("Load List", color = MaterialTheme.colorScheme.secondary)
+                Text("Load List", color = MaterialTheme.colorScheme.onBackground)
             },
             text = {
                 Column {

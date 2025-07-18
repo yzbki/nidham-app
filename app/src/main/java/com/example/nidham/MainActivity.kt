@@ -35,6 +35,7 @@ import androidx.core.content.ContextCompat
 import com.example.nidham.ui.components.BottomRowSection
 import com.example.nidham.ui.components.LoadDialogBox
 import com.example.nidham.ui.components.SaveDialogBox
+import com.example.nidham.ui.components.VoiceDialogBox
 import com.example.nidham.ui.components.TaskListSection
 import com.example.nidham.ui.components.TopBarSection
 import com.example.nidham.ui.theme.GradientBrush
@@ -62,6 +63,7 @@ fun ToDoListScreen() {
     var menuExpanded by remember { mutableStateOf(false) }
     var showSaveDialog by remember { mutableStateOf(false) }
     var showLoadDialog by remember { mutableStateOf(false) }
+    var showVoiceDialog by remember { mutableStateOf(false) }
     var inputListName by remember { mutableStateOf("") }
     var savedListNames by remember { mutableStateOf(listOf<String>()) }
     val focusManager = LocalFocusManager.current
@@ -147,18 +149,7 @@ fun ToDoListScreen() {
                         if (ContextCompat.checkSelfPermission(activity, permission) != PackageManager.PERMISSION_GRANTED) {
                             ActivityCompat.requestPermissions(activity, arrayOf(permission), 101)
                         } else {
-                            isRecording = true
-                            voiceManager.startListening(
-                                onResult = { text ->
-                                    voiceResult.value = text
-                                    Toast.makeText(activity, "Heard: $text", Toast.LENGTH_LONG).show()
-                                    isRecording = false
-                                },
-                                onError = { errorMsg ->
-                                    Toast.makeText(activity, errorMsg, Toast.LENGTH_SHORT).show()
-                                    isRecording = false
-                                }
-                            )
+                            showVoiceDialog = true
                         }
                     },
                     isRecording = isRecording
@@ -196,6 +187,34 @@ fun ToDoListScreen() {
                     state = state
                 )
             }
+            VoiceDialogBox(
+                showDialog = showVoiceDialog,
+                activity = activity,
+                voiceManager = voiceManager,
+                isRecording = isRecording,
+                onDismiss = {
+                    showVoiceDialog = false
+                    isRecording = false
+                },
+                onStartRecording = {
+                    isRecording = true
+                    voiceManager.startListening(
+                        onResult = { text ->
+                            voiceResult.value = text
+                            isRecording = false
+                        },
+                        onError = { errorMsg ->
+                            Toast.makeText(activity, errorMsg, Toast.LENGTH_SHORT).show()
+                            isRecording = false
+                        }
+                    )
+                },
+                onStopRecording = {
+                    voiceManager.stopListening()
+                    isRecording = false
+                },
+                transcribedText = voiceResult
+            )
             SaveDialogBox(
                 showDialog = showSaveDialog,
                 onDismiss = {
