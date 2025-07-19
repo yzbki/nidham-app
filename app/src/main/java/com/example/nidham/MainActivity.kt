@@ -70,6 +70,7 @@ fun ToDoListScreen() {
     var isRecording by remember { mutableStateOf(false) }
 
 
+    /*
     // Load autosave list
     LaunchedEffect(Unit) {
         val loadedData = dataStore.loadListData("AUTOSAVE")
@@ -84,6 +85,7 @@ fun ToDoListScreen() {
     LaunchedEffect(listData.title.value, listData.tasks.size, listData.checkedStates) {
         dataStore.saveListData("AUTOSAVE", listData)
     }
+     */
 
     // Keep checkedStates size in sync with tasks size
     LaunchedEffect(listData.tasks.size) {
@@ -211,7 +213,8 @@ fun ToDoListScreen() {
                     voiceManager.stopListening()
                     isRecording = false
                 },
-                transcribedText = voiceResult
+                transcribedText = voiceResult,
+                listData = listData
             )
             SaveDialogBox(
                 showDialog = showSaveDialog,

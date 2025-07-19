@@ -1,7 +1,9 @@
 package com.example.nidham.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -17,11 +19,19 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import com.example.nidham.ListData
+import com.example.nidham.OpenAIService
 import com.example.nidham.ui.theme.GradientBrush
+import kotlinx.coroutines.launch
 
 @Composable
 fun VoiceDialogBox(
@@ -30,9 +40,14 @@ fun VoiceDialogBox(
     onDismiss: () -> Unit,
     onStartRecording: () -> Unit,
     onStopRecording: () -> Unit,
-    transcribedText: MutableState<String>
+    transcribedText: MutableState<String>,
+    listData: ListData // <-- this is new
 ) {
-    if(showDialog) {
+    val scope = rememberCoroutineScope()
+    var isLoading by remember { mutableStateOf(false) }
+    var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    if (showDialog) {
         AlertDialog(
             modifier = Modifier
                 .clip(RoundedCornerShape(20.dp))
@@ -43,38 +58,9 @@ fun VoiceDialogBox(
                 onStopRecording()
                 transcribedText.value = ""
             },
-            confirmButton = {
-                Button(
-                    onClick = {
-                        if (isRecording) {
-                            onStopRecording()
-                        } else {
-                            onStartRecording()
-                        }
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = if (isRecording) Color.Red
-                        else colorScheme.primary
-                    )
-                ) {
-                    Text(if (isRecording) "Stop Recording" else "Start Recording",
-                        color = colorScheme.onBackground)
-                }
+            title = {
+                Text("Voice Input", color = colorScheme.onBackground)
             },
-            dismissButton = {
-                TextButton(
-                    onClick = {
-                        onDismiss()
-                        onStopRecording()
-                        transcribedText.value = ""
-                    },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = colorScheme.primary
-                    )) {
-                    Text("Cancel", color = colorScheme.onBackground)
-                }
-            },
-            title = { Text("Voice Input", color = colorScheme.onBackground) },
             text = {
                 Column {
                     Text(
@@ -89,6 +75,7 @@ fun VoiceDialogBox(
                         label = { Text("Transcribed Text") },
                         singleLine = false,
                         modifier = Modifier.fillMaxWidth(),
+                        enabled = !isLoading,
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = colorScheme.surface,
                             unfocusedContainerColor = colorScheme.surface,
@@ -100,9 +87,90 @@ fun VoiceDialogBox(
                             unfocusedIndicatorColor = colorScheme.background,
                         ),
                     )
+                    errorMessage?.let {
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Text(it, color = Color.Red)
+                    }
 
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // Buttons row with Start/Stop and Generate
+                    Row(
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        Button(
+                            modifier = Modifier.weight(1f),
+                            onClick = {
+                                if (isRecording) {
+                                    onStopRecording()
+                                } else {
+                                    onStartRecording()
+                                }
+                            },
+                            enabled = !isLoading,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = if (isRecording) Color.Red else colorScheme.primary
+                            )
+                        ) {
+                            Text(
+                                if (isRecording) "Stop Recording" else "Start Recording",
+                                color = colorScheme.onBackground
+                            )
+                        }
+
+                        Button(
+                            modifier = Modifier.weight(1f),
+                            onClick = {
+                                scope.launch {
+                                    isLoading = true
+                                    errorMessage = null
+
+                                    val result = OpenAIService.generateListDataFromPrompt(transcribedText.value)
+                                    if (result != null) {
+                                        listData.title.value = result.title.value
+                                        listData.tasks.clear()
+                                        listData.tasks.addAll(result.tasks)
+                                        listData.checkedStates.clear()
+                                        listData.checkedStates.addAll(result.checkedStates)
+                                        onDismiss()
+                                    } else {
+                                        errorMessage = "Failed to generate response"
+                                    }
+
+                                    isLoading = false
+                                }
+                            },
+                            enabled = transcribedText.value.isNotBlank() && !isLoading,
+                            colors = ButtonDefaults.buttonColors(
+                                containerColor = colorScheme.primary
+                            )
+                        ) {
+                            Text(if (isLoading) "Generating..." else "Generate", color = colorScheme.onBackground)
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(16.dp))
+
+                    // Cancel button on its own row, full width
+                    Button(
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = {
+                            onDismiss()
+                            onStopRecording()
+                            transcribedText.value = ""
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            containerColor = colorScheme.primary
+                        )
+                    ) {
+                        Text("Cancel", color = colorScheme.onBackground)
+                    }
                 }
-            }
+            },
+            confirmButton = {},
+            dismissButton = {}
         )
     }
+
 }
