@@ -55,7 +55,7 @@ fun TopBarSection(
     ) {
         // Centered App Title
         Text(
-            text = "NIDHAM",
+            text = "Nidham",
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
             color = colorScheme.onBackground,

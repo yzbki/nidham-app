@@ -14,7 +14,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -41,11 +41,11 @@ fun LoadDialogBox(
             modifier = Modifier
                 .clip(RoundedCornerShape(20.dp))
                 .background(GradientBrush),
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = colorScheme.background,
             onDismissRequest = onDismiss,
             confirmButton = {},
             title = {
-                Text("Load List", color = MaterialTheme.colorScheme.onBackground)
+                Text("Load List", color = colorScheme.onBackground)
             },
             text = {
                 Column {
@@ -72,11 +72,11 @@ fun LoadDialogBox(
                                         .weight(1f)
                                         .padding(end = 8.dp),
                                     colors = ButtonDefaults.buttonColors(
-                                        containerColor = MaterialTheme.colorScheme.surface,
-                                        contentColor = MaterialTheme.colorScheme.onSurface
+                                        containerColor = colorScheme.surface,
+                                        contentColor = colorScheme.onSurface
                                     )
                                 ) {
-                                    Text(name, color = MaterialTheme.colorScheme.onSurface)
+                                    Text(name, color = colorScheme.onSurface)
                                 }
                                 IconButton(
                                     onClick = {
@@ -87,7 +87,7 @@ fun LoadDialogBox(
                                         }
                                     },
                                     colors = IconButtonDefaults.iconButtonColors(
-                                        contentColor = MaterialTheme.colorScheme.onBackground
+                                        contentColor = colorScheme.onBackground
                                     )
                                 ) {
                                     Icon(

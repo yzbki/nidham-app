@@ -5,7 +5,7 @@ import androidx.compose.ui.graphics.Color
 
 val GradientBrush = Brush.linearGradient(
     colors = listOf(
-        Color(0,19,32),
-        Color(0,74,127)
+        Color(135, 206, 250),
+        Color(0, 71, 171)
     )
 )

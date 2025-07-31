@@ -40,6 +40,8 @@ import com.example.nidham.ui.components.TaskListSection
 import com.example.nidham.ui.components.TopBarSection
 import com.example.nidham.ui.theme.GradientBrush
 import com.example.nidham.ui.theme.NidhamTheme
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import org.burnoutcrew.reorderable.rememberReorderableLazyListState
 
 class MainActivity : ComponentActivity() {
@@ -69,23 +71,37 @@ fun ToDoListScreen() {
     val focusManager = LocalFocusManager.current
     var isRecording by remember { mutableStateOf(false) }
 
-
-    /*
     // Load autosave list
     LaunchedEffect(Unit) {
-        val loadedData = dataStore.loadListData("AUTOSAVE")
-        listData.title.value = loadedData.title.value
-        listData.tasks.clear()
-        listData.tasks.addAll(loadedData.tasks)
-        listData.checkedStates.clear()
-        listData.checkedStates.addAll(loadedData.checkedStates)
+        val lastKey = dataStore.getLastOpenedKey()
+        if (lastKey != null) {
+            val loadedData = dataStore.loadListData(lastKey)
+
+            listData.title.value = loadedData.title.value
+            listData.tasks.clear()
+            listData.tasks.addAll(loadedData.tasks)
+            listData.checkedStates.clear()
+            listData.checkedStates.addAll(loadedData.checkedStates)
+
+            while (listData.checkedStates.size < listData.tasks.size) {
+                listData.checkedStates.add(false)
+            }
+        }
     }
 
     // Auto-save on any change
-    LaunchedEffect(listData.title.value, listData.tasks.size, listData.checkedStates) {
-        dataStore.saveListData("AUTOSAVE", listData)
+    LaunchedEffect(
+        listData.title.value,
+        listData.tasks.map { it.textState.value },
+        listData.checkedStates.toList(),
+        savedListNames
+    ) {
+        val title = listData.title.value.trim()
+        if (title.isBlank()) return@LaunchedEffect
+        if (title !in savedListNames) return@LaunchedEffect
+        delay(300) // Delay autosave to avoid spam
+        dataStore.saveListData(title, listData)
     }
-     */
 
     // Keep checkedStates size in sync with tasks size
     LaunchedEffect(listData.tasks.size) {
@@ -105,11 +121,12 @@ fun ToDoListScreen() {
     // Handle dynamic reordering of tasks
     val state = rememberReorderableLazyListState(
         onMove = { from, to ->
-            listData.tasks.apply {
-                add(to.index, removeAt(from.index))
-            }
-            listData.checkedStates.apply {
-                add(to.index, removeAt(from.index))
+            listData.tasks.add(to.index, listData.tasks.removeAt(from.index))
+            listData.checkedStates.add(to.index, listData.checkedStates.removeAt(from.index))
+        },
+        onDragEnd = { _, _ ->
+            scope.launch {
+                dataStore.saveListData(listData.title.value, listData)
             }
         }
     )
@@ -226,6 +243,9 @@ fun ToDoListScreen() {
                 onInputChange = { inputListName = it },
                 onSave = { listName ->
                     dataStore.saveListData(listName, listData)
+                    scope.launch {
+                        dataStore.saveLastOpenedKey(listName)
+                    }
                 },
                 snackbarHostState = snackbarHostState,
                 scope = scope
@@ -243,6 +263,9 @@ fun ToDoListScreen() {
                     listData.checkedStates.addAll(loaded.checkedStates)
                     while (listData.checkedStates.size < listData.tasks.size)
                         listData.checkedStates.add(false)
+                    scope.launch {
+                        dataStore.saveLastOpenedKey(name)
+                    }
                 },
                 onDelete = { name ->
                     dataStore.deleteListByName(name)

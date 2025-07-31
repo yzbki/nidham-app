@@ -13,6 +13,8 @@ class DataStoreManager(private val context: Context) {
 
     private val gson = Gson()
 
+    private val LAST_OPENED_LIST_KEY = stringPreferencesKey("last_opened_list")
+
     suspend fun saveListData(listName: String, listData: ListData) {
         val tasksJson = gson.toJson(listData.tasks.map { it.textState.value })
         val checksJson = gson.toJson(listData.checkedStates)
@@ -75,4 +77,16 @@ class DataStoreManager(private val context: Context) {
             }
             .distinct()
     }
+
+    suspend fun saveLastOpenedKey(listKey: String) {
+        context.dataStore.edit { prefs ->
+            prefs[LAST_OPENED_LIST_KEY] = listKey
+        }
+    }
+
+    suspend fun getLastOpenedKey(): String? {
+        val prefs = context.dataStore.data.first()
+        return prefs[LAST_OPENED_LIST_KEY]
+    }
+
 }

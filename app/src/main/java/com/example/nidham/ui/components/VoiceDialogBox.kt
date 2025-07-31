@@ -14,7 +14,6 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextButton
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
@@ -41,7 +40,7 @@ fun VoiceDialogBox(
     onStartRecording: () -> Unit,
     onStopRecording: () -> Unit,
     transcribedText: MutableState<String>,
-    listData: ListData // <-- this is new
+    listData: ListData
 ) {
     val scope = rememberCoroutineScope()
     var isLoading by remember { mutableStateOf(false) }
@@ -59,7 +58,7 @@ fun VoiceDialogBox(
                 transcribedText.value = ""
             },
             title = {
-                Text("Voice Input", color = colorScheme.onBackground)
+                Text("Auto-List", color = colorScheme.onBackground)
             },
             text = {
                 Column {
@@ -97,7 +96,7 @@ fun VoiceDialogBox(
                     // Buttons row with Start/Stop and Generate
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
                     ) {
                         Button(
                             modifier = Modifier.weight(1f),
@@ -110,13 +109,11 @@ fun VoiceDialogBox(
                             },
                             enabled = !isLoading,
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = if (isRecording) Color.Red else colorScheme.primary
+                                containerColor = if (isRecording) Color.Red else colorScheme.surface,
+                                contentColor = colorScheme.onSurface
                             )
                         ) {
-                            Text(
-                                if (isRecording) "Stop Recording" else "Start Recording",
-                                color = colorScheme.onBackground
-                            )
+                            Text(if (isRecording) "Stop Recording" else "Record Voice")
                         }
 
                         Button(
@@ -143,10 +140,13 @@ fun VoiceDialogBox(
                             },
                             enabled = transcribedText.value.isNotBlank() && !isLoading,
                             colors = ButtonDefaults.buttonColors(
-                                containerColor = colorScheme.primary
+                                containerColor = colorScheme.surface,
+                                contentColor = colorScheme.onSurface,
+                                disabledContainerColor = colorScheme.surface.copy(alpha = 0.4f),
+                                disabledContentColor = colorScheme.onSurface.copy(alpha = 0.4f)
                             )
                         ) {
-                            Text(if (isLoading) "Generating..." else "Generate", color = colorScheme.onBackground)
+                            Text(if (isLoading) "Generating..." else "Generate")
                         }
                     }
 
@@ -161,7 +161,8 @@ fun VoiceDialogBox(
                             transcribedText.value = ""
                         },
                         colors = ButtonDefaults.buttonColors(
-                            containerColor = colorScheme.primary
+                            containerColor = colorScheme.surface,
+                            contentColor = colorScheme.onSurface
                         )
                     ) {
                         Text("Cancel", color = colorScheme.onBackground)
@@ -172,5 +173,4 @@ fun VoiceDialogBox(
             dismissButton = {}
         )
     }
-
 }

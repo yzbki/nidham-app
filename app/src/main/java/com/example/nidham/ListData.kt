@@ -11,12 +11,12 @@ data class TaskItem(
 )
 
 class ListData {
-    val title = mutableStateOf("To-Do List")
+    val title = mutableStateOf("")
     val tasks = mutableStateListOf(TaskItem())
     val checkedStates = mutableStateListOf<Boolean>()
 
     fun reset() {
-        title.value = "To-Do List"
+        title.value = ""
         tasks.clear()
         checkedStates.clear()
         tasks.add(TaskItem())

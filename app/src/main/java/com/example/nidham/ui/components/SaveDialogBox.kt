@@ -5,7 +5,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
@@ -33,21 +35,21 @@ fun SaveDialogBox(
             modifier = Modifier
                 .clip(RoundedCornerShape(20.dp))
                 .background(GradientBrush),
-            containerColor = MaterialTheme.colorScheme.background,
+            containerColor = colorScheme.background,
             onDismissRequest = {
                 onDismiss()
             },
-            title = { Text("Save List", color = MaterialTheme.colorScheme.onBackground) },
+            title = { Text("Save List", color = colorScheme.onBackground) },
             text = {
                 TextField(
                     value = inputListName,
                     onValueChange = onInputChange,
-                    label = { Text("List Name", color = MaterialTheme.colorScheme.onBackground) },
+                    label = { Text("List Name", color = colorScheme.onBackground) },
                     colors = TextFieldDefaults.colors(
-                        focusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        unfocusedTextColor = MaterialTheme.colorScheme.onSurface,
-                        focusedContainerColor = MaterialTheme.colorScheme.surface,
-                        unfocusedContainerColor = MaterialTheme.colorScheme.surface,
+                        focusedTextColor = colorScheme.onSurface,
+                        unfocusedTextColor = colorScheme.onSurface,
+                        focusedContainerColor = colorScheme.surface,
+                        unfocusedContainerColor = colorScheme.surface,
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -65,15 +67,21 @@ fun SaveDialogBox(
                         }
                     }
                     onDismiss()
-                }) {
-                    Text("Save", color = MaterialTheme.colorScheme.onBackground)
+                }, colors = ButtonDefaults.buttonColors(
+                    containerColor = colorScheme.surface,
+                    contentColor = colorScheme.onSurface
+                )) {
+                    Text("Save", color = colorScheme.onBackground)
                 }
             },
             dismissButton = {
                 Button(onClick = {
                     onDismiss()
-                }) {
-                    Text("Cancel", color = MaterialTheme.colorScheme.onBackground)
+                }, colors = ButtonDefaults.buttonColors(
+                    containerColor = colorScheme.surface,
+                    contentColor = colorScheme.onSurface
+                )) {
+                    Text("Cancel", color = colorScheme.onBackground)
                 }
             }
         )
