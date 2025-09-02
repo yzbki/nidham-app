@@ -141,8 +141,8 @@ fun TaskListSection(
                             }
                         },
                         colors = CheckboxDefaults.colors(
-                            uncheckedColor = colorScheme.surface,
-                            checkedColor = colorScheme.onBackground
+                            uncheckedColor = colorScheme.onBackground,
+                            checkedColor = colorScheme.onSurface
                         )
                     )
 

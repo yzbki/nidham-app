@@ -141,7 +141,7 @@ fun ToDoListScreen() {
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .background(GradientBrush)
+            .background(colorScheme.background)
     ) {
         Scaffold(
             snackbarHost = {
