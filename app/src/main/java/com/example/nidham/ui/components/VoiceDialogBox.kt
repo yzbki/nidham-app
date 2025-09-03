@@ -48,9 +48,6 @@ fun VoiceDialogBox(
 
     if (showDialog) {
         AlertDialog(
-            modifier = Modifier
-                .clip(RoundedCornerShape(20.dp))
-                .background(GradientBrush),
             containerColor = colorScheme.background,
             onDismissRequest = {
                 onDismiss()

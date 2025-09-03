@@ -9,7 +9,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -55,7 +54,7 @@ fun TopBarSection(
     ) {
         // Centered App Title
         Text(
-            text = "Nidham",
+            text = "NIDHAM",
             style = MaterialTheme.typography.headlineLarge,
             fontWeight = FontWeight.Bold,
             color = colorScheme.onBackground,
@@ -77,6 +76,7 @@ fun TopBarSection(
             modifier = Modifier.align(Alignment.CenterEnd),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            /*
             // Sort Dropdown
             Box(
                 modifier = Modifier.wrapContentSize(Alignment.TopEnd),
@@ -116,6 +116,7 @@ fun TopBarSection(
                     )
                 }
             }
+             */
             // Settings Dropdown
             Box(
                 modifier = Modifier.wrapContentSize(Alignment.TopEnd),

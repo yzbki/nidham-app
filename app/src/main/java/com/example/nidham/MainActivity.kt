@@ -38,7 +38,6 @@ import com.example.nidham.ui.components.SaveDialogBox
 import com.example.nidham.ui.components.VoiceDialogBox
 import com.example.nidham.ui.components.TaskListSection
 import com.example.nidham.ui.components.TopBarSection
-import com.example.nidham.ui.theme.GradientBrush
 import com.example.nidham.ui.theme.NidhamTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch

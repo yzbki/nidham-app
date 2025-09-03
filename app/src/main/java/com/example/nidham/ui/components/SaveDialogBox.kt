@@ -1,12 +1,9 @@
 package com.example.nidham.ui.components
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
@@ -14,9 +11,6 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.unit.dp
-import com.example.nidham.ui.theme.GradientBrush
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -32,11 +26,6 @@ fun SaveDialogBox(
 ) {
     if (showDialog) {
         AlertDialog(
-            /*
-            modifier = Modifier
-                .clip(RoundedCornerShape(20.dp))
-                .background(GradientBrush),
-             */
             containerColor = colorScheme.background,
             onDismissRequest = {
                 onDismiss()

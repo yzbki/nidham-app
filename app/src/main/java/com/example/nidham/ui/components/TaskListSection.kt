@@ -51,26 +51,6 @@ fun TaskListSection(
             .fillMaxWidth()
             .padding(bottom = 16.dp)
     ) {
-        /*
-        // "Select All" Checkbox
-        val allChecked = listData.checkedStates.all { it }
-        Checkbox(
-            checked = allChecked,
-            onCheckedChange = { isChecked ->
-                listData.checkedStates.indices.forEach { index ->
-                    listData.checkedStates[index] = isChecked
-                }
-                scope.launch {
-                    dataStore.saveListData(listData.title.value, listData)
-                }
-            },
-            colors = CheckboxDefaults.colors(
-                uncheckedColor = colorScheme.surface,
-                checkedColor = colorScheme.onBackground
-            )
-        )
-         */
-
         // Title TextField
         TextField(
             value = listData.title.value,
@@ -142,7 +122,8 @@ fun TaskListSection(
                         },
                         colors = CheckboxDefaults.colors(
                             uncheckedColor = colorScheme.onBackground,
-                            checkedColor = colorScheme.onSurface
+                            checkedColor = colorScheme.background,
+                            checkmarkColor = colorScheme.onSurface
                         )
                     )
 
