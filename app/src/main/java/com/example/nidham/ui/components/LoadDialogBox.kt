@@ -45,7 +45,7 @@ fun LoadDialogBox(
                     if (savedListNames.isEmpty()) {
                         Text("No saved lists found.")
                     } else {
-                        savedListNames.forEach { name ->
+                        savedListNames.sortedBy { it.lowercase() }.forEach { name ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()

@@ -1,5 +1,7 @@
 package com.example.nidham.ui.components
 
+import androidx.compose.animation.Animatable
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -23,8 +25,11 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -94,6 +99,23 @@ fun TaskListSection(
         }
     }
 
+    // Completed list green flashing animation
+    val surfaceColor = colorScheme.surface
+    val flashColor = remember { Animatable(surfaceColor) }
+
+    LaunchedEffect(listData.checkedStates.all { it }) {
+        if (listData.tasks.isNotEmpty() && listData.checkedStates.all { it }) {
+            flashColor.animateTo(
+                targetValue = Color(0xFF4CAF50),
+                animationSpec = tween(durationMillis = 300)
+            )
+            flashColor.animateTo(
+                targetValue = surfaceColor,
+                animationSpec = tween(durationMillis = 700)
+            )
+        }
+    }
+
     // Task list rendering
     LazyColumn(
         state = state.listState,
@@ -148,13 +170,13 @@ fun TaskListSection(
                         ),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = if (listData.checkedStates.getOrElse(index) { false })
-                                colorScheme.surface.copy(alpha = 0.4f)
+                                flashColor.value.copy(alpha = 0.4f)
                             else
-                                colorScheme.surface.copy(alpha = 0.7f),
+                                flashColor.value.copy(alpha = 0.7f),
                             unfocusedContainerColor = if (listData.checkedStates.getOrElse(index) { false })
-                                colorScheme.surface.copy(alpha = 0.4f)
+                                flashColor.value.copy(alpha = 0.4f)
                             else
-                                colorScheme.surface.copy(alpha = 0.7f),
+                                flashColor.value.copy(alpha = 0.7f),
                             focusedLabelColor = colorScheme.onBackground.copy(alpha = 0.7f),
                             unfocusedLabelColor = colorScheme.onBackground.copy(alpha = 0.7f),
                             focusedTextColor = colorScheme.onSurface.copy(alpha = 0.7f),
