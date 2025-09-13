@@ -54,7 +54,7 @@ fun SaveDialogBox(
                             snackbarHostState.showSnackbar("List '$inputListName' saved!")
                         } else {
                             snackbarHostState.currentSnackbarData?.dismiss()
-                            snackbarHostState.showSnackbar("Please enter a valid name.")
+                            snackbarHostState.showSnackbar("Please enter a valid list name.")
                         }
                     }
                     onDismiss()
