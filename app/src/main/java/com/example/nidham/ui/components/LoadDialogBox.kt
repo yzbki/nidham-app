@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 fun LoadDialogBox(
     showDialog: Boolean,
     onDismiss: () -> Unit,
-    savedListNames: Map<String, String>,
+    savedListNames: List<String>,
     onLoad: suspend (String) -> Unit,
     onDelete: suspend (String) -> Unit,
     snackbarHostState: SnackbarHostState,
@@ -37,60 +37,59 @@ fun LoadDialogBox(
             containerColor = colorScheme.background,
             onDismissRequest = onDismiss,
             confirmButton = {},
-            title = { Text("Load List", color = colorScheme.onBackground) },
+            title = {
+                Text("Load List", color = colorScheme.onBackground)
+            },
             text = {
                 Column {
                     if (savedListNames.isEmpty()) {
                         Text("No saved lists found.")
                     } else {
-                        // Iterate over map entries
-                        savedListNames.entries
-                            .sortedBy { it.value.lowercase() } // sort by title
-                            .forEach { (id, title) ->
-                                Row(
+                        savedListNames.sortedBy { it.lowercase() }.forEach { name ->
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Button(
+                                    onClick = {
+                                        scope.launch {
+                                            onLoad(name)
+                                            snackbarHostState.currentSnackbarData?.dismiss()
+                                            snackbarHostState.showSnackbar("Loaded \"$name\"")
+                                        }
+                                        onDismiss()
+                                    },
                                     modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 4.dp),
-                                    verticalAlignment = Alignment.CenterVertically
+                                        .weight(1f)
+                                        .padding(end = 8.dp),
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = colorScheme.surface,
+                                        contentColor = colorScheme.onSurface
+                                    )
                                 ) {
-                                    Button(
-                                        onClick = {
-                                            scope.launch {
-                                                onLoad(id)
-                                                snackbarHostState.currentSnackbarData?.dismiss()
-                                                snackbarHostState.showSnackbar("Loaded \"$title\"")
-                                            }
-                                            onDismiss()
-                                        },
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .padding(end = 8.dp),
-                                        colors = ButtonDefaults.buttonColors(
-                                            containerColor = colorScheme.surface,
-                                            contentColor = colorScheme.onSurface
-                                        )
-                                    ) {
-                                        Text(title, color = colorScheme.onSurface)
-                                    }
-                                    IconButton(
-                                        onClick = {
-                                            scope.launch {
-                                                onDelete(id)
-                                                snackbarHostState.currentSnackbarData?.dismiss()
-                                                snackbarHostState.showSnackbar("Deleted \"$title\"")
-                                            }
-                                        },
-                                        colors = IconButtonDefaults.iconButtonColors(
-                                            contentColor = colorScheme.onBackground
-                                        )
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Default.Delete,
-                                            contentDescription = "Delete $title"
-                                        )
-                                    }
+                                    Text(name, color = colorScheme.onSurface)
+                                }
+                                IconButton(
+                                    onClick = {
+                                        scope.launch {
+                                            onDelete(name)
+                                            snackbarHostState.currentSnackbarData?.dismiss()
+                                            snackbarHostState.showSnackbar("Deleted \"$name\"")
+                                        }
+                                    },
+                                    colors = IconButtonDefaults.iconButtonColors(
+                                        contentColor = colorScheme.onBackground
+                                    )
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Delete,
+                                        contentDescription = "Delete $name"
+                                    )
                                 }
                             }
+                        }
                     }
                 }
             }

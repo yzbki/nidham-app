@@ -85,7 +85,7 @@ fun TaskListSection(
                 listData.checkedStates.clear()
                 listData.checkedStates.addAll(newCheckedStates)
                 scope.launch {
-                    dataStore.saveListData(listData)
+                    dataStore.saveListData(listData.title.value, listData)
                 }
             },
             colors = IconButtonDefaults.iconButtonColors(
@@ -139,7 +139,7 @@ fun TaskListSection(
                         onCheckedChange = {
                             listData.checkedStates[index] = it
                             scope.launch {
-                                dataStore.saveListData(listData)
+                                dataStore.saveListData(listData.title.value, listData)
                             }
                         },
                         colors = CheckboxDefaults.colors(
@@ -155,7 +155,7 @@ fun TaskListSection(
                         onValueChange = { newValue ->
                             taskItem.textState.value = newValue
                             scope.launch {
-                                dataStore.saveListData(listData)
+                                dataStore.saveListData(listData.title.value, listData)
                             }
                         },
                         modifier = Modifier.weight(1f),

@@ -11,7 +11,6 @@ data class TaskItem(
 )
 
 class ListData {
-    val id: String = UUID.randomUUID().toString()
     val title = mutableStateOf("")
     val tasks = mutableStateListOf(TaskItem())
     val checkedStates = mutableStateListOf<Boolean>()

@@ -66,7 +66,7 @@ fun ToDoListScreen() {
     var showLoadDialog by remember { mutableStateOf(false) }
     var showVoiceDialog by remember { mutableStateOf(false) }
     var inputListName by remember { mutableStateOf("") }
-    var savedListNames by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
+    var savedListNames by remember { mutableStateOf(listOf<String>()) }
     val focusManager = LocalFocusManager.current
     var isRecording by remember { mutableStateOf(false) }
 
@@ -99,7 +99,7 @@ fun ToDoListScreen() {
         if (title.isBlank()) return@LaunchedEffect
         if (title !in savedListNames) return@LaunchedEffect
         delay(300) // Delay autosave to avoid spam
-        dataStore.saveListData(listData)
+        dataStore.saveListData(title, listData)
     }
 
     // Keep checkedStates size in sync with tasks size
@@ -125,7 +125,7 @@ fun ToDoListScreen() {
         },
         onDragEnd = { _, _ ->
             scope.launch {
-                dataStore.saveListData(listData)
+                dataStore.saveListData(listData.title.value, listData)
             }
         }
     )
@@ -240,11 +240,10 @@ fun ToDoListScreen() {
                 },
                 inputListName = inputListName,
                 onInputChange = { inputListName = it },
-                onSave = { newName ->
-                    listData.title.value = newName.trim()
+                onSave = { listName ->
+                    dataStore.saveListData(listName, listData)
                     scope.launch {
-                        dataStore.saveListData(listData)
-                        dataStore.saveLastOpenedKey(listData.id)
+                        dataStore.saveLastOpenedKey(listName)
                     }
                 },
                 snackbarHostState = snackbarHostState,
@@ -254,8 +253,8 @@ fun ToDoListScreen() {
                 showDialog = showLoadDialog,
                 onDismiss = { showLoadDialog = false },
                 savedListNames = savedListNames,
-                onLoad = { id ->
-                    val loaded = dataStore.loadListData(id)
+                onLoad = { name ->
+                    val loaded = dataStore.loadListData(name)
                     listData.title.value = loaded.title.value
                     listData.tasks.clear()
                     listData.tasks.addAll(loaded.tasks)
@@ -264,14 +263,12 @@ fun ToDoListScreen() {
                     while (listData.checkedStates.size < listData.tasks.size)
                         listData.checkedStates.add(false)
                     scope.launch {
-                        dataStore.saveLastOpenedKey(id)
+                        dataStore.saveLastOpenedKey(name)
                     }
                 },
-                onDelete = { id ->
-                    scope.launch {
-                        dataStore.deleteListById(id)
-                        savedListNames = savedListNames - id
-                    }
+                onDelete = { name ->
+                    dataStore.deleteListByName(name)
+                    savedListNames = savedListNames - name
                 },
                 snackbarHostState = snackbarHostState,
                 scope = scope

@@ -43,7 +43,7 @@ fun TopBarSection(
     onMenuExpandChange: (Boolean) -> Unit,
     onShowSaveDialog: () -> Unit,
     onShowLoadDialog: suspend () -> Unit,
-    updateSavedListNames: (Map<String, String>) -> Unit
+    updateSavedListNames: (List<String>) -> Unit
 ) {
     var sortMenuExpanded by remember { mutableStateOf(false) }
 
@@ -64,19 +64,9 @@ fun TopBarSection(
         // Quicksave button
         IconButton(onClick = {
             scope.launch {
-                val title = listData.title.value.trim()
-                if (title.isNotEmpty()) {
-                    scope.launch {
-                        dataStore.saveListData(listData)
-                        snackbarHostState.currentSnackbarData?.dismiss()
-                        snackbarHostState.showSnackbar("List saved as \"$title\"")
-                    }
-                } else {
-                    scope.launch {
-                        snackbarHostState.currentSnackbarData?.dismiss()
-                        snackbarHostState.showSnackbar("Please enter a valid list name.")
-                    }
-                }
+                dataStore.saveListData(listData.title.value, listData)
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar("List saved as \"${listData.title.value}\"")
             }
         }, modifier = Modifier.align(Alignment.CenterStart)) {
             Icon(Icons.Default.Lock, contentDescription = "Quicksave")
@@ -166,8 +156,7 @@ fun TopBarSection(
                         text = { Text("Load List", color = colorScheme.onSurface) },
                         onClick = {
                             scope.launch {
-                                val savedLists = dataStore.getSavedLists()
-                                updateSavedListNames(savedLists)
+                                updateSavedListNames(dataStore.getSavedListNames())
                                 onShowLoadDialog()
                             }
                             onMenuExpandChange(false)
