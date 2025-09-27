@@ -18,10 +18,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
@@ -43,10 +39,9 @@ fun TopBarSection(
     onMenuExpandChange: (Boolean) -> Unit,
     onShowSaveDialog: () -> Unit,
     onShowLoadDialog: suspend () -> Unit,
-    updateSavedListNames: (List<String>) -> Unit
+    updateSavedLists: (List<Pair<String, String>>) -> Unit,
+    onNewList: () -> Unit
 ) {
-    var sortMenuExpanded by remember { mutableStateOf(false) }
-
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -61,63 +56,33 @@ fun TopBarSection(
             textAlign = TextAlign.Center,
             modifier = Modifier.align(Alignment.Center)
         )
+
         // Quicksave button
-        IconButton(onClick = {
-            scope.launch {
-                dataStore.saveListData(listData.title.value, listData)
-                snackbarHostState.currentSnackbarData?.dismiss()
-                snackbarHostState.showSnackbar("List saved as \"${listData.title.value}\"")
-            }
-        }, modifier = Modifier.align(Alignment.CenterStart)) {
+        IconButton(
+            onClick = {
+                scope.launch {
+                    if (listData.isTitleValid(listData.title.value)) {
+                        dataStore.saveListData(listData)
+                        snackbarHostState.currentSnackbarData?.dismiss()
+                        snackbarHostState.showSnackbar("List saved as \"${listData.title.value}\"")
+                    } else {
+                        snackbarHostState.currentSnackbarData?.dismiss()
+                        snackbarHostState.showSnackbar(
+                            "ERROR: Title must be (1-${ListData.MAX_TITLE_LENGTH} chars)."
+                        )
+                    }
+                }
+            },
+            modifier = Modifier.align(Alignment.CenterStart)
+        ) {
             Icon(Icons.Default.Lock, contentDescription = "Quicksave")
         }
-        // Grouped dropdown menus aligned to the end
+
+        // Menu aligned to the end
         Row(
             modifier = Modifier.align(Alignment.CenterEnd),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            /*
-            // Sort Dropdown
-            Box(
-                modifier = Modifier.wrapContentSize(Alignment.TopEnd),
-                contentAlignment = Alignment.TopEnd
-            ) {
-                IconButton(onClick = { sortMenuExpanded = true }) {
-                    Icon(Icons.Default.MoreVert, contentDescription = "Sort Tasks")
-                }
-                DropdownMenu(
-                    expanded = sortMenuExpanded,
-                    onDismissRequest = { sortMenuExpanded = false },
-                    modifier = Modifier.background(colorScheme.surface)
-                ) {
-                    DropdownMenuItem(
-                        text = { Text("Sort by Checked", color = colorScheme.onSurface) },
-                        onClick = {
-                            sortMenuExpanded = false
-                            val combined = listData.tasks.zip(listData.checkedStates)
-                                .sortedByDescending { it.second }
-                            listData.tasks.clear()
-                            listData.checkedStates.clear()
-                            listData.tasks.addAll(combined.map { it.first })
-                            listData.checkedStates.addAll(combined.map { it.second })
-                        }
-                    )
-                    DropdownMenuItem(
-                        text = { Text("Sort by Unchecked", color = colorScheme.onSurface) },
-                        onClick = {
-                            sortMenuExpanded = false
-                            val combined = listData.tasks.zip(listData.checkedStates)
-                                .sortedBy { it.second }
-                            listData.tasks.clear()
-                            listData.checkedStates.clear()
-                            listData.tasks.addAll(combined.map { it.first })
-                            listData.checkedStates.addAll(combined.map { it.second })
-                        }
-                    )
-                }
-            }
-             */
-            // Settings Dropdown
             Box(
                 modifier = Modifier.wrapContentSize(Alignment.TopEnd),
                 contentAlignment = Alignment.TopEnd
@@ -134,17 +99,20 @@ fun TopBarSection(
                     onDismissRequest = { onMenuExpandChange(false) },
                     modifier = Modifier.background(colorScheme.surface)
                 ) {
+                    // New List
                     DropdownMenuItem(
                         text = { Text("New List", color = colorScheme.onSurface) },
                         onClick = {
+                            onNewList()
                             scope.launch {
                                 snackbarHostState.currentSnackbarData?.dismiss()
-                                snackbarHostState.showSnackbar("New list!")
+                                snackbarHostState.showSnackbar("New list created!")
                             }
-                            listData.reset()
                             onMenuExpandChange(false)
                         }
                     )
+
+                    // Save List
                     DropdownMenuItem(
                         text = { Text("Save List", color = colorScheme.onSurface) },
                         onClick = {
@@ -152,11 +120,13 @@ fun TopBarSection(
                             onMenuExpandChange(false)
                         }
                     )
+
+                    // Load List
                     DropdownMenuItem(
                         text = { Text("Load List", color = colorScheme.onSurface) },
                         onClick = {
                             scope.launch {
-                                updateSavedListNames(dataStore.getSavedListNames())
+                                updateSavedLists(dataStore.getSavedLists())
                                 onShowLoadDialog()
                             }
                             onMenuExpandChange(false)

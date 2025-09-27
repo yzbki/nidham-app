@@ -11,6 +11,8 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.example.nidham.DataStoreManager
+import com.example.nidham.ListData
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -18,18 +20,17 @@ import kotlinx.coroutines.launch
 fun SaveDialogBox(
     showDialog: Boolean,
     onDismiss: () -> Unit,
+    listData: ListData,
     inputListName: String,
     onInputChange: (String) -> Unit,
-    onSave: suspend (String) -> Unit,
+    dataStore: DataStoreManager,
     snackbarHostState: SnackbarHostState,
     scope: CoroutineScope
 ) {
     if (showDialog) {
         AlertDialog(
             containerColor = colorScheme.background,
-            onDismissRequest = {
-                onDismiss()
-            },
+            onDismissRequest = onDismiss,
             title = { Text("Save List", color = colorScheme.onBackground) },
             text = {
                 TextField(
@@ -40,38 +41,45 @@ fun SaveDialogBox(
                         focusedTextColor = colorScheme.onSurface,
                         unfocusedTextColor = colorScheme.onSurface,
                         focusedContainerColor = colorScheme.surface,
-                        unfocusedContainerColor = colorScheme.surface,
+                        unfocusedContainerColor = colorScheme.surface
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
             },
             confirmButton = {
-                Button(onClick = {
-                    scope.launch {
-                        if (inputListName.isNotBlank()) {
-                            onSave(inputListName)
-                            snackbarHostState.currentSnackbarData?.dismiss()
-                            snackbarHostState.showSnackbar("List '$inputListName' saved!")
-                        } else {
-                            snackbarHostState.currentSnackbarData?.dismiss()
-                            snackbarHostState.showSnackbar("Please enter a valid name.")
+                Button(
+                    onClick = {
+                        scope.launch {
+                            if (listData.isTitleValid(inputListName)) {
+                                listData.title.value = inputListName
+                                dataStore.saveListData(listData)
+                                snackbarHostState.currentSnackbarData?.dismiss()
+                                snackbarHostState.showSnackbar("List '$inputListName' saved!")
+                            } else {
+                                snackbarHostState.currentSnackbarData?.dismiss()
+                                snackbarHostState.showSnackbar(
+                                    "ERROR: Title must be (1-${ListData.MAX_TITLE_LENGTH} chars)."
+                                )
+                            }
                         }
-                    }
-                    onDismiss()
-                }, colors = ButtonDefaults.buttonColors(
-                    containerColor = colorScheme.surface,
-                    contentColor = colorScheme.onSurface
-                )) {
+                        onDismiss()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorScheme.surface,
+                        contentColor = colorScheme.onSurface
+                    )
+                ) {
                     Text("Save", color = colorScheme.onBackground)
                 }
             },
             dismissButton = {
-                Button(onClick = {
-                    onDismiss()
-                }, colors = ButtonDefaults.buttonColors(
-                    containerColor = colorScheme.surface,
-                    contentColor = colorScheme.onSurface
-                )) {
+                Button(
+                    onClick = { onDismiss() },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = colorScheme.surface,
+                        contentColor = colorScheme.onSurface
+                    )
+                ) {
                     Text("Cancel", color = colorScheme.onBackground)
                 }
             }

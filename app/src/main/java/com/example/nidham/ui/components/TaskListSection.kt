@@ -85,7 +85,7 @@ fun TaskListSection(
                 listData.checkedStates.clear()
                 listData.checkedStates.addAll(newCheckedStates)
                 scope.launch {
-                    dataStore.saveListData(listData.title.value, listData)
+                    dataStore.saveListData(listData)
                 }
             },
             colors = IconButtonDefaults.iconButtonColors(
@@ -102,7 +102,6 @@ fun TaskListSection(
     // Completed list green flashing animation
     val surfaceColor = colorScheme.surface
     val flashColor = remember { Animatable(surfaceColor) }
-
     LaunchedEffect(listData.checkedStates.all { it }) {
         if (listData.tasks.isNotEmpty() && listData.checkedStates.all { it }) {
             flashColor.animateTo(
@@ -139,7 +138,7 @@ fun TaskListSection(
                         onCheckedChange = {
                             listData.checkedStates[index] = it
                             scope.launch {
-                                dataStore.saveListData(listData.title.value, listData)
+                                dataStore.saveListData(listData)
                             }
                         },
                         colors = CheckboxDefaults.colors(
@@ -155,7 +154,7 @@ fun TaskListSection(
                         onValueChange = { newValue ->
                             taskItem.textState.value = newValue
                             scope.launch {
-                                dataStore.saveListData(listData.title.value, listData)
+                                dataStore.saveListData(listData)
                             }
                         },
                         modifier = Modifier.weight(1f),

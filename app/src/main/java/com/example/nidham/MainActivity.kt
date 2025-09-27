@@ -57,76 +57,71 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun ToDoListScreen() {
     val context = LocalContext.current
-    val dataStore = remember { DataStoreManager(context) }
+    val focusManager = LocalFocusManager.current
     val scope = rememberCoroutineScope()
+    val dataStore = remember { DataStoreManager(context) }
+    var inputListName by remember { mutableStateOf("") }
+    var currentListData by remember { mutableStateOf(ListData()) }
+    var savedLists by remember { mutableStateOf(listOf<Pair<String, String>>()) }
     val snackbarHostState = remember { SnackbarHostState() }
-    val listData = remember { ListData() }
+
     var menuExpanded by remember { mutableStateOf(false) }
     var showSaveDialog by remember { mutableStateOf(false) }
     var showLoadDialog by remember { mutableStateOf(false) }
     var showVoiceDialog by remember { mutableStateOf(false) }
-    var inputListName by remember { mutableStateOf("") }
-    var savedListNames by remember { mutableStateOf(listOf<String>()) }
-    val focusManager = LocalFocusManager.current
     var isRecording by remember { mutableStateOf(false) }
 
-    // Load autosave list
+    // Helper to create a brand-new list
+    fun createNewList() {
+        currentListData = ListData.newListData()
+    }
+
+    // Load last opened list
     LaunchedEffect(Unit) {
         val lastKey = dataStore.getLastOpenedKey()
         if (lastKey != null) {
-            val loadedData = dataStore.loadListData(lastKey)
-
-            listData.title.value = loadedData.title.value
-            listData.tasks.clear()
-            listData.tasks.addAll(loadedData.tasks)
-            listData.checkedStates.clear()
-            listData.checkedStates.addAll(loadedData.checkedStates)
-
-            while (listData.checkedStates.size < listData.tasks.size) {
-                listData.checkedStates.add(false)
-            }
+            currentListData = dataStore.loadListData(lastKey)
         }
     }
 
     // Auto-save on any change
     LaunchedEffect(
-        listData.title.value,
-        listData.tasks.map { it.textState.value },
-        listData.checkedStates.toList(),
-        savedListNames
+        currentListData.title.value,
+        currentListData.tasks.map { it.textState.value },
+        currentListData.checkedStates.toList(),
+        savedLists
     ) {
-        val title = listData.title.value.trim()
-        if (title.isBlank()) return@LaunchedEffect
-        if (title !in savedListNames) return@LaunchedEffect
-        delay(300) // Delay autosave to avoid spam
-        dataStore.saveListData(title, listData)
+        if (!currentListData.isTitleValid(currentListData.title.value)) return@LaunchedEffect
+        val isExistingList = savedLists.any { it.first == currentListData.id }
+        if (!isExistingList) return@LaunchedEffect
+
+        delay(300) // small debounce to avoid spamming saves
+        dataStore.saveListData(currentListData)
     }
 
-    // Keep checkedStates size in sync with tasks size
-    LaunchedEffect(listData.tasks.size) {
-        while (listData.checkedStates.size < listData.tasks.size)
-            listData.checkedStates.add(false)
-        while (listData.checkedStates.size > listData.tasks.size)
-            listData.checkedStates.removeAt(listData.checkedStates.lastIndex)
+    // Keep checkedStates in sync with tasks size
+    LaunchedEffect(currentListData.tasks.size) {
+        while (currentListData.checkedStates.size < currentListData.tasks.size)
+            currentListData.checkedStates.add(false)
+        while (currentListData.checkedStates.size > currentListData.tasks.size)
+            currentListData.checkedStates.removeAt(currentListData.checkedStates.lastIndex)
     }
 
     // Set default list title when saving
     LaunchedEffect(showSaveDialog) {
         if (showSaveDialog) {
-            inputListName = listData.title.value
+            inputListName = currentListData.title.value
         }
     }
 
-    // Handle dynamic reordering of tasks
+    // Handle dynamic reordering
     val state = rememberReorderableLazyListState(
         onMove = { from, to ->
-            listData.tasks.add(to.index, listData.tasks.removeAt(from.index))
-            listData.checkedStates.add(to.index, listData.checkedStates.removeAt(from.index))
+            currentListData.tasks.add(to.index, currentListData.tasks.removeAt(from.index))
+            currentListData.checkedStates.add(to.index, currentListData.checkedStates.removeAt(from.index))
         },
         onDragEnd = { _, _ ->
-            scope.launch {
-                dataStore.saveListData(listData.title.value, listData)
-            }
+            scope.launch { dataStore.saveListData(currentListData) }
         }
     )
 
@@ -135,8 +130,7 @@ fun ToDoListScreen() {
     val voiceResult = remember { mutableStateOf("") }
     val voiceManager = remember { VoiceRecognitionManager(activity) }
 
-
-    // User interface structure
+    // Main UI
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -160,7 +154,7 @@ fun ToDoListScreen() {
             contentColor = colorScheme.onBackground,
             bottomBar = {
                 BottomRowSection(
-                    listData = listData,
+                    listData = currentListData,
                     colorScheme = colorScheme,
                     onVoiceInputClick = {
                         val permission = android.Manifest.permission.RECORD_AUDIO
@@ -190,21 +184,24 @@ fun ToDoListScreen() {
                     colorScheme = colorScheme,
                     scope = scope,
                     snackbarHostState = snackbarHostState,
-                    listData = listData,
+                    listData = currentListData,
                     dataStore = dataStore,
                     menuExpanded = menuExpanded,
                     onMenuExpandChange = { menuExpanded = it },
                     onShowSaveDialog = { showSaveDialog = true },
                     onShowLoadDialog = { showLoadDialog = true },
-                    updateSavedListNames = { savedListNames = it }
+                    updateSavedLists = { savedLists = it },
+                    onNewList = { createNewList() }
                 )
                 TaskListSection(
-                    listData = listData,
+                    listData = currentListData,
                     scope = scope,
                     dataStore = dataStore,
                     state = state
                 )
             }
+
+            // Voice Dialog
             VoiceDialogBox(
                 showDialog = showVoiceDialog,
                 isRecording = isRecording,
@@ -230,45 +227,40 @@ fun ToDoListScreen() {
                     isRecording = false
                 },
                 transcribedText = voiceResult,
-                listData = listData
+                listData = currentListData
             )
+
+            // Save Dialog
             SaveDialogBox(
                 showDialog = showSaveDialog,
                 onDismiss = {
                     showSaveDialog = false
                     inputListName = ""
                 },
+                listData = currentListData,
                 inputListName = inputListName,
                 onInputChange = { inputListName = it },
-                onSave = { listName ->
-                    dataStore.saveListData(listName, listData)
-                    scope.launch {
-                        dataStore.saveLastOpenedKey(listName)
-                    }
-                },
+                dataStore = dataStore,
                 snackbarHostState = snackbarHostState,
                 scope = scope
             )
+
+            // Load Dialog
             LoadDialogBox(
                 showDialog = showLoadDialog,
                 onDismiss = { showLoadDialog = false },
-                savedListNames = savedListNames,
-                onLoad = { name ->
-                    val loaded = dataStore.loadListData(name)
-                    listData.title.value = loaded.title.value
-                    listData.tasks.clear()
-                    listData.tasks.addAll(loaded.tasks)
-                    listData.checkedStates.clear()
-                    listData.checkedStates.addAll(loaded.checkedStates)
-                    while (listData.checkedStates.size < listData.tasks.size)
-                        listData.checkedStates.add(false)
-                    scope.launch {
-                        dataStore.saveLastOpenedKey(name)
-                    }
+                savedLists = savedLists,
+                onLoad = { id ->
+                    currentListData = dataStore.loadListData(id)
+                    scope.launch { dataStore.saveLastOpenedKey(id) }
                 },
-                onDelete = { name ->
-                    dataStore.deleteListByName(name)
-                    savedListNames = savedListNames - name
+                onDelete = { id ->
+                    dataStore.deleteListById(id)
+                    savedLists = savedLists.filterNot { it.first == id }
+                    if (currentListData.id == id) {
+                        currentListData.reset()
+                        dataStore.saveLastOpenedKey(currentListData.id)
+                    }
                 },
                 snackbarHostState = snackbarHostState,
                 scope = scope

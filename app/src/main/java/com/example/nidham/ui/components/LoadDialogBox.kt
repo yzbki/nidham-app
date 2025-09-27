@@ -26,7 +26,7 @@ import kotlinx.coroutines.launch
 fun LoadDialogBox(
     showDialog: Boolean,
     onDismiss: () -> Unit,
-    savedListNames: List<String>,
+    savedLists: List<Pair<String, String>>,
     onLoad: suspend (String) -> Unit,
     onDelete: suspend (String) -> Unit,
     snackbarHostState: SnackbarHostState,
@@ -37,15 +37,13 @@ fun LoadDialogBox(
             containerColor = colorScheme.background,
             onDismissRequest = onDismiss,
             confirmButton = {},
-            title = {
-                Text("Load List", color = colorScheme.onBackground)
-            },
+            title = { Text("Load List", color = colorScheme.onBackground) },
             text = {
                 Column {
-                    if (savedListNames.isEmpty()) {
-                        Text("No saved lists found.")
+                    if (savedLists.isEmpty()) {
+                        Text("No saved lists found.", color = colorScheme.onSurface)
                     } else {
-                        savedListNames.sortedBy { it.lowercase() }.forEach { name ->
+                        savedLists.sortedBy { it.second.lowercase() }.forEach { (id, title) ->
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -55,9 +53,9 @@ fun LoadDialogBox(
                                 Button(
                                     onClick = {
                                         scope.launch {
-                                            onLoad(name)
+                                            onLoad(id)
                                             snackbarHostState.currentSnackbarData?.dismiss()
-                                            snackbarHostState.showSnackbar("Loaded \"$name\"")
+                                            snackbarHostState.showSnackbar("Loaded \"$title\"")
                                         }
                                         onDismiss()
                                     },
@@ -69,14 +67,14 @@ fun LoadDialogBox(
                                         contentColor = colorScheme.onSurface
                                     )
                                 ) {
-                                    Text(name, color = colorScheme.onSurface)
+                                    Text(title, color = colorScheme.onSurface)
                                 }
                                 IconButton(
                                     onClick = {
                                         scope.launch {
-                                            onDelete(name)
+                                            onDelete(id) // delete by ID
                                             snackbarHostState.currentSnackbarData?.dismiss()
-                                            snackbarHostState.showSnackbar("Deleted \"$name\"")
+                                            snackbarHostState.showSnackbar("Deleted \"$title\"")
                                         }
                                     },
                                     colors = IconButtonDefaults.iconButtonColors(
@@ -85,7 +83,7 @@ fun LoadDialogBox(
                                 ) {
                                     Icon(
                                         imageVector = Icons.Default.Delete,
-                                        contentDescription = "Delete $name"
+                                        contentDescription = "Delete $title"
                                     )
                                 }
                             }
