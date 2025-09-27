@@ -67,7 +67,6 @@ data class ListDataJson(
 )
 
 data class TaskItemJson(
-    val id: String,
     val text: String
 )
 
@@ -113,7 +112,11 @@ object OpenAIService {
                 messages = listOf(
                     Message(
                         "system",
-                        "You are an assistant that outputs only raw JSON (no markdown or code blocks). Format: { title: String, tasks: [{ id: String, text: String }], checkedStates: [Boolean] }"
+                        "You are an assistant that outputs only raw JSON (no markdown or code blocks). " +
+                                "Format: { title: String, tasks: [{ id: String, text: String }], checkedStates: [Boolean] }. " +
+                                "The title must be at most ${ListData.MAX_TITLE_LENGTH} characters. " +
+                                "Do not exceed this limit, and do not truncate it yourself." +
+                                "Always generate a title within this limit."
                     ),
                     Message("user", prompt)
                 ),
@@ -123,30 +126,27 @@ object OpenAIService {
             val response = api.getChatCompletion(request)
             val rawText = response.choices.firstOrNull()?.message?.content ?: return@withContext null
 
-            // Optional callback with raw response
             onRawResponse?.invoke(rawText)
 
-            // Clean markdown formatting (```json ... ```)
-            val cleanedJson = rawText
-                .replace("```json", "")
-                .replace("```", "")
-                .trim()
+            val cleanedJson = rawText.replace("```json", "").replace("```", "").trim()
 
-            // Parse cleaned JSON into ListDataJson
             val listDataJson = gson.fromJson(cleanedJson, ListDataJson::class.java)
 
-            val listData = ListData()
-            listData.title.value = listDataJson.title
+            // Create proper ListData object
+            val listData = ListData.newListData()
+            listData.title.value = listDataJson.title.take(ListData.MAX_TITLE_LENGTH)
 
+            // Map tasks to TaskItem objects
             listData.tasks.clear()
-            listData.tasks.addAll(listDataJson.tasks.map {
-                TaskItem(id = it.id).apply {
-                    textState.value = it.text
-                }
-            })
+            listData.tasks.addAll(listDataJson.tasks.map { TaskItem().apply { textState.value = it.text } })
 
+            // Map checkedStates and fill remaining with false
             listData.checkedStates.clear()
-            listData.checkedStates.addAll(listDataJson.checkedStates)
+            val checks = listDataJson.checkedStates.take(listData.tasks.size)
+            listData.checkedStates.addAll(checks)
+            while (listData.checkedStates.size < listData.tasks.size) {
+                listData.checkedStates.add(false)
+            }
 
             return@withContext listData
         } catch (e: Exception) {
