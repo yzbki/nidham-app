@@ -16,7 +16,7 @@ class DataStoreManager(private val context: Context) {
     suspend fun saveListData(listData: ListData) {
         val tasksJson = gson.toJson(listData.tasks.map { it.textState.value })
         val checksJson = gson.toJson(listData.checkedStates)
-        val title = listData.title.value
+        val title = listData.title.value;
 
         context.dataStore.edit { prefs ->
             prefs[stringPreferencesKey("${listData.id}_tasks")] = tasksJson
@@ -24,6 +24,7 @@ class DataStoreManager(private val context: Context) {
             prefs[stringPreferencesKey("${listData.id}_title")] = title
         }
     }
+
     suspend fun loadListData(listId: String): ListData {
         val prefs = context.dataStore.data.first()
         val listData = ListData().apply {
@@ -48,6 +49,7 @@ class DataStoreManager(private val context: Context) {
         }
         return listData.copyId(listId)
     }
+
     suspend fun deleteListById(listId: String) {
         context.dataStore.edit { prefs ->
             prefs.remove(stringPreferencesKey("${listId}_tasks"))
@@ -55,6 +57,7 @@ class DataStoreManager(private val context: Context) {
             prefs.remove(stringPreferencesKey("${listId}_title"))
         }
     }
+
     suspend fun getSavedLists(): List<Pair<String, String>> {
         val prefs = context.dataStore.data.first()
         return prefs.asMap()
@@ -69,11 +72,20 @@ class DataStoreManager(private val context: Context) {
             }
             .distinctBy { it.first } // avoid duplicates
     }
+
+    suspend fun isTitleDuplicate(title: String, excludeId: String? = null): Boolean {
+        val existingLists = getSavedLists()
+        return existingLists.any { (id, existingTitle) ->
+            id != excludeId && existingTitle.equals(title.trim(), ignoreCase = true)
+        }
+    }
+
     suspend fun saveLastOpenedKey(listId: String) {
         context.dataStore.edit { prefs ->
             prefs[LAST_OPENED_LIST_KEY] = listId
         }
     }
+
     suspend fun getLastOpenedKey(): String? {
         val prefs = context.dataStore.data.first()
         return prefs[LAST_OPENED_LIST_KEY]

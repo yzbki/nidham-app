@@ -91,7 +91,7 @@ fun ToDoListScreen() {
         currentListData.checkedStates.toList(),
         savedLists
     ) {
-        if (!currentListData.isTitleValid(currentListData.title.value)) return@LaunchedEffect
+        if (!currentListData.isTitleValid(currentListData.title.value, dataStore)) return@LaunchedEffect
         val isExistingList = savedLists.any { it.first == currentListData.id }
         if (!isExistingList) return@LaunchedEffect
 

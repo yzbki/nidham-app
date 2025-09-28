@@ -44,8 +44,15 @@ class ListData(val id: String = UUID.randomUUID().toString()) {
         }
     }
 
-    fun isTitleValid(proposedTitle: String): Boolean {
-        val trimmed = proposedTitle.trim()
-        return trimmed.isNotEmpty() && trimmed.length <= MAX_TITLE_LENGTH
+    suspend fun isTitleValid(
+        title: String,
+        dataStore: DataStoreManager,
+        currentId: String? = null
+    ): Boolean {
+        val trimmed = title.trim()
+        if (trimmed.isEmpty()) return false
+        if (trimmed.length > MAX_TITLE_LENGTH) return false
+        if (dataStore.isTitleDuplicate(trimmed, excludeId = currentId)) return false
+        return true
     }
 }

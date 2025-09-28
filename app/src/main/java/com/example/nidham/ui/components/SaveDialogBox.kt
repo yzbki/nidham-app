@@ -50,7 +50,7 @@ fun SaveDialogBox(
                 Button(
                     onClick = {
                         scope.launch {
-                            if (listData.isTitleValid(inputListName)) {
+                            if (listData.isTitleValid(inputListName, dataStore)) {
                                 listData.title.value = inputListName
                                 dataStore.saveListData(listData)
                                 snackbarHostState.currentSnackbarData?.dismiss()
@@ -58,7 +58,7 @@ fun SaveDialogBox(
                             } else {
                                 snackbarHostState.currentSnackbarData?.dismiss()
                                 snackbarHostState.showSnackbar(
-                                    "ERROR: Title must be (1-${ListData.MAX_TITLE_LENGTH} chars)."
+                                    "ERROR: Invalid title."
                                 )
                             }
                         }

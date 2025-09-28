@@ -61,14 +61,14 @@ fun TopBarSection(
         IconButton(
             onClick = {
                 scope.launch {
-                    if (listData.isTitleValid(listData.title.value)) {
+                    if (listData.isTitleValid(listData.title.value, dataStore)) {
                         dataStore.saveListData(listData)
                         snackbarHostState.currentSnackbarData?.dismiss()
                         snackbarHostState.showSnackbar("List saved as \"${listData.title.value}\"")
                     } else {
                         snackbarHostState.currentSnackbarData?.dismiss()
                         snackbarHostState.showSnackbar(
-                            "ERROR: Title must be (1-${ListData.MAX_TITLE_LENGTH} chars)."
+                            "ERROR: Invalid title."
                         )
                     }
                 }
