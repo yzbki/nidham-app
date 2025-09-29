@@ -1,6 +1,7 @@
 package com.example.nidham.ui.components
 
-import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
@@ -27,15 +28,16 @@ fun BottomRowSection(
     onVoiceInputClick: () -> Unit,
     isRecording: Boolean
 ) {
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp)
-            .padding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom).asPaddingValues())
+            .padding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom).asPaddingValues()),
+        horizontalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         Button(
             onClick = onVoiceInputClick,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.weight(1f),
             colors = ButtonDefaults.buttonColors(
                 containerColor = colorScheme.surface.copy(alpha = 0.7f),
                 contentColor = colorScheme.onSurface
@@ -44,14 +46,12 @@ fun BottomRowSection(
             Text("Auto-List")
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
-
         Button(
             onClick = {
                 listData.tasks.add(TaskItem())
                 listData.checkedStates.add(false)
             },
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.weight(1f),
             colors = ButtonDefaults.buttonColors(
                 containerColor = colorScheme.surface.copy(alpha = 0.7f),
                 contentColor = colorScheme.onSurface
