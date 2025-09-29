@@ -20,6 +20,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -49,10 +50,12 @@ fun TopBarSection(
     ) {
         // Centered App Title
         Text(
-            text = "NIDHAM",
-            style = MaterialTheme.typography.headlineLarge,
-            fontWeight = FontWeight.Bold,
-            color = colorScheme.onBackground,
+            text = "Nidham",
+            style = MaterialTheme.typography.headlineLarge.copy(
+                fontFamily = FontFamily.Cursive,
+                fontWeight = FontWeight.Bold
+            ),
+            color = MaterialTheme.colorScheme.onBackground,
             textAlign = TextAlign.Center,
             modifier = Modifier.align(Alignment.Center)
         )
@@ -101,7 +104,7 @@ fun TopBarSection(
                 ) {
                     // New List
                     DropdownMenuItem(
-                        text = { Text("New List", color = colorScheme.onSurface) },
+                        text = { Text("New", color = colorScheme.onSurface) },
                         onClick = {
                             onNewList()
                             scope.launch {
@@ -114,7 +117,7 @@ fun TopBarSection(
 
                     // Save List
                     DropdownMenuItem(
-                        text = { Text("Save List", color = colorScheme.onSurface) },
+                        text = { Text("Save", color = colorScheme.onSurface) },
                         onClick = {
                             onShowSaveDialog()
                             onMenuExpandChange(false)
@@ -123,7 +126,7 @@ fun TopBarSection(
 
                     // Load List
                     DropdownMenuItem(
-                        text = { Text("Load List", color = colorScheme.onSurface) },
+                        text = { Text("Load", color = colorScheme.onSurface) },
                         onClick = {
                             scope.launch {
                                 updateSavedLists(dataStore.getSavedLists())

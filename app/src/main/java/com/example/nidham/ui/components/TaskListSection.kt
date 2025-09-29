@@ -12,7 +12,6 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
@@ -39,7 +38,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.burnoutcrew.reorderable.ReorderableItem
 import org.burnoutcrew.reorderable.ReorderableLazyListState
-import org.burnoutcrew.reorderable.detectReorderAfterLongPress
+import org.burnoutcrew.reorderable.detectReorder
 import org.burnoutcrew.reorderable.reorderable
 
 @Composable
@@ -122,14 +121,14 @@ fun TaskListSection(
             .fillMaxSize()
             .reorderable(state)
             .background(colorScheme.background)
-            .detectReorderAfterLongPress(state)
     ) {
         itemsIndexed(listData.tasks, key = { _, taskItem -> taskItem.id }) { index, taskItem ->
             ReorderableItem(state, key = taskItem.id) { _ ->
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 8.dp),
+                        .padding(bottom = 8.dp)
+                        .detectReorder(state),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Checkboxes
@@ -202,14 +201,6 @@ fun TaskListSection(
                             contentDescription = "Delete Task"
                         )
                     }
-
-                    // Drag handle
-                    Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = "Drag Handle",
-                        tint = colorScheme.onBackground,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
                 }
             }
         }
