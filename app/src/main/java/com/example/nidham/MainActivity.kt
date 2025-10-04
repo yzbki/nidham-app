@@ -121,7 +121,11 @@ fun ToDoListScreen() {
             currentListData.checkedStates.add(to.index, currentListData.checkedStates.removeAt(from.index))
         },
         onDragEnd = { _, _ ->
-            scope.launch { dataStore.saveListData(currentListData) }
+            scope.launch {
+                if(currentListData.isTitleValid(currentListData.title.value, dataStore = dataStore)) {
+                    dataStore.saveListData(currentListData)
+                }
+            }
         }
     )
 
