@@ -1,4 +1,4 @@
-package com.example.nidham
+package com.example.nidham.service
 
 import android.app.Activity
 import android.content.Intent
@@ -6,7 +6,6 @@ import android.os.Bundle
 import android.speech.RecognitionListener
 import android.speech.RecognizerIntent
 import android.speech.SpeechRecognizer
-import android.widget.Toast
 import java.util.Locale
 
 class VoiceRecognitionManager(private val activity: Activity) {

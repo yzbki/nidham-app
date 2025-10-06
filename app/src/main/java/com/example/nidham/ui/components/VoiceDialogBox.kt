@@ -24,8 +24,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.example.nidham.ListData
-import com.example.nidham.OpenAIService
+import com.example.nidham.data.ListData
+import com.example.nidham.service.OpenAIService
 import kotlinx.coroutines.launch
 
 @Composable

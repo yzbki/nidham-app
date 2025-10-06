@@ -1,4 +1,4 @@
-package com.example.nidham
+package com.example.nidham.data
 
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
