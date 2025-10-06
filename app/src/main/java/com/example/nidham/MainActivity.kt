@@ -91,12 +91,10 @@ fun ToDoListScreen() {
         currentListData.checkedStates.toList(),
         savedLists
     ) {
-        if (!currentListData.isTitleValid(currentListData.title.value, dataStore)) return@LaunchedEffect
-        val isExistingList = savedLists.any { it.first == currentListData.id }
-        if (!isExistingList) return@LaunchedEffect
-
         delay(300) // small debounce to avoid spamming saves
-        dataStore.saveListData(currentListData)
+        scope.launch {
+            dataStore.saveListData(currentListData)
+        }
     }
 
     // Keep checkedStates in sync with tasks size
@@ -122,9 +120,7 @@ fun ToDoListScreen() {
         },
         onDragEnd = { _, _ ->
             scope.launch {
-                if(currentListData.isTitleValid(currentListData.title.value, dataStore = dataStore)) {
-                    dataStore.saveListData(currentListData)
-                }
+                dataStore.saveListData(currentListData)
             }
         }
     )

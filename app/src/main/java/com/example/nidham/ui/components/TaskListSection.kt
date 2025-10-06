@@ -12,6 +12,7 @@ import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
@@ -39,6 +40,7 @@ import kotlinx.coroutines.launch
 import org.burnoutcrew.reorderable.ReorderableItem
 import org.burnoutcrew.reorderable.ReorderableLazyListState
 import org.burnoutcrew.reorderable.detectReorder
+import org.burnoutcrew.reorderable.detectReorderAfterLongPress
 import org.burnoutcrew.reorderable.reorderable
 
 @Composable
@@ -71,7 +73,7 @@ fun TaskListSection(
             )
         )
 
-        // "Delete All" Icon Button
+        // "Multiple Delete" Icon Button
         IconButton(
             onClick = {
                 val newTasks = listData.tasks
@@ -128,7 +130,7 @@ fun TaskListSection(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp)
-                        .detectReorder(state),
+                        .detectReorderAfterLongPress(state),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Checkboxes
@@ -167,14 +169,8 @@ fun TaskListSection(
                                 TextDecoration.LineThrough else null
                         ),
                         colors = TextFieldDefaults.colors(
-                            focusedContainerColor = if (listData.checkedStates.getOrElse(index) { false })
-                                flashColor.value.copy(alpha = 0.4f)
-                            else
-                                flashColor.value.copy(alpha = 0.7f),
-                            unfocusedContainerColor = if (listData.checkedStates.getOrElse(index) { false })
-                                flashColor.value.copy(alpha = 0.4f)
-                            else
-                                flashColor.value.copy(alpha = 0.7f),
+                            focusedContainerColor = colorScheme.surface,
+                            unfocusedContainerColor = colorScheme.surface,
                             focusedLabelColor = colorScheme.onBackground.copy(alpha = 0.7f),
                             unfocusedLabelColor = colorScheme.onBackground.copy(alpha = 0.7f),
                             focusedTextColor = colorScheme.onSurface.copy(alpha = 0.7f),
@@ -186,21 +182,13 @@ fun TaskListSection(
                         keyboardActions = KeyboardActions(onDone = { /* handle done */ })
                     )
 
-                    // Delete button
-                    IconButton(
-                        onClick = {
-                            listData.tasks.removeAt(index)
-                            listData.checkedStates.removeAt(index)
-                        },
-                        colors = IconButtonDefaults.iconButtonColors(
-                            contentColor = colorScheme.onBackground
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete Task"
-                        )
-                    }
+                    // Drag handle
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = "Drag Handle",
+                        tint = colorScheme.onBackground,
+                        modifier = Modifier.padding(start = 8.dp)
+                    )
                 }
             }
         }

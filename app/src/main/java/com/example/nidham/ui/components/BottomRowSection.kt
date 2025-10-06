@@ -1,6 +1,7 @@
 package com.example.nidham.ui.components
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -28,16 +29,17 @@ fun BottomRowSection(
     onVoiceInputClick: () -> Unit,
     isRecording: Boolean
 ) {
-    Row(
+    Column(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp)
             .padding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom).asPaddingValues()),
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
+        // --- Top full-width Auto-List button ---
         Button(
             onClick = onVoiceInputClick,
-            modifier = Modifier.weight(1f),
+            modifier = Modifier.fillMaxWidth(),
             colors = ButtonDefaults.buttonColors(
                 containerColor = colorScheme.surface.copy(alpha = 0.7f),
                 contentColor = colorScheme.onSurface
@@ -46,18 +48,37 @@ fun BottomRowSection(
             Text("Auto-List")
         }
 
-        Button(
-            onClick = {
-                listData.tasks.add(TaskItem())
-                listData.checkedStates.add(false)
-            },
-            modifier = Modifier.weight(1f),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = colorScheme.surface.copy(alpha = 0.7f),
-                contentColor = colorScheme.onSurface
-            )
+        // --- Bottom row: Add Group + Add Task side by side ---
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Text("Add Task")
+            Button(
+                onClick = {
+                    // TODO: implement group creation
+                },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorScheme.surface.copy(alpha = 0.7f),
+                    contentColor = colorScheme.onSurface
+                )
+            ) {
+                Text("Add Group")
+            }
+
+            Button(
+                onClick = {
+                    listData.tasks.add(TaskItem())
+                    listData.checkedStates.add(false)
+                },
+                modifier = Modifier.weight(1f),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = colorScheme.surface.copy(alpha = 0.7f),
+                    contentColor = colorScheme.onSurface
+                )
+            ) {
+                Text("Add Task")
+            }
         }
     }
 }

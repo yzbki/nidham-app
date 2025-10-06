@@ -14,9 +14,11 @@ class DataStoreManager(private val context: Context) {
     private val LAST_OPENED_LIST_KEY = stringPreferencesKey("last_opened_list")
 
     suspend fun saveListData(listData: ListData) {
+        val title = listData.title.value;
+        if (!listData.isTitleValid(title, this, currentId = listData.id)) return
+
         val tasksJson = gson.toJson(listData.tasks.map { it.textState.value })
         val checksJson = gson.toJson(listData.checkedStates)
-        val title = listData.title.value;
 
         context.dataStore.edit { prefs ->
             prefs[stringPreferencesKey("${listData.id}_tasks")] = tasksJson
