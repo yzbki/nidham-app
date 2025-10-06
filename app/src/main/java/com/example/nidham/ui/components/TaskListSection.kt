@@ -1,7 +1,5 @@
 package com.example.nidham.ui.components
 
-import androidx.compose.animation.Animatable
-import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -25,11 +23,8 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
@@ -39,7 +34,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.burnoutcrew.reorderable.ReorderableItem
 import org.burnoutcrew.reorderable.ReorderableLazyListState
-import org.burnoutcrew.reorderable.detectReorder
 import org.burnoutcrew.reorderable.detectReorderAfterLongPress
 import org.burnoutcrew.reorderable.reorderable
 
@@ -57,22 +51,6 @@ fun TaskListSection(
             .fillMaxWidth()
             .padding(bottom = 16.dp)
     ) {
-        // Title TextField
-        TextField(
-            value = listData.title.value,
-            onValueChange = { listData.title.value = it },
-            label = { Text("List Title") },
-            modifier = Modifier.weight(1f),
-            colors = TextFieldDefaults.colors(
-                focusedLabelColor = colorScheme.onBackground,
-                unfocusedLabelColor = colorScheme.onBackground,
-                focusedContainerColor = colorScheme.surface.copy(alpha = 0.7f),
-                unfocusedContainerColor = colorScheme.background,
-                focusedTextColor = colorScheme.onSurface,
-                unfocusedTextColor = colorScheme.onBackground,
-            )
-        )
-
         // "Multiple Delete" Icon Button
         IconButton(
             onClick = {
@@ -98,22 +76,22 @@ fun TaskListSection(
                 contentDescription = "Delete Selected Tasks"
             )
         }
-    }
 
-    // Completed list green flashing animation
-    val surfaceColor = colorScheme.surface
-    val flashColor = remember { Animatable(surfaceColor) }
-    LaunchedEffect(listData.checkedStates.all { it }) {
-        if (listData.tasks.isNotEmpty() && listData.checkedStates.all { it }) {
-            flashColor.animateTo(
-                targetValue = Color(0xFF4CAF50),
-                animationSpec = tween(durationMillis = 300)
+        // Title TextField
+        TextField(
+            value = listData.title.value,
+            onValueChange = { listData.title.value = it },
+            label = { Text("List Title") },
+            modifier = Modifier.weight(1f),
+            colors = TextFieldDefaults.colors(
+                focusedLabelColor = colorScheme.onBackground,
+                unfocusedLabelColor = colorScheme.onBackground,
+                focusedContainerColor = colorScheme.surface.copy(alpha = 0.7f),
+                unfocusedContainerColor = colorScheme.background,
+                focusedTextColor = colorScheme.onSurface,
+                unfocusedTextColor = colorScheme.onBackground,
             )
-            flashColor.animateTo(
-                targetValue = surfaceColor,
-                animationSpec = tween(durationMillis = 700)
-            )
-        }
+        )
     }
 
     // Task list rendering
