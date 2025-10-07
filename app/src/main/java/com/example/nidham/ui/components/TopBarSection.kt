@@ -40,6 +40,7 @@ fun TopBarSection(
     onMenuExpandChange: (Boolean) -> Unit,
     onShowSaveDialog: () -> Unit,
     onShowLoadDialog: suspend () -> Unit,
+    onShowSettings: () -> Unit,
     updateSavedLists: (List<Pair<String, String>>) -> Unit,
     onNewList: () -> Unit
 ) {
@@ -133,6 +134,15 @@ fun TopBarSection(
                                 onShowLoadDialog()
                             }
                             onMenuExpandChange(false)
+                        }
+                    )
+
+                    // Settings
+                    DropdownMenuItem(
+                        text = { Text("Settings", color = colorScheme.onSurface) },
+                        onClick = {
+                            onMenuExpandChange(false)
+                            onShowSettings()
                         }
                     )
                 }

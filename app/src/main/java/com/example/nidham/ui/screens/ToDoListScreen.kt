@@ -43,7 +43,11 @@ import kotlinx.coroutines.launch
 import org.burnoutcrew.reorderable.rememberReorderableLazyListState
 
 @Composable
-fun ToDoListScreen() {
+fun ToDoListScreen(
+    themeMode: String,
+    colorVariant: String,
+    onThemeChange: (themeMode: String, colorVariant: String) -> Unit
+) {
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val scope = rememberCoroutineScope()
@@ -57,6 +61,7 @@ fun ToDoListScreen() {
     var showSaveDialog by remember { mutableStateOf(false) }
     var showLoadDialog by remember { mutableStateOf(false) }
     var showVoiceDialog by remember { mutableStateOf(false) }
+    var showSettingsScreen by remember { mutableStateOf(false) }
     var isRecording by remember { mutableStateOf(false) }
 
     // Helper to create a brand-new list
@@ -118,141 +123,152 @@ fun ToDoListScreen() {
     val voiceResult = remember { mutableStateOf("") }
     val voiceManager = remember { VoiceRecognitionManager(activity) }
 
-    // Main UI
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(colorScheme.background)
-    ) {
-        Scaffold(
-            snackbarHost = {
-                SnackbarHost(
-                    hostState = snackbarHostState,
-                    snackbar = { data ->
-                        Snackbar(
-                            containerColor = colorScheme.surface,
-                            contentColor = colorScheme.onSurface,
-                            actionColor = colorScheme.onBackground,
-                            snackbarData = data
-                        )
-                    }
-                )
-            },
-            containerColor = Color.Transparent,
-            contentColor = colorScheme.onBackground,
-            bottomBar = {
-                BottomRowSection(
-                    listData = currentListData,
-                    colorScheme = colorScheme,
-                    onVoiceInputClick = {
-                        val permission = android.Manifest.permission.RECORD_AUDIO
-                        if (ContextCompat.checkSelfPermission(activity, permission) != PackageManager.PERMISSION_GRANTED) {
-                            ActivityCompat.requestPermissions(activity, arrayOf(permission), 101)
-                        } else {
-                            showVoiceDialog = true
-                        }
-                    },
-                    isRecording = isRecording
-                )
-            }
-        ) { innerPadding ->
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(innerPadding)
-                    .padding(horizontal = 16.dp)
-                    .clickable(
-                        indication = null,
-                        interactionSource = remember { MutableInteractionSource() }
-                    ) {
-                        focusManager.clearFocus()
-                    }
-            ) {
-                TopBarSection(
-                    colorScheme = colorScheme,
-                    scope = scope,
-                    snackbarHostState = snackbarHostState,
-                    listData = currentListData,
-                    dataStore = dataStore,
-                    menuExpanded = menuExpanded,
-                    onMenuExpandChange = { menuExpanded = it },
-                    onShowSaveDialog = { showSaveDialog = true },
-                    onShowLoadDialog = { showLoadDialog = true },
-                    updateSavedLists = { savedLists = it },
-                    onNewList = { createNewList() }
-                )
-                TaskListSection(
-                    listData = currentListData,
-                    scope = scope,
-                    dataStore = dataStore,
-                    state = state
-                )
-            }
-
-            // Voice Dialog
-            VoiceDialogBox(
-                showDialog = showVoiceDialog,
-                isRecording = isRecording,
-                onDismiss = {
-                    showVoiceDialog = false
-                    isRecording = false
-                },
-                onStartRecording = {
-                    isRecording = true
-                    voiceManager.startListening(
-                        onResult = { text ->
-                            voiceResult.value = text
-                            isRecording = false
-                        },
-                        onError = { errorMsg ->
-                            Toast.makeText(activity, errorMsg, Toast.LENGTH_SHORT).show()
-                            isRecording = false
+    // Settings screen
+    if (showSettingsScreen) {
+        SettingsScreen(
+            themeMode = themeMode,
+            colorVariant = colorVariant,
+            onBackClick = { showSettingsScreen = false },
+            onThemeModeChange = { mode -> onThemeChange(mode, "") },
+            onColorVariantChange = { color -> onThemeChange("", color) }
+        )
+    } else {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(colorScheme.background)
+        ) {
+            Scaffold(
+                snackbarHost = {
+                    SnackbarHost(
+                        hostState = snackbarHostState,
+                        snackbar = { data ->
+                            Snackbar(
+                                containerColor = colorScheme.surface,
+                                contentColor = colorScheme.onSurface,
+                                actionColor = colorScheme.onBackground,
+                                snackbarData = data
+                            )
                         }
                     )
                 },
-                onStopRecording = {
-                    voiceManager.stopListening()
-                    isRecording = false
-                },
-                transcribedText = voiceResult,
-                listData = currentListData
-            )
+                containerColor = Color.Transparent,
+                contentColor = colorScheme.onBackground,
+                bottomBar = {
+                    BottomRowSection(
+                        listData = currentListData,
+                        colorScheme = colorScheme,
+                        onVoiceInputClick = {
+                            val permission = android.Manifest.permission.RECORD_AUDIO
+                            if (ContextCompat.checkSelfPermission(activity, permission) != PackageManager.PERMISSION_GRANTED) {
+                                ActivityCompat.requestPermissions(activity, arrayOf(permission), 101)
+                            } else {
+                                showVoiceDialog = true
+                            }
+                        },
+                        isRecording = isRecording
+                    )
+                }
+            ) { innerPadding ->
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(innerPadding)
+                        .padding(horizontal = 16.dp)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
+                            focusManager.clearFocus()
+                        }
+                ) {
+                    TopBarSection(
+                        colorScheme = colorScheme,
+                        scope = scope,
+                        snackbarHostState = snackbarHostState,
+                        listData = currentListData,
+                        dataStore = dataStore,
+                        menuExpanded = menuExpanded,
+                        onMenuExpandChange = { menuExpanded = it },
+                        onShowSaveDialog = { showSaveDialog = true },
+                        onShowLoadDialog = { showLoadDialog = true },
+                        onShowSettings = { showSettingsScreen = true },
+                        updateSavedLists = { savedLists = it },
+                        onNewList = { createNewList() }
+                    )
+                    TaskListSection(
+                        listData = currentListData,
+                        scope = scope,
+                        dataStore = dataStore,
+                        state = state
+                    )
+                }
 
-            // Save Dialog
-            SaveDialogBox(
-                showDialog = showSaveDialog,
-                onDismiss = {
-                    showSaveDialog = false
-                    inputListName = ""
-                },
-                listData = currentListData,
-                inputListName = inputListName,
-                onInputChange = { inputListName = it },
-                dataStore = dataStore,
-                snackbarHostState = snackbarHostState,
-                scope = scope
-            )
+                // Voice Dialog
+                VoiceDialogBox(
+                    showDialog = showVoiceDialog,
+                    isRecording = isRecording,
+                    onDismiss = {
+                        showVoiceDialog = false
+                        isRecording = false
+                    },
+                    onStartRecording = {
+                        isRecording = true
+                        voiceManager.startListening(
+                            onResult = { text ->
+                                voiceResult.value = text
+                                isRecording = false
+                            },
+                            onError = { errorMsg ->
+                                Toast.makeText(activity, errorMsg, Toast.LENGTH_SHORT).show()
+                                isRecording = false
+                            }
+                        )
+                    },
+                    onStopRecording = {
+                        voiceManager.stopListening()
+                        isRecording = false
+                    },
+                    transcribedText = voiceResult,
+                    listData = currentListData
+                )
 
-            // Load Dialog
-            LoadDialogBox(
-                showDialog = showLoadDialog,
-                onDismiss = { showLoadDialog = false },
-                savedLists = savedLists,
-                onLoad = { id ->
-                    currentListData = dataStore.loadListData(id)
-                    scope.launch { dataStore.saveLastOpenedKey(id) }
-                },
-                onDelete = { id ->
-                    dataStore.deleteListById(id)
-                    savedLists = savedLists.filterNot { it.first == id }
-                    if (currentListData.id == id) {
-                        currentListData.reset()
-                        dataStore.saveLastOpenedKey(currentListData.id)
-                    }
-                },
-                snackbarHostState = snackbarHostState,
-                scope = scope
-            )
+                // Save Dialog
+                SaveDialogBox(
+                    showDialog = showSaveDialog,
+                    onDismiss = {
+                        showSaveDialog = false
+                        inputListName = ""
+                    },
+                    listData = currentListData,
+                    inputListName = inputListName,
+                    onInputChange = { inputListName = it },
+                    dataStore = dataStore,
+                    snackbarHostState = snackbarHostState,
+                    scope = scope
+                )
+
+                // Load Dialog
+                LoadDialogBox(
+                    showDialog = showLoadDialog,
+                    onDismiss = { showLoadDialog = false },
+                    savedLists = savedLists,
+                    onLoad = { id ->
+                        currentListData = dataStore.loadListData(id)
+                        scope.launch { dataStore.saveLastOpenedKey(id) }
+                    },
+                    onDelete = { id ->
+                        dataStore.deleteListById(id)
+                        savedLists = savedLists.filterNot { it.first == id }
+                        if (currentListData.id == id) {
+                            currentListData.reset()
+                            dataStore.saveLastOpenedKey(currentListData.id)
+                        }
+                    },
+                    snackbarHostState = snackbarHostState,
+                    scope = scope
+                )
+            }
         }
     }
 }
