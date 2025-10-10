@@ -77,6 +77,14 @@ fun ToDoListScreen(
         }
     }
 
+    // Load saved settings on launch
+    LaunchedEffect(Unit) {
+        val savedTheme = dataStore.getThemeMode()
+        val savedColor = dataStore.getColorVariant()
+
+        onThemeChange(savedTheme, savedColor)
+    }
+
     // Auto-save on any change
     LaunchedEffect(
         currentListData.title.value,

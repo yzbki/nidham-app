@@ -12,6 +12,9 @@ private val Context.dataStore by preferencesDataStore(name = "nidham_prefs")
 class DataStoreManager(private val context: Context) {
     private val gson = Gson()
     private val LAST_OPENED_LIST_KEY = stringPreferencesKey("last_opened_list")
+    private val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
+    private val COLOR_VARIANT_KEY = stringPreferencesKey("color_variant")
+
 
     suspend fun saveListData(listData: ListData) {
         val title = listData.title.value;
@@ -92,4 +95,27 @@ class DataStoreManager(private val context: Context) {
         val prefs = context.dataStore.data.first()
         return prefs[LAST_OPENED_LIST_KEY]
     }
+
+    suspend fun saveThemeMode(mode: String) {
+        context.dataStore.edit { prefs ->
+            prefs[THEME_MODE_KEY] = mode
+        }
+    }
+
+    suspend fun saveColorVariant(variant: String) {
+        context.dataStore.edit { prefs ->
+            prefs[COLOR_VARIANT_KEY] = variant
+        }
+    }
+
+    suspend fun getThemeMode(): String {
+        val prefs = context.dataStore.data.first()
+        return prefs[THEME_MODE_KEY] ?: "system"
+    }
+
+    suspend fun getColorVariant(): String {
+        val prefs = context.dataStore.data.first()
+        return prefs[COLOR_VARIANT_KEY] ?: "default"
+    }
+
 }
