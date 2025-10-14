@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <!-- Splash screen theme -->
+    <style name="Theme.Nidham.Splash" parent="Theme.SplashScreen">
+        <!-- Background that shows immediately on launch -->
+        <item name="windowSplashScreenBackground">@color/background_color_dark</item>
+
+        <!-- Optional: show your app icon -->
+        <item name="windowSplashScreenAnimatedIcon">@mipmap/ic_launcher</item>
+        <item name="windowSplashScreenAnimationDuration">200</item>
+
+        <!-- When splash finishes, switch to your real theme -->
+        <item name="postSplashScreenTheme">@style/Theme.Nidham</item>
+    </style>
+
+</resources>
