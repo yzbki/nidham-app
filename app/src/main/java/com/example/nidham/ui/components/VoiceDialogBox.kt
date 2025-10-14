@@ -86,7 +86,7 @@ fun VoiceDialogBox(
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // Buttons row with Start/Stop and Generate
+                    // Buttons row
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.fillMaxWidth(),
@@ -145,7 +145,7 @@ fun VoiceDialogBox(
 
                     Spacer(modifier = Modifier.height(16.dp))
 
-                    // Cancel button on its own row, full width
+                    // Cancel button
                     Button(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {

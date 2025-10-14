@@ -44,14 +44,14 @@ fun TaskListSection(
     dataStore: DataStoreManager,
     state: ReorderableLazyListState
 ) {
-    // Title row with select all checkbox
+    // Title row
     Row(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
             .padding(bottom = 16.dp)
     ) {
-        // "Multiple Delete" Icon Button
+        // Multiple delete
         IconButton(
             onClick = {
                 val newTasks = listData.tasks
@@ -77,7 +77,7 @@ fun TaskListSection(
             )
         }
 
-        // Title TextField
+        // Title
         TextField(
             value = listData.title.value,
             onValueChange = { listData.title.value = it },
@@ -94,7 +94,7 @@ fun TaskListSection(
         )
     }
 
-    // Task list rendering
+    // Tasklist
     LazyColumn(
         state = state.listState,
         modifier = Modifier

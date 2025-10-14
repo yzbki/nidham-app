@@ -64,7 +64,7 @@ fun ToDoListScreen(
     var showSettingsScreen by remember { mutableStateOf(false) }
     var isRecording by remember { mutableStateOf(false) }
 
-    // Helper to create a brand-new list
+    // Create a brand-new list
     fun createNewList() {
         currentListData = ListData.newListData()
     }
@@ -77,7 +77,7 @@ fun ToDoListScreen(
         }
     }
 
-    // Load saved settings on launch
+    // Load saved settings
     LaunchedEffect(Unit) {
         val savedTheme = dataStore.getThemeMode()
         val savedColor = dataStore.getColorVariant()
@@ -85,14 +85,14 @@ fun ToDoListScreen(
         onThemeChange(savedTheme, savedColor)
     }
 
-    // Auto-save on any change
+    // Auto-save every change
     LaunchedEffect(
         currentListData.title.value,
         currentListData.tasks.map { it.textState.value },
         currentListData.checkedStates.toList(),
         savedLists
     ) {
-        delay(300) // small debounce to avoid spamming saves
+        delay(300) // Delay for spam
         scope.launch {
             dataStore.saveListData(currentListData)
         }

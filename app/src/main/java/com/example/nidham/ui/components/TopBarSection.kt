@@ -3,15 +3,23 @@ package com.example.nidham.ui.components
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeContentPadding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.outlined.AccountCircle
+import androidx.compose.material.icons.outlined.CheckCircle
+import androidx.compose.material.icons.outlined.Create
+import androidx.compose.material.icons.outlined.PlayArrow
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -20,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -82,7 +91,7 @@ fun TopBarSection(
             Icon(Icons.Default.Lock, contentDescription = "Quicksave")
         }
 
-        // Menu aligned to the end
+        // Menu
         Row(
             modifier = Modifier.align(Alignment.CenterEnd),
             verticalAlignment = Alignment.CenterVertically
@@ -106,6 +115,7 @@ fun TopBarSection(
                     // New List
                     DropdownMenuItem(
                         text = { Text("New", color = colorScheme.onSurface) },
+                        leadingIcon = { Icon(Icons.Outlined.Create, contentDescription = null) },
                         onClick = {
                             onNewList()
                             scope.launch {
@@ -119,6 +129,7 @@ fun TopBarSection(
                     // Save List
                     DropdownMenuItem(
                         text = { Text("Save", color = colorScheme.onSurface) },
+                        leadingIcon = { Icon(Icons.Outlined.CheckCircle, contentDescription = null) },
                         onClick = {
                             onShowSaveDialog()
                             onMenuExpandChange(false)
@@ -128,6 +139,7 @@ fun TopBarSection(
                     // Load List
                     DropdownMenuItem(
                         text = { Text("Load", color = colorScheme.onSurface) },
+                        leadingIcon = { Icon(Icons.Outlined.AccountCircle, contentDescription = null) },
                         onClick = {
                             scope.launch {
                                 updateSavedLists(dataStore.getSavedLists())
@@ -137,9 +149,12 @@ fun TopBarSection(
                         }
                     )
 
+                    HorizontalDivider()
+
                     // Settings
                     DropdownMenuItem(
                         text = { Text("Settings", color = colorScheme.onSurface) },
+                        leadingIcon = { Icon(Icons.Outlined.Settings, contentDescription = null) },
                         onClick = {
                             onMenuExpandChange(false)
                             onShowSettings()

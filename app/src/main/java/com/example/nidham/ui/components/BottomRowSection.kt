@@ -34,7 +34,7 @@ fun BottomRowSection(
             .padding(WindowInsets.safeDrawing.only(WindowInsetsSides.Bottom).asPaddingValues()),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        // --- Top full-width Auto-List button ---
+        // Top row
         Button(
             onClick = onVoiceInputClick,
             modifier = Modifier.fillMaxWidth(),
@@ -46,7 +46,7 @@ fun BottomRowSection(
             Text("Auto-List")
         }
 
-        // --- Bottom row: Add Group + Add Task side by side ---
+        // Bottom row
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)

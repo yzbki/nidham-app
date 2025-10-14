@@ -52,6 +52,10 @@ class DataStoreManager(private val context: Context) {
         while (listData.checkedStates.size < listData.tasks.size) {
             listData.checkedStates.add(false)
         }
+        if (listData.tasks.isEmpty()) {
+            listData.tasks.add(TaskItem(textState = mutableStateOf("")))
+            listData.checkedStates.add(false)
+        }
         return listData.copyId(listId)
     }
 
@@ -117,5 +121,4 @@ class DataStoreManager(private val context: Context) {
         val prefs = context.dataStore.data.first()
         return prefs[COLOR_VARIANT_KEY] ?: "default"
     }
-
 }

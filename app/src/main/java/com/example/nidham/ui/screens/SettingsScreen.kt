@@ -96,8 +96,8 @@ fun SettingsScreen(
 
                     Text(
                         text = "Settings",
-                        style = typography.headlineLarge.copy(
-                            fontFamily = FontFamily.Serif,
+                        style = typography.headlineMedium.copy(
+                            fontFamily = FontFamily.SansSerif,
                             fontWeight = FontWeight.Bold
                         ),
                         color = colorScheme.onBackground,
