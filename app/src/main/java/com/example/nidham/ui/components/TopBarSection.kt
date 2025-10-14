@@ -11,9 +11,13 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Create
+import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.PlayArrow
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ColorScheme
@@ -151,6 +155,26 @@ fun TopBarSection(
 
                     HorizontalDivider()
 
+                    // Import List
+                    DropdownMenuItem(
+                        text = { Text("Import", color = colorScheme.onSurface) },
+                        leadingIcon = { Icon(Icons.Outlined.KeyboardArrowDown, contentDescription = null) },
+                        onClick = {
+                            // TO:DO Import functionality
+                        }
+                    )
+
+                    // Export List
+                    DropdownMenuItem(
+                        text = { Text("Export", color = colorScheme.onSurface) },
+                        leadingIcon = { Icon(Icons.Outlined.KeyboardArrowUp, contentDescription = null) },
+                        onClick = {
+                            // TO:DO Export functionality
+                        }
+                    )
+
+                    HorizontalDivider()
+
                     // Settings
                     DropdownMenuItem(
                         text = { Text("Settings", color = colorScheme.onSurface) },
@@ -158,6 +182,15 @@ fun TopBarSection(
                         onClick = {
                             onMenuExpandChange(false)
                             onShowSettings()
+                        }
+                    )
+
+                    // About
+                    DropdownMenuItem(
+                        text = { Text("About", color = colorScheme.onSurface) },
+                        leadingIcon = { Icon(Icons.Outlined.Info, contentDescription = null) },
+                        onClick = {
+                            // TO:DO About page
                         }
                     )
                 }

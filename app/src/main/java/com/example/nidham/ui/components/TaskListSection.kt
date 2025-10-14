@@ -90,6 +90,7 @@ fun TaskListSection(
                 unfocusedContainerColor = colorScheme.background,
                 focusedTextColor = colorScheme.onSurface,
                 unfocusedTextColor = colorScheme.onBackground,
+                cursorColor = colorScheme.onSurface
             )
         )
     }
@@ -155,6 +156,7 @@ fun TaskListSection(
                             unfocusedTextColor = colorScheme.onSurface.copy(alpha = 0.7f),
                             focusedIndicatorColor = colorScheme.background,
                             unfocusedIndicatorColor = colorScheme.background,
+                            cursorColor = colorScheme.onSurface,
                         ),
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
                         keyboardActions = KeyboardActions(onDone = { /* handle done */ })

@@ -41,7 +41,8 @@ fun SaveDialogBox(
                         focusedTextColor = colorScheme.onSurface,
                         unfocusedTextColor = colorScheme.onSurface,
                         focusedContainerColor = colorScheme.surface,
-                        unfocusedContainerColor = colorScheme.surface
+                        unfocusedContainerColor = colorScheme.surface,
+                        cursorColor = colorScheme.onSurface
                     ),
                     modifier = Modifier.fillMaxWidth()
                 )
