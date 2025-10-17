@@ -3,45 +3,56 @@ package com.example.nidham.data
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import java.util.UUID
 
-data class TaskItem(
-    val id: String = UUID.randomUUID().toString(),
-    val textState: MutableState<String> = mutableStateOf("")
-)
+sealed class ListItem {
+    abstract val id: String
+    abstract val textState: MutableState<String>
+
+    data class TaskItem(
+        override val id: String = UUID.randomUUID().toString(),
+        override val textState: MutableState<String> = mutableStateOf("")
+    ) : ListItem()
+
+    // Groups will be implemented later...
+    data class GroupItem(
+        override val id: String = UUID.randomUUID().toString(),
+        override val textState: MutableState<String> = mutableStateOf(""),
+        val color: MutableState<String> = mutableStateOf("#FFFFFF"),
+        val collapsed: MutableState<Boolean> = mutableStateOf(false),
+        val children: SnapshotStateList<TaskItem> = mutableStateListOf()
+    ) : ListItem()
+}
 
 class ListData(val id: String = UUID.randomUUID().toString()) {
     val title = mutableStateOf("")
-    val tasks = mutableStateListOf<TaskItem>()
+    val items = mutableStateListOf<ListItem>()
     val checkedStates = mutableStateListOf<Boolean>()
 
     companion object {
         const val MAX_TITLE_LENGTH = 50
 
-        fun newListData(): ListData {
-            return ListData().apply {
-                tasks.clear()
-                checkedStates.clear()
-                tasks.add(TaskItem())
-                checkedStates.add(false)
-            }
+        fun newListData(): ListData = ListData().apply {
+            items.clear()
+            checkedStates.clear()
+            items.add(ListItem.TaskItem())
+            checkedStates.add(false)
         }
     }
 
     fun reset() {
         title.value = ""
-        tasks.clear()
+        items.clear()
         checkedStates.clear()
-        tasks.add(TaskItem())
+        items.add(ListItem.TaskItem())
         checkedStates.add(false)
     }
 
-    fun copyId(existingId: String): ListData {
-        return ListData(existingId).also {
-            it.title.value = this.title.value
-            it.tasks.addAll(this.tasks)
-            it.checkedStates.addAll(this.checkedStates)
-        }
+    fun copyId(existingId: String): ListData = ListData(existingId).also {
+        it.title.value = this.title.value
+        it.items.addAll(this.items)
+        it.checkedStates.addAll(this.checkedStates)
     }
 
     suspend fun isTitleValid(
@@ -50,8 +61,7 @@ class ListData(val id: String = UUID.randomUUID().toString()) {
         currentId: String? = null
     ): Boolean {
         val trimmed = title.trim()
-        if (trimmed.isEmpty()) return false
-        if (trimmed.length > MAX_TITLE_LENGTH) return false
+        if (trimmed.isEmpty() || trimmed.length > MAX_TITLE_LENGTH) return false
         if (dataStore.isTitleDuplicate(trimmed, excludeId = currentId)) return false
         return true
     }

@@ -18,7 +18,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.nidham.data.ListData
-import com.example.nidham.data.TaskItem
+import com.example.nidham.data.ListItem
 
 @Composable
 fun BottomRowSection(
@@ -66,7 +66,7 @@ fun BottomRowSection(
 
             Button(
                 onClick = {
-                    listData.tasks.add(TaskItem())
+                    listData.items.add(ListItem.TaskItem())
                     listData.checkedStates.add(false)
                 },
                 modifier = Modifier.weight(1f),

@@ -15,12 +15,13 @@ class DataStoreManager(private val context: Context) {
     private val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
     private val COLOR_VARIANT_KEY = stringPreferencesKey("color_variant")
 
-
     suspend fun saveListData(listData: ListData) {
-        val title = listData.title.value;
+        val title = listData.title.value
         if (!listData.isTitleValid(title, this, currentId = listData.id)) return
 
-        val tasksJson = gson.toJson(listData.tasks.map { it.textState.value })
+        val tasksJson = gson.toJson(
+            listData.items.filterIsInstance<ListItem.TaskItem>().map { it.textState.value }
+        )
         val checksJson = gson.toJson(listData.checkedStates)
 
         context.dataStore.edit { prefs ->
@@ -35,27 +36,34 @@ class DataStoreManager(private val context: Context) {
         val listData = ListData().apply {
             this.title.value = prefs[stringPreferencesKey("${listId}_title")] ?: ""
         }
+
         val tasks = prefs[stringPreferencesKey("${listId}_tasks")]?.let { json ->
             gson.fromJson(json, Array<String>::class.java).toList()
         } ?: emptyList()
+
         val checks = prefs[stringPreferencesKey("${listId}_checked")]?.let { json ->
             gson.fromJson(json, Array<Boolean>::class.java).toList()
         } ?: emptyList()
-        listData.tasks.clear()
+
+        listData.items.clear()
         listData.checkedStates.clear()
+
         tasks.forEach { taskText ->
-            listData.tasks.add(TaskItem(textState = mutableStateOf(taskText)))
+            listData.items.add(ListItem.TaskItem(textState = mutableStateOf(taskText)))
         }
-        checks.forEach {
-            listData.checkedStates.add(it)
-        }
-        while (listData.checkedStates.size < listData.tasks.size) {
+
+        checks.forEach { listData.checkedStates.add(it) }
+
+        while (listData.checkedStates.size < listData.items.filterIsInstance<ListItem.TaskItem>().size) {
             listData.checkedStates.add(false)
         }
-        if (listData.tasks.isEmpty()) {
-            listData.tasks.add(TaskItem(textState = mutableStateOf("")))
+
+        // Ensure at least one task exists
+        if (listData.items.none { it is ListItem.TaskItem }) {
+            listData.items.add(ListItem.TaskItem(textState = mutableStateOf("")))
             listData.checkedStates.add(false)
         }
+
         return listData.copyId(listId)
     }
 

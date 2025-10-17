@@ -25,6 +25,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import com.example.nidham.data.ListData
+import com.example.nidham.data.ListItem
 import com.example.nidham.service.OpenAIService
 import kotlinx.coroutines.launch
 
@@ -35,6 +36,7 @@ fun VoiceDialogBox(
     onDismiss: () -> Unit,
     onStartRecording: () -> Unit,
     onStopRecording: () -> Unit,
+    onNewList: (ListData) -> Unit,
     transcribedText: MutableState<String>,
     listData: ListData
 ) {
@@ -106,7 +108,7 @@ fun VoiceDialogBox(
                                 contentColor = colorScheme.onSurface
                             )
                         ) {
-                            Text(if (isRecording) "Stop Recording" else "Record Voice")
+                            Text(if (isRecording) "Stop" else "Record Voice")
                         }
 
                         Button(
@@ -118,11 +120,29 @@ fun VoiceDialogBox(
 
                                     val result = OpenAIService.generateListDataFromPrompt(transcribedText.value)
                                     if (result != null) {
-                                        listData.title.value = result.title.value
-                                        listData.tasks.clear()
-                                        listData.tasks.addAll(result.tasks)
-                                        listData.checkedStates.clear()
-                                        listData.checkedStates.addAll(result.checkedStates)
+                                        // Create new list
+                                        val newList = ListData.newListData().apply {
+                                            title.value = result.title.value.take(ListData.MAX_TITLE_LENGTH)
+                                            items.clear()
+                                            items.addAll(result.items.mapNotNull { li ->
+                                                if (li is ListItem.TaskItem) {
+                                                    ListItem.TaskItem(
+                                                        id = li.id,
+                                                        textState = mutableStateOf(li.textState.value)
+                                                    )
+                                                } else null
+                                            })
+                                            checkedStates.clear()
+                                            val checks = result.checkedStates.take(items.filterIsInstance<ListItem.TaskItem>().size)
+                                            checkedStates.addAll(checks)
+                                            while (checkedStates.size < items.filterIsInstance<ListItem.TaskItem>().size) {
+                                                checkedStates.add(false)
+                                            }
+                                        }
+
+                                        // Let the screen display it
+                                        onNewList(newList)
+                                        transcribedText.value = ""
                                         onDismiss()
                                     } else {
                                         errorMessage = "Failed to generate response"

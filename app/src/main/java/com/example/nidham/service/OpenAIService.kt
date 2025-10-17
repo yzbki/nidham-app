@@ -2,7 +2,7 @@ package com.example.nidham.service
 
 import com.example.nidham.BuildConfig
 import com.example.nidham.data.ListData
-import com.example.nidham.data.TaskItem
+import com.example.nidham.data.ListItem
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.Dispatchers
@@ -118,7 +118,6 @@ object OpenAIService {
                         "You are an assistant that outputs only raw JSON (no markdown or code blocks). " +
                                 "Format: { title: String, tasks: [{ id: String, text: String }], checkedStates: [Boolean] }. " +
                                 "The title must be at most ${ListData.MAX_TITLE_LENGTH} characters. " +
-                                "Do not exceed this limit, and do not truncate it yourself." +
                                 "Always generate a title within this limit."
                     ),
                     Message("user", prompt)
@@ -139,17 +138,20 @@ object OpenAIService {
             val listData = ListData.newListData()
             listData.title.value = listDataJson.title.take(ListData.MAX_TITLE_LENGTH)
 
-            // Map tasks to TaskItem objects
-            listData.tasks.clear()
-            listData.tasks.addAll(listDataJson.tasks.map { TaskItem().apply { textState.value = it.text } })
+            // Map tasks to ListItem.TaskItem objects
+            listData.items.clear()
+            listData.items.addAll(listDataJson.tasks.map {
+                ListItem.TaskItem().apply { textState.value = it.text }
+            })
 
             // Map checkedStates and fill remaining with false
             listData.checkedStates.clear()
-            val checks = listDataJson.checkedStates.take(listData.tasks.size)
+            val checks = listDataJson.checkedStates.take(listData.items.size)
             listData.checkedStates.addAll(checks)
-            while (listData.checkedStates.size < listData.tasks.size) {
+            while (listData.checkedStates.size < listData.items.size) {
                 listData.checkedStates.add(false)
             }
+
 
             return@withContext listData
         } catch (e: Exception) {

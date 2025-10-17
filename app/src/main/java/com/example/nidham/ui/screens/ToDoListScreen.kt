@@ -31,6 +31,7 @@ import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import com.example.nidham.data.DataStoreManager
 import com.example.nidham.data.ListData
+import com.example.nidham.data.ListItem
 import com.example.nidham.service.VoiceRecognitionManager
 import com.example.nidham.ui.components.BottomRowSection
 import com.example.nidham.ui.components.LoadDialogBox
@@ -88,21 +89,22 @@ fun ToDoListScreen(
     // Auto-save every change
     LaunchedEffect(
         currentListData.title.value,
-        currentListData.tasks.map { it.textState.value },
+        currentListData.items.filterIsInstance<ListItem.TaskItem>().map { it.textState.value },
         currentListData.checkedStates.toList(),
         savedLists
     ) {
-        delay(300) // Delay for spam
+        delay(300) // debounce
         scope.launch {
             dataStore.saveListData(currentListData)
         }
     }
 
-    // Keep checkedStates in sync with tasks size
-    LaunchedEffect(currentListData.tasks.size) {
-        while (currentListData.checkedStates.size < currentListData.tasks.size)
+    // Keep checkedStates in sync with task items
+    LaunchedEffect(currentListData.items.size) {
+        val tasks = currentListData.items.filterIsInstance<ListItem.TaskItem>()
+        while (currentListData.checkedStates.size < tasks.size)
             currentListData.checkedStates.add(false)
-        while (currentListData.checkedStates.size > currentListData.tasks.size)
+        while (currentListData.checkedStates.size > tasks.size)
             currentListData.checkedStates.removeAt(currentListData.checkedStates.lastIndex)
     }
 
@@ -116,7 +118,15 @@ fun ToDoListScreen(
     // Handle dynamic reordering
     val state = rememberReorderableLazyListState(
         onMove = { from, to ->
-            currentListData.tasks.add(to.index, currentListData.tasks.removeAt(from.index))
+            val tasks = currentListData.items.filterIsInstance<ListItem.TaskItem>().toMutableList()
+            val movedTask = tasks.removeAt(from.index)
+            tasks.add(to.index, movedTask)
+
+            var taskIndex = 0
+            currentListData.items.replaceAll { item ->
+                if (item is ListItem.TaskItem) tasks[taskIndex++] else item
+            }
+
             currentListData.checkedStates.add(to.index, currentListData.checkedStates.removeAt(from.index))
         },
         onDragEnd = { _, _ ->
@@ -238,7 +248,10 @@ fun ToDoListScreen(
                         isRecording = false
                     },
                     transcribedText = voiceResult,
-                    listData = currentListData
+                    listData = currentListData,
+                    onNewList = { newList ->
+                        currentListData = newList
+                    }
                 )
 
                 // Save Dialog

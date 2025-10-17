@@ -30,6 +30,7 @@ import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.example.nidham.data.DataStoreManager
 import com.example.nidham.data.ListData
+import com.example.nidham.data.ListItem
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.burnoutcrew.reorderable.ReorderableItem
@@ -54,30 +55,25 @@ fun TaskListSection(
         // Multiple delete
         IconButton(
             onClick = {
-                val newTasks = listData.tasks
+                val newItems = listData.items.filterIsInstance<ListItem.TaskItem>()
                     .withIndex()
                     .filterNot { listData.checkedStates.getOrElse(it.index) { false } }
                     .map { it.value }
                 val newCheckedStates = listData.checkedStates.filter { !it }
-                listData.tasks.clear()
-                listData.tasks.addAll(newTasks)
+
+                listData.items.clear()
+                listData.items.addAll(newItems)
                 listData.checkedStates.clear()
                 listData.checkedStates.addAll(newCheckedStates)
-                scope.launch {
-                    dataStore.saveListData(listData)
-                }
+
+                scope.launch { dataStore.saveListData(listData) }
             },
-            colors = IconButtonDefaults.iconButtonColors(
-                contentColor = colorScheme.onBackground
-            )
+            colors = IconButtonDefaults.iconButtonColors(contentColor = colorScheme.onBackground)
         ) {
-            Icon(
-                imageVector = Icons.Default.Delete,
-                contentDescription = "Delete Selected Tasks"
-            )
+            Icon(Icons.Default.Delete, contentDescription = "Delete Selected Tasks")
         }
 
-        // Title
+        // Title field
         TextField(
             value = listData.title.value,
             onValueChange = { listData.title.value = it },
@@ -95,7 +91,7 @@ fun TaskListSection(
         )
     }
 
-    // Tasklist
+    // Task list
     LazyColumn(
         state = state.listState,
         modifier = Modifier
@@ -103,8 +99,10 @@ fun TaskListSection(
             .reorderable(state)
             .background(colorScheme.background)
     ) {
-        itemsIndexed(listData.tasks, key = { _, taskItem -> taskItem.id }) { index, taskItem ->
-            ReorderableItem(state, key = taskItem.id) { _ ->
+        val taskItems = listData.items.filterIsInstance<ListItem.TaskItem>()
+
+        itemsIndexed(taskItems, key = { _, item -> item.id }) { index, taskItem ->
+            ReorderableItem(state, key = taskItem.id) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -112,14 +110,12 @@ fun TaskListSection(
                         .detectReorderAfterLongPress(state),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Checkboxes
+                    // Checkbox
                     Checkbox(
                         checked = listData.checkedStates.getOrElse(index) { false },
                         onCheckedChange = {
                             listData.checkedStates[index] = it
-                            scope.launch {
-                                dataStore.saveListData(listData)
-                            }
+                            scope.launch { dataStore.saveListData(listData) }
                         },
                         colors = CheckboxDefaults.colors(
                             uncheckedColor = colorScheme.onBackground,
@@ -128,14 +124,12 @@ fun TaskListSection(
                         )
                     )
 
-                    // Task list
+                    // Task text field
                     TextField(
                         value = taskItem.textState.value,
                         onValueChange = { newValue ->
                             taskItem.textState.value = newValue
-                            scope.launch {
-                                dataStore.saveListData(listData)
-                            }
+                            scope.launch { dataStore.saveListData(listData) }
                         },
                         modifier = Modifier.weight(1f),
                         label = { Text("Task ${index + 1}") },
