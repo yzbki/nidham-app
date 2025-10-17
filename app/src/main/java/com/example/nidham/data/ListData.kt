@@ -15,7 +15,7 @@ sealed class ListItem {
         override val textState: MutableState<String> = mutableStateOf("")
     ) : ListItem()
 
-    // Groups will be implemented later...
+    /* TODO: implement group creation
     data class GroupItem(
         override val id: String = UUID.randomUUID().toString(),
         override val textState: MutableState<String> = mutableStateOf(""),
@@ -23,6 +23,7 @@ sealed class ListItem {
         val collapsed: MutableState<Boolean> = mutableStateOf(false),
         val children: SnapshotStateList<TaskItem> = mutableStateListOf()
     ) : ListItem()
+     */
 }
 
 class ListData(val id: String = UUID.randomUUID().toString()) {

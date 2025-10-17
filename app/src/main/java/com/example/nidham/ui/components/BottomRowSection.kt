@@ -35,16 +35,20 @@ fun BottomRowSection(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         // Top row
+        /* TODO: implement group creation
         Button(
-            onClick = onVoiceInputClick,
-            modifier = Modifier.fillMaxWidth(),
+            onClick = {
+                // Create group
+            },
+            modifier = Modifier.weight(1f),
             colors = ButtonDefaults.buttonColors(
                 containerColor = colorScheme.surface.copy(alpha = 0.7f),
                 contentColor = colorScheme.onSurface
             )
         ) {
-            Text("Auto-List")
+            Text("Add Group")
         }
+         */
 
         // Bottom row
         Row(
@@ -52,16 +56,14 @@ fun BottomRowSection(
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             Button(
-                onClick = {
-                    // TODO: implement group creation
-                },
+                onClick = onVoiceInputClick,
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = colorScheme.surface.copy(alpha = 0.7f),
                     contentColor = colorScheme.onSurface
                 )
             ) {
-                Text("Add Group")
+                Text("Auto-List")
             }
 
             Button(
