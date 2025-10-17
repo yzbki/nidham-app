@@ -34,6 +34,8 @@ import com.example.nidham.data.ListData
 import com.example.nidham.data.ListItem
 import com.example.nidham.service.VoiceRecognitionManager
 import com.example.nidham.ui.components.BottomRowSection
+import com.example.nidham.ui.components.ExportDialogBox
+import com.example.nidham.ui.components.ImportDialogBox
 import com.example.nidham.ui.components.LoadDialogBox
 import com.example.nidham.ui.components.SaveDialogBox
 import com.example.nidham.ui.components.TaskListSection
@@ -62,6 +64,8 @@ fun ToDoListScreen(
     var showSaveDialog by remember { mutableStateOf(false) }
     var showLoadDialog by remember { mutableStateOf(false) }
     var showVoiceDialog by remember { mutableStateOf(false) }
+    var showImportDialog by remember { mutableStateOf(false) }
+    var showExportDialog by remember { mutableStateOf(false) }
     var showSettingsScreen by remember { mutableStateOf(false) }
     var isRecording by remember { mutableStateOf(false) }
 
@@ -210,6 +214,8 @@ fun ToDoListScreen(
                         onMenuExpandChange = { menuExpanded = it },
                         onShowSaveDialog = { showSaveDialog = true },
                         onShowLoadDialog = { showLoadDialog = true },
+                        onShowImportDialog = { showImportDialog = true },
+                        onShowExportDialog = { showExportDialog = true },
                         onShowSettings = { showSettingsScreen = true },
                         updateSavedLists = { savedLists = it },
                         onNewList = { createNewList() }
@@ -285,6 +291,28 @@ fun ToDoListScreen(
                             currentListData.reset()
                             dataStore.saveLastOpenedKey(currentListData.id)
                         }
+                    },
+                    snackbarHostState = snackbarHostState,
+                    scope = scope
+                )
+
+                // Import Dialog
+                ImportDialogBox(
+                    showDialog = showImportDialog,
+                    onDismiss = { showImportDialog = false },
+                    onImport = {
+                        // TODO: Add your import functionality here
+                    },
+                    snackbarHostState = snackbarHostState,
+                    scope = scope
+                )
+
+                // Export Dialog
+                ExportDialogBox(
+                    showDialog = showExportDialog,
+                    onDismiss = { showExportDialog = false },
+                    onExport = {
+                        // TODO: Add your export functionality here
                     },
                     snackbarHostState = snackbarHostState,
                     scope = scope

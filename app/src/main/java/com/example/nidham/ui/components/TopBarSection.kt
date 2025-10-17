@@ -48,6 +48,8 @@ fun TopBarSection(
     onMenuExpandChange: (Boolean) -> Unit,
     onShowSaveDialog: () -> Unit,
     onShowLoadDialog: suspend () -> Unit,
+    onShowImportDialog: () -> Unit,
+    onShowExportDialog: () -> Unit,
     onShowSettings: () -> Unit,
     updateSavedLists: (List<Pair<String, String>>) -> Unit,
     onNewList: () -> Unit
@@ -155,7 +157,8 @@ fun TopBarSection(
                         text = { Text("Import", color = colorScheme.onSurface) },
                         leadingIcon = { Icon(Icons.Outlined.KeyboardArrowDown, contentDescription = null) },
                         onClick = {
-                            // TO:DO Import functionality
+                            onShowImportDialog()
+                            onMenuExpandChange(false)
                         }
                     )
 
@@ -164,7 +167,8 @@ fun TopBarSection(
                         text = { Text("Export", color = colorScheme.onSurface) },
                         leadingIcon = { Icon(Icons.Outlined.KeyboardArrowUp, contentDescription = null) },
                         onClick = {
-                            // TO:DO Export functionality
+                            onShowExportDialog()
+                            onMenuExpandChange(false)
                         }
                     )
 
