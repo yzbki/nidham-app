@@ -67,6 +67,7 @@ fun ToDoListScreen(
     var showImportDialog by remember { mutableStateOf(false) }
     var showExportDialog by remember { mutableStateOf(false) }
     var showSettingsScreen by remember { mutableStateOf(false) }
+    var showAboutScreen by remember { mutableStateOf(false) }
     var isRecording by remember { mutableStateOf(false) }
 
     // Create a brand-new list
@@ -154,6 +155,10 @@ fun ToDoListScreen(
             onThemeModeChange = { mode -> onThemeChange(mode, "") },
             onColorVariantChange = { color -> onThemeChange("", color) }
         )
+    } else if (showAboutScreen) {
+        AboutScreen(
+            onBackClick = { showAboutScreen = false }
+        )
     } else {
         Box(
             modifier = Modifier
@@ -217,6 +222,7 @@ fun ToDoListScreen(
                         onShowImportDialog = { showImportDialog = true },
                         onShowExportDialog = { showExportDialog = true },
                         onShowSettings = { showSettingsScreen = true },
+                        onShowAbout = { showAboutScreen = true },
                         updateSavedLists = { savedLists = it },
                         onNewList = { createNewList() }
                     )

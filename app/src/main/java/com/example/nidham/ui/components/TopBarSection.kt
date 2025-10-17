@@ -51,6 +51,7 @@ fun TopBarSection(
     onShowImportDialog: () -> Unit,
     onShowExportDialog: () -> Unit,
     onShowSettings: () -> Unit,
+    onShowAbout: () -> Unit,
     updateSavedLists: (List<Pair<String, String>>) -> Unit,
     onNewList: () -> Unit
 ) {
@@ -179,8 +180,8 @@ fun TopBarSection(
                         text = { Text("Settings", color = colorScheme.onSurface) },
                         leadingIcon = { Icon(Icons.Outlined.Settings, contentDescription = null) },
                         onClick = {
-                            onMenuExpandChange(false)
                             onShowSettings()
+                            onMenuExpandChange(false)
                         }
                     )
 
@@ -189,7 +190,8 @@ fun TopBarSection(
                         text = { Text("About", color = colorScheme.onSurface) },
                         leadingIcon = { Icon(Icons.Outlined.Info, contentDescription = null) },
                         onClick = {
-                            // TO:DO About page
+                            onShowAbout()
+                            onMenuExpandChange(false)
                         }
                     )
                 }
