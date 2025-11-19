@@ -35,7 +35,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.burnoutcrew.reorderable.ReorderableItem
 import org.burnoutcrew.reorderable.ReorderableLazyListState
-import org.burnoutcrew.reorderable.detectReorderAfterLongPress
+import org.burnoutcrew.reorderable.detectReorder
 import org.burnoutcrew.reorderable.reorderable
 
 @Composable
@@ -52,7 +52,7 @@ fun TaskListSection(
             .fillMaxWidth()
             .padding(bottom = 16.dp)
     ) {
-        // Multiple delete
+        // Delete button (multiple)
         IconButton(
             onClick = {
                 val newItems = listData.items.filterIsInstance<ListItem.TaskItem>()
@@ -107,7 +107,7 @@ fun TaskListSection(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp)
-                        .detectReorderAfterLongPress(state),
+                        .detectReorder(state),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Checkbox
@@ -156,13 +156,23 @@ fun TaskListSection(
                         keyboardActions = KeyboardActions(onDone = { /* handle done */ })
                     )
 
-                    // Drag handle
-                    Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = "Drag Handle",
-                        tint = colorScheme.onBackground,
-                        modifier = Modifier.padding(start = 8.dp)
-                    )
+                    // Delete button (individual)
+                    IconButton(
+                        onClick = {
+                            listData.items.remove(taskItem)
+                            if (listData.checkedStates.size > index) {
+                                listData.checkedStates.removeAt(index)
+                            }
+                            scope.launch { dataStore.saveListData(listData) }
+                        },
+                        colors = IconButtonDefaults.iconButtonColors(contentColor = colorScheme.error)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete Task",
+                            tint = colorScheme.onBackground
+                        )
+                    }
                 }
             }
         }
