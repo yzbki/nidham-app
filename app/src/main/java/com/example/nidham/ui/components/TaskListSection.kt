@@ -97,14 +97,14 @@ fun TaskListSection(
         )
     }
 
-    // Task list with scrollbar
+    // Task list
     LazyColumn(
         state = state.listState,
         modifier = Modifier
             .fillMaxSize()
             .reorderable(state)
             .background(colorScheme.background)
-            .drawVerticalScrollbar(state.listState)   // ← SCROLLBAR ADDED HERE
+            .drawVerticalScrollbar(state.listState)
     ) {
         val taskItems = listData.items.filterIsInstance<ListItem.TaskItem>()
 
@@ -191,9 +191,9 @@ fun TaskListSection(
 fun Modifier.drawVerticalScrollbar(
     state: LazyListState,
     width: Dp = 4.dp,
-    trackColor: Color = colorScheme.surface,       // Full-length track
-    thumbColor: Color = colorScheme.onSurface,     // Scroll indicator
-    cornerRadius: Dp = 2.dp                        // Rounded edges for both
+    trackColor: Color = colorScheme.surface,         // Full-length track
+    thumbColor: Color = colorScheme.onSurface,       // Scroll indicator
+    cornerRadius: Dp = 2.dp                          // Rounded edges for both
 ): Modifier = this.drawBehind {
 
     val totalItems = state.layoutInfo.totalItemsCount
@@ -211,12 +211,13 @@ fun Modifier.drawVerticalScrollbar(
     // Calculate the thumb size & position
     val proportion = visibleCount.toFloat() / totalItems
     val thumbHeight = size.height * proportion
-    val scrollFraction = state.firstVisibleItemIndex.toFloat() / (totalItems - visibleCount).coerceAtLeast(1)
+    val scrollFraction = state.firstVisibleItemIndex.toFloat() /
+            (totalItems - visibleCount).coerceAtLeast(1)
     val thumbOffsetY = (size.height - thumbHeight) * scrollFraction
 
     // Draw the scroll thumb
     drawRoundRect(
-        color = thumbColor.copy(alpha = 0.7f),
+        color = thumbColor.copy(alpha = 0.2f),
         topLeft = Offset(size.width - width.toPx(), thumbOffsetY),
         size = Size(width.toPx(), thumbHeight),
         cornerRadius = CornerRadius(cornerRadius.toPx(), cornerRadius.toPx())

@@ -1,9 +1,3 @@
-import java.util.Properties
-import java.io.FileInputStream
-
-val apikeyProperties = Properties()
-val apikeyPropertiesFile = rootProject.file("apikey.properties")
-apikeyProperties.load(FileInputStream(apikeyPropertiesFile))
 
 plugins {
     alias(libs.plugins.android.application)
@@ -21,8 +15,6 @@ android {
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
-
-        buildConfigField("String", "OPENAI_API_KEY", "\"${apikeyProperties["OPENAI_API_KEY"]}\"")
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -64,6 +56,7 @@ dependencies {
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.androidx.core.splashscreen)
+    implementation(libs.play.services.ads)
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
