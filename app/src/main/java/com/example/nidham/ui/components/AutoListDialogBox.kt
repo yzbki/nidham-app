@@ -1,5 +1,6 @@
 package com.example.nidham.ui.components
 
+import android.app.Activity
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,24 +24,26 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.example.nidham.data.ListData
 import com.example.nidham.data.ListItem
+import com.example.nidham.service.AdManager
 import com.example.nidham.service.OpenAIService
 import kotlinx.coroutines.launch
 
 @Composable
-fun VoiceDialogBox(
+fun AutoListDialogBox(
     showDialog: Boolean,
     isRecording: Boolean,
     onDismiss: () -> Unit,
     onStartRecording: () -> Unit,
     onStopRecording: () -> Unit,
     onNewList: (ListData) -> Unit,
-    transcribedText: MutableState<String>,
-    listData: ListData
+    transcribedText: MutableState<String>
 ) {
     val scope = rememberCoroutineScope()
+    val context = LocalContext.current
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
 
@@ -93,6 +96,7 @@ fun VoiceDialogBox(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         modifier = Modifier.fillMaxWidth(),
                     ) {
+                        // Record Voice Button
                         Button(
                             modifier = Modifier.weight(1f),
                             onClick = {
@@ -111,44 +115,45 @@ fun VoiceDialogBox(
                             Text(if (isRecording) "Stop" else "Record Voice")
                         }
 
+                        // Generate Auto-List Button
                         Button(
                             modifier = Modifier.weight(1f),
                             onClick = {
-                                scope.launch {
-                                    isLoading = true
-                                    errorMessage = null
+                                AdManager.showInterstitial(context as Activity) {
+                                    scope.launch {
+                                        isLoading = true
+                                        errorMessage = null
 
-                                    val result = OpenAIService.generateListDataFromPrompt(transcribedText.value)
-                                    if (result != null) {
-                                        // Create new list
-                                        val newList = ListData.newListData().apply {
-                                            title.value = result.title.value.take(ListData.MAX_TITLE_LENGTH)
-                                            items.clear()
-                                            items.addAll(result.items.mapNotNull { li ->
-                                                if (li is ListItem.TaskItem) {
-                                                    ListItem.TaskItem(
-                                                        id = li.id,
-                                                        textState = mutableStateOf(li.textState.value)
-                                                    )
-                                                } else null
-                                            })
-                                            checkedStates.clear()
-                                            val checks = result.checkedStates.take(items.filterIsInstance<ListItem.TaskItem>().size)
-                                            checkedStates.addAll(checks)
-                                            while (checkedStates.size < items.filterIsInstance<ListItem.TaskItem>().size) {
-                                                checkedStates.add(false)
+                                        val result = OpenAIService.generateListDataFromPrompt(transcribedText.value)
+                                        if (result != null) {
+                                            val newList = ListData.newListData().apply {
+                                                title.value = result.title.value.take(ListData.MAX_TITLE_LENGTH)
+                                                items.clear()
+                                                items.addAll(result.items.mapNotNull { li ->
+                                                    if (li is ListItem.TaskItem) {
+                                                        ListItem.TaskItem(
+                                                            id = li.id,
+                                                            textState = mutableStateOf(li.textState.value)
+                                                        )
+                                                    } else null
+                                                })
+                                                checkedStates.clear()
+                                                val checks = result.checkedStates.take(items.filterIsInstance<ListItem.TaskItem>().size)
+                                                checkedStates.addAll(checks)
+                                                while (checkedStates.size < items.filterIsInstance<ListItem.TaskItem>().size) {
+                                                    checkedStates.add(false)
+                                                }
                                             }
+
+                                            onNewList(newList)
+                                            transcribedText.value = ""
+                                            onDismiss()
+                                        } else {
+                                            errorMessage = "Failed to generate response"
                                         }
 
-                                        // Let the screen display it
-                                        onNewList(newList)
-                                        transcribedText.value = ""
-                                        onDismiss()
-                                    } else {
-                                        errorMessage = "Failed to generate response"
+                                        isLoading = false
                                     }
-
-                                    isLoading = false
                                 }
                             },
                             enabled = transcribedText.value.isNotBlank() && !isLoading,

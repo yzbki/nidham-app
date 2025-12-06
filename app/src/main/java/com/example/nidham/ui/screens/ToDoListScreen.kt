@@ -40,7 +40,7 @@ import com.example.nidham.ui.components.LoadDialogBox
 import com.example.nidham.ui.components.SaveDialogBox
 import com.example.nidham.ui.components.TaskListSection
 import com.example.nidham.ui.components.TopBarSection
-import com.example.nidham.ui.components.VoiceDialogBox
+import com.example.nidham.ui.components.AutoListDialogBox
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.burnoutcrew.reorderable.rememberReorderableLazyListState
@@ -63,7 +63,7 @@ fun ToDoListScreen(
     var menuExpanded by remember { mutableStateOf(false) }
     var showSaveDialog by remember { mutableStateOf(false) }
     var showLoadDialog by remember { mutableStateOf(false) }
-    var showVoiceDialog by remember { mutableStateOf(false) }
+    var showAutoListDialog by remember { mutableStateOf(false) }
     var showImportDialog by remember { mutableStateOf(false) }
     var showExportDialog by remember { mutableStateOf(false) }
     var showSettingsScreen by remember { mutableStateOf(false) }
@@ -190,7 +190,7 @@ fun ToDoListScreen(
                             if (ContextCompat.checkSelfPermission(activity, permission) != PackageManager.PERMISSION_GRANTED) {
                                 ActivityCompat.requestPermissions(activity, arrayOf(permission), 101)
                             } else {
-                                showVoiceDialog = true
+                                showAutoListDialog = true
                             }
                         },
                         isRecording = isRecording
@@ -234,12 +234,12 @@ fun ToDoListScreen(
                     )
                 }
 
-                // Voice Dialog
-                VoiceDialogBox(
-                    showDialog = showVoiceDialog,
+                // AutoList Dialog
+                AutoListDialogBox(
+                    showDialog = showAutoListDialog,
                     isRecording = isRecording,
                     onDismiss = {
-                        showVoiceDialog = false
+                        showAutoListDialog = false
                         isRecording = false
                     },
                     onStartRecording = {
@@ -260,7 +260,6 @@ fun ToDoListScreen(
                         isRecording = false
                     },
                     transcribedText = voiceResult,
-                    listData = currentListData,
                     onNewList = { newList ->
                         currentListData = newList
                     }
