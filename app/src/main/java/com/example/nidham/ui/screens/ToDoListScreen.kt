@@ -34,8 +34,6 @@ import com.example.nidham.data.ListData
 import com.example.nidham.data.ListItem
 import com.example.nidham.service.VoiceRecognitionManager
 import com.example.nidham.ui.components.BottomRowSection
-import com.example.nidham.ui.components.ExportDialogBox
-import com.example.nidham.ui.components.ImportDialogBox
 import com.example.nidham.ui.components.LoadDialogBox
 import com.example.nidham.ui.components.SaveDialogBox
 import com.example.nidham.ui.components.TaskListSection
@@ -193,7 +191,9 @@ fun ToDoListScreen(
                                 showAutoListDialog = true
                             }
                         },
-                        isRecording = isRecording
+                        isRecording = isRecording,
+                        snackbarHostState = snackbarHostState,
+                        scope = scope
                     )
                 }
             ) { innerPadding ->
@@ -301,6 +301,7 @@ fun ToDoListScreen(
                     scope = scope
                 )
 
+                /*
                 // Import Dialog
                 ImportDialogBox(
                     showDialog = showImportDialog,
@@ -322,6 +323,7 @@ fun ToDoListScreen(
                     snackbarHostState = snackbarHostState,
                     scope = scope
                 )
+                */
             }
         }
     }

@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Create
@@ -72,25 +73,14 @@ fun TopBarSection(
             modifier = Modifier.align(Alignment.Center)
         )
 
-        // Quicksave button
+        // Undo button
         IconButton(
             onClick = {
-                scope.launch {
-                    if (listData.isTitleValid(listData.title.value, dataStore)) {
-                        dataStore.saveListData(listData)
-                        snackbarHostState.currentSnackbarData?.dismiss()
-                        snackbarHostState.showSnackbar("List saved as \"${listData.title.value}\"")
-                    } else {
-                        snackbarHostState.currentSnackbarData?.dismiss()
-                        snackbarHostState.showSnackbar(
-                            "ERROR: Invalid title."
-                        )
-                    }
-                }
+                // TODO: Implement Undo Functionality
             },
             modifier = Modifier.align(Alignment.CenterStart)
         ) {
-            Icon(Icons.Default.Lock, contentDescription = "Quicksave")
+            Icon(Icons.Default.Refresh, contentDescription = "Undo")
         }
 
         // Menu
@@ -153,6 +143,7 @@ fun TopBarSection(
 
                     HorizontalDivider()
 
+                    /*
                     // Import List
                     DropdownMenuItem(
                         text = { Text("Import", color = colorScheme.onSurface) },
@@ -174,6 +165,7 @@ fun TopBarSection(
                     )
 
                     HorizontalDivider()
+                     */
 
                     // Settings
                     DropdownMenuItem(

@@ -32,6 +32,8 @@ class ListData(val id: String = UUID.randomUUID().toString()) {
 
     companion object {
         const val MAX_TITLE_LENGTH = 50
+        const val MAX_TASKS = 100
+        const val MAX_TASK_LENGTH = 200
 
         fun newListData(): ListData = ListData().apply {
             items.clear()
@@ -65,4 +67,20 @@ class ListData(val id: String = UUID.randomUUID().toString()) {
         if (dataStore.isTitleDuplicate(trimmed, excludeId = currentId)) return false
         return true
     }
+
+    fun canAddTask(): Boolean {
+        val taskCount = items.count { it is ListItem.TaskItem }
+        return taskCount < MAX_TASKS
+    }
+
+    fun addTask(): Boolean {
+        return if (canAddTask()) {
+            items.add(ListItem.TaskItem())
+            checkedStates.add(false)
+            true
+        } else {
+            false
+        }
+    }
+
 }

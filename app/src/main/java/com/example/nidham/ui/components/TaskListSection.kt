@@ -23,6 +23,10 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -56,8 +60,47 @@ fun TaskListSection(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 16.dp)
+            .padding(end = 12.dp, bottom = 16.dp)
     ) {
+        var selectAll by remember { mutableStateOf(false) }
+
+        Checkbox(
+            checked = selectAll,
+            onCheckedChange = { isChecked ->
+                selectAll = isChecked
+                // Update all items' checked states
+                listData.checkedStates.replaceAll { isChecked }
+                // Persist changes
+                scope.launch { dataStore.saveListData(listData) }
+            },
+            colors = CheckboxDefaults.colors(
+                uncheckedColor = colorScheme.onBackground,
+                checkedColor = colorScheme.primary,
+                checkmarkColor = colorScheme.onPrimary
+            )
+        )
+
+        // Title field
+        TextField(
+            value = listData.title.value,
+            onValueChange = { newValue ->
+                if (newValue.length <= ListData.MAX_TITLE_LENGTH) {
+                    listData.title.value = newValue
+                }
+            },
+            label = { Text("List Title") },
+            modifier = Modifier.weight(1f),
+            colors = TextFieldDefaults.colors(
+                focusedLabelColor = colorScheme.onBackground,
+                unfocusedLabelColor = colorScheme.onBackground,
+                focusedContainerColor = colorScheme.surface.copy(alpha = 0.7f),
+                unfocusedContainerColor = colorScheme.background,
+                focusedTextColor = colorScheme.onSurface,
+                unfocusedTextColor = colorScheme.onBackground,
+                cursorColor = colorScheme.onSurface
+            )
+        )
+
         // Delete button (multiple)
         IconButton(
             onClick = {
@@ -78,23 +121,6 @@ fun TaskListSection(
         ) {
             Icon(Icons.Default.Delete, contentDescription = "Delete Selected Tasks")
         }
-
-        // Title field
-        TextField(
-            value = listData.title.value,
-            onValueChange = { listData.title.value = it },
-            label = { Text("List Title") },
-            modifier = Modifier.weight(1f),
-            colors = TextFieldDefaults.colors(
-                focusedLabelColor = colorScheme.onBackground,
-                unfocusedLabelColor = colorScheme.onBackground,
-                focusedContainerColor = colorScheme.surface.copy(alpha = 0.7f),
-                unfocusedContainerColor = colorScheme.background,
-                focusedTextColor = colorScheme.onSurface,
-                unfocusedTextColor = colorScheme.onBackground,
-                cursorColor = colorScheme.onSurface
-            )
-        )
     }
 
     // Task list
@@ -135,8 +161,10 @@ fun TaskListSection(
                     TextField(
                         value = taskItem.textState.value,
                         onValueChange = { newValue ->
-                            taskItem.textState.value = newValue
-                            scope.launch { dataStore.saveListData(listData) }
+                            if (newValue.length <= ListData.MAX_TASK_LENGTH) {
+                                taskItem.textState.value = newValue
+                                scope.launch { dataStore.saveListData(listData) }
+                            }
                         },
                         modifier = Modifier.weight(1f),
                         label = { Text("Task ${index + 1}") },

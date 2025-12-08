@@ -13,20 +13,25 @@ import androidx.compose.foundation.layout.safeDrawing
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ColorScheme
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.example.nidham.data.ListData
-import com.example.nidham.data.ListItem
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @Composable
 fun BottomRowSection(
     listData: ListData,
     colorScheme: ColorScheme,
     onVoiceInputClick: () -> Unit,
-    isRecording: Boolean
+    isRecording: Boolean,
+    snackbarHostState: SnackbarHostState,
+    scope: CoroutineScope
 ) {
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -68,8 +73,15 @@ fun BottomRowSection(
 
             Button(
                 onClick = {
-                    listData.items.add(ListItem.TaskItem())
-                    listData.checkedStates.add(false)
+                    val added = listData.addTask()
+                    if (!added) {
+                        scope.launch {
+                            snackbarHostState.showSnackbar(
+                                message = "You reached the maximum of ${ListData.MAX_TASKS} tasks.",
+                                withDismissAction = true
+                            )
+                        }
+                    }
                 },
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(
@@ -79,6 +91,7 @@ fun BottomRowSection(
             ) {
                 Text("Add Task")
             }
+
         }
     }
 }
