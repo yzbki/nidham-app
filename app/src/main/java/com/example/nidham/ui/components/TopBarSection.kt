@@ -109,14 +109,20 @@ fun TopBarSection(
                         text = { Text("New", color = colorScheme.onSurface) },
                         leadingIcon = { Icon(Icons.Outlined.Create, contentDescription = null) },
                         onClick = {
-                            onNewList()
                             scope.launch {
-                                snackbarHostState.currentSnackbarData?.dismiss()
-                                snackbarHostState.showSnackbar("New list created!")
+                                if (dataStore.canAddNewList()) {
+                                    onNewList()
+                                    snackbarHostState.currentSnackbarData?.dismiss()
+                                    snackbarHostState.showSnackbar("New list created!")
+                                } else {
+                                    snackbarHostState.currentSnackbarData?.dismiss()
+                                    snackbarHostState.showSnackbar("Maximum number of lists reached.")
+                                }
+                                onMenuExpandChange(false)
                             }
-                            onMenuExpandChange(false)
                         }
                     )
+
 
                     // Save List
                     DropdownMenuItem(

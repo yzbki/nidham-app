@@ -15,10 +15,17 @@ class DataStoreManager(private val context: Context) {
     private val LAST_OPENED_LIST_KEY = stringPreferencesKey("last_opened_list")
     private val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
     private val COLOR_VARIANT_KEY = stringPreferencesKey("color_variant")
+    private val MAX_LISTS = 10
 
-    suspend fun saveListData(listData: ListData) {
+    suspend fun saveListData(listData: ListData): Boolean {
         val title = listData.title.value
-        if (!listData.isTitleValid(title, this, currentId = listData.id)) return
+        if (!listData.isTitleValid(title, this, currentId = listData.id)) return false
+
+        val isNew = isNewList(listData.id)
+        val existingCount = getSavedLists().size
+        if (isNew && existingCount >= MAX_LISTS) {
+            return false
+        }
 
         val tasksJson = gson.toJson(
             listData.items.filterIsInstance<ListItem.TaskItem>().map { it.textState.value }
@@ -30,6 +37,8 @@ class DataStoreManager(private val context: Context) {
             prefs[stringPreferencesKey("${listData.id}_checked")] = checksJson
             prefs[stringPreferencesKey("${listData.id}_title")] = title
         }
+
+        return true
     }
 
     suspend fun loadListData(listId: String): ListData {
@@ -129,5 +138,15 @@ class DataStoreManager(private val context: Context) {
     suspend fun getColorVariant(): String {
         val prefs = context.dataStore.data.first()
         return prefs[COLOR_VARIANT_KEY] ?: "default"
+    }
+
+    private suspend fun isNewList(listId: String): Boolean {
+        val saved = getSavedLists().map { it.first }
+        return listId !in saved
+    }
+
+    suspend fun canAddNewList(): Boolean {
+        val saved = getSavedLists()
+        return saved.size < MAX_LISTS
     }
 }
