@@ -40,7 +40,8 @@ fun AutoListDialogBox(
     onStartRecording: () -> Unit,
     onStopRecording: () -> Unit,
     onNewList: (ListData) -> Unit,
-    transcribedText: MutableState<String>
+    transcribedText: MutableState<String>,
+    maxPromptLength: Int
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
@@ -68,7 +69,11 @@ fun AutoListDialogBox(
                     Spacer(modifier = Modifier.height(16.dp))
                     TextField(
                         value = transcribedText.value,
-                        onValueChange = { transcribedText.value = it },
+                        onValueChange = { newValue ->
+                            if (newValue.length <= maxPromptLength) {
+                                transcribedText.value = newValue
+                            }
+                        },
                         label = { Text("Transcribed Text") },
                         singleLine = false,
                         modifier = Modifier.fillMaxWidth(),

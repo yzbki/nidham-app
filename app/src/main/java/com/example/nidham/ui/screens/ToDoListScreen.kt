@@ -2,7 +2,6 @@ package com.example.nidham.ui.screens
 
 import android.app.Activity
 import android.content.pm.PackageManager
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -49,6 +48,7 @@ fun ToDoListScreen(
     colorVariant: String,
     onThemeChange: (themeMode: String, colorVariant: String) -> Unit
 ) {
+    val MAX_PROMPT_LENGTH = 200
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val scope = rememberCoroutineScope()
@@ -246,11 +246,10 @@ fun ToDoListScreen(
                         isRecording = true
                         voiceManager.startListening(
                             onResult = { text ->
-                                voiceResult.value = text
+                                voiceResult.value = text.take(MAX_PROMPT_LENGTH)
                                 isRecording = false
                             },
                             onError = { errorMsg ->
-                                Toast.makeText(activity, errorMsg, Toast.LENGTH_SHORT).show()
                                 isRecording = false
                             }
                         )
@@ -262,7 +261,8 @@ fun ToDoListScreen(
                     transcribedText = voiceResult,
                     onNewList = { newList ->
                         currentListData = newList
-                    }
+                    },
+                    maxPromptLength = MAX_PROMPT_LENGTH
                 )
 
                 // Save Dialog

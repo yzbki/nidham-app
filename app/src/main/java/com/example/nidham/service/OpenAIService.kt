@@ -63,7 +63,9 @@ object OpenAIService {
                         "You are an assistant that outputs only raw JSON (no markdown or code blocks). " +
                                 "Format: { title: String, tasks: [{ id: String, text: String }], checkedStates: [Boolean] }. " +
                                 "The title must be at most ${ListData.MAX_TITLE_LENGTH} characters. " +
-                                "Always generate a title within this limit."
+                                "Each task must be at most ${ListData.MAX_TASK_LENGTH} characters. " +
+                                "The list must have at most ${ListData.MAX_TASKS} tasks. " +
+                                "Always generate a list within these limits."
                     ),
                     Message("user", prompt)
                 ),
