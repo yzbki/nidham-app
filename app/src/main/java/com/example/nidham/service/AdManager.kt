@@ -6,6 +6,7 @@ import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.FullScreenContentCallback
 import com.google.android.gms.ads.LoadAdError
 import com.google.android.gms.ads.MobileAds
+import com.google.android.gms.ads.RequestConfiguration
 import com.google.android.gms.ads.interstitial.InterstitialAd
 import com.google.android.gms.ads.interstitial.InterstitialAdLoadCallback
 
@@ -13,9 +14,16 @@ object AdManager {
 
     private var interstitialAd: InterstitialAd? = null
 
-    private const val INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712"
+    // TEST ID: private const val INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712"
+    private const val INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-5646403037659023/1995857921"
 
     fun initialize(context: Context) {
+        // DEVICE ID: C8EDDFBF580246926A6ED0EC79A2C854
+        val configuration = RequestConfiguration.Builder()
+            .setTestDeviceIds(listOf("C8EDDFBF580246926A6ED0EC79A2C854"))
+            .build()
+
+        MobileAds.setRequestConfiguration(configuration)
         MobileAds.initialize(context)
         loadInterstitial(context)
     }
