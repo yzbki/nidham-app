@@ -50,7 +50,7 @@ private val PinkLightColorScheme = lightColorScheme(
     background = Color(0xFFFCE4EC),
     onBackground = Color(0xFFE91E63),
     surface = Color(0xFFF8BBD0),
-    onSurface = Color(0xFFE91E63),
+    onSurface = DarkGray,
     inverseSurface = Color.White
 )
 
@@ -64,7 +64,7 @@ private val PinkDarkColorScheme = darkColorScheme(
     background = Color(0xFF2B0013),
     onBackground = Color(0xFFFFC1E3),
     surface = Color(0xFF3B0020),
-    onSurface = Color(0xFFFFC1E3),
+    onSurface = LightText,
     inverseSurface = Color.White
 )
 
@@ -78,7 +78,7 @@ private val GreenLightColorScheme = lightColorScheme(
     background = Color(0xFFE8F5E9),
     onBackground = Color(0xFF2E7D32),
     surface = Color(0xFFC8E6C9),
-    onSurface = Color(0xFF2E7D32),
+    onSurface = DarkGray,
     inverseSurface = Color.White
 )
 
@@ -92,7 +92,7 @@ private val GreenDarkColorScheme = darkColorScheme(
     background = Color(0xFF0F1A12),
     onBackground = Color(0xFFD0E8D0),
     surface = Color(0xFF1B2A1F),
-    onSurface = Color(0xFFD0E8D0),
+    onSurface = LightText,
     inverseSurface = Color.White
 )
 
@@ -106,7 +106,7 @@ private val BlueLightColorScheme = lightColorScheme(
     background = Color(0xFFE3F2FD),
     onBackground = Color(0xFF0D47A1),
     surface = Color(0xFFBBDEFB),
-    onSurface = Color(0xFF0D47A1),
+    onSurface = DarkGray,
     inverseSurface = Color.White
 )
 
@@ -120,21 +120,21 @@ private val BlueDarkColorScheme = darkColorScheme(
     background = Color(0xFF0D1117),
     onBackground = Color(0xFFBBDEFB),
     surface = Color(0xFF1A1F26),
-    onSurface = Color(0xFFBBDEFB),
+    onSurface = LightText,
     inverseSurface = Color.White
 )
 
 private val OrangeLightColorScheme = lightColorScheme(
-    primary = Color(0xFFF57C00),
+    primary = Color(0xFFFB8C00),
     onPrimary = Color.White,
-    secondary = Color(0xFFFFCC80),
+    secondary = Color(0xFFFFE0B2),
     onSecondary = Color.Black,
-    tertiary = Color(0xFFFFE0B2),
+    tertiary = Color(0xFFFFF3E0),
     onTertiary = Color.Black,
     background = Color(0xFFFFF3E0),
-    onBackground = Color(0xFFF57C00),
+    onBackground = Color(0xFFFB8C00),
     surface = Color(0xFFFFE0B2),
-    onSurface = Color(0xFFF57C00),
+    onSurface = DarkGray,
     inverseSurface = Color.White
 )
 
@@ -145,15 +145,15 @@ private val OrangeDarkColorScheme = darkColorScheme(
     onSecondary = Color.Black,
     tertiary = Color(0xFFFFE0B2),
     onTertiary = Color.Black,
-    background = Color(0xFF2C1300),
-    onBackground = Color(0xFFFFE0B2),
-    surface = Color(0xFF3B1A00),
-    onSurface = Color(0xFFFFE0B2),
+    background = Color(0xFF3B1A00),
+    onBackground = Color(0xFFFFCC80),
+    surface = Color(0xFF5D2A00),
+    onSurface = LightText,
     inverseSurface = Color.White
 )
 
 private val RedLightColorScheme = lightColorScheme(
-    primary = Color(0xFFF44336),
+    primary = Color(0xFFD32F2F),
     onPrimary = Color.White,
     secondary = Color(0xFFFFCDD2),
     onSecondary = Color.Black,
@@ -162,49 +162,49 @@ private val RedLightColorScheme = lightColorScheme(
     background = Color(0xFFFFEBEE),
     onBackground = Color(0xFFD32F2F),
     surface = Color(0xFFFFCDD2),
-    onSurface = Color(0xFFD32F2F),
+    onSurface = DarkGray,
     inverseSurface = Color.White
 )
 
 private val RedDarkColorScheme = darkColorScheme(
-    primary = Color(0xFFD32F2F),
-    onPrimary = Color.White,
-    secondary = Color(0xFFFFCDD2),
+    primary = Color(0xFFEF5350),
+    onPrimary = Color.Black,
+    secondary = Color(0xFFFF8A80),
     onSecondary = Color.Black,
-    tertiary = Color(0xFFFFEBEE),
+    tertiary = Color(0xFFFFCDD2),
     onTertiary = Color.Black,
     background = Color(0xFF3B0000),
-    onBackground = Color(0xFFFFCDD2),
+    onBackground = Color(0xFFFF8A80),
     surface = Color(0xFFB71C1C),
-    onSurface = Color(0xFFFFCDD2),
+    onSurface = LightText,
     inverseSurface = Color.White
 )
 
 private val YellowLightColorScheme = lightColorScheme(
-    primary = Color(0xFFFFC107),
+    primary = Color(0xFFFBC02D),
     onPrimary = Color.Black,
-    secondary = Color(0xFFFFE082),
+    secondary = Color(0xFFFFF59D),
     onSecondary = Color.Black,
-    tertiary = Color(0xFFFFF59D),
+    tertiary = Color(0xFFFFFDE7),
     onTertiary = Color.Black,
     background = Color(0xFFFFFDE7),
-    onBackground = Color(0xFFFFC107),
-    surface = Color(0xFFFFE082),
-    onSurface = Color(0xFFFFC107),
+    onBackground = Color(0xFFFBC02D),
+    surface = Color(0xFFFFF59D),
+    onSurface = DarkGray,
     inverseSurface = Color.White
 )
 
 private val YellowDarkColorScheme = darkColorScheme(
-    primary = Color(0xFFFFA000),
+    primary = Color(0xFFFFEB3B),
     onPrimary = Color.Black,
-    secondary = Color(0xFFFFE082),
+    secondary = Color(0xFFFFF176),
     onSecondary = Color.Black,
-    tertiary = Color(0xFFFFF59D),
+    tertiary = Color(0xFFFFFDE7),
     onTertiary = Color.Black,
     background = Color(0xFF332500),
-    onBackground = Color(0xFFFFE082),
-    surface = Color(0xFFFF8F00),
-    onSurface = Color(0xFFFFE082),
+    onBackground = Color(0xFFFFF176),
+    surface = Color(0xFF5D4B00),
+    onSurface = LightText,
     inverseSurface = Color.White
 )
 
@@ -218,7 +218,7 @@ private val PurpleLightColorScheme = lightColorScheme(
     background = Color(0xFFF3E5F5),
     onBackground = Color(0xFF9C27B0),
     surface = Color(0xFFD1C4E9),
-    onSurface = Color(0xFF9C27B0),
+    onSurface = DarkGray,
     inverseSurface = Color.White
 )
 
@@ -232,35 +232,7 @@ private val PurpleDarkColorScheme = darkColorScheme(
     background = Color(0xFF2A003D),
     onBackground = Color(0xFFCE93D8),
     surface = Color(0xFF4A148C),
-    onSurface = Color(0xFFCE93D8),
-    inverseSurface = Color.White
-)
-
-private val LimeLightColorScheme = lightColorScheme(
-    primary = Color(0xFFCDDC39),
-    onPrimary = Color.Black,
-    secondary = Color(0xFFF0F4C3),
-    onSecondary = Color.Black,
-    tertiary = Color(0xFFE6EE9C),
-    onTertiary = Color.Black,
-    background = Color(0xFFF9FBE7),
-    onBackground = Color(0xFF827717),
-    surface = Color(0xFFE6EE9C),
-    onSurface = Color(0xFF827717),
-    inverseSurface = Color.White
-)
-
-private val LimeDarkColorScheme = darkColorScheme(
-    primary = Color(0xFFAFB42B),
-    onPrimary = Color.Black,
-    secondary = Color(0xFFCCEA6A),
-    onSecondary = Color.Black,
-    tertiary = Color(0xFFDCE775),
-    onTertiary = Color.Black,
-    background = Color(0xFF1B1F00),
-    onBackground = Color(0xFFDCE775),
-    surface = Color(0xFF3C3F00),
-    onSurface = Color(0xFFDCE775),
+    onSurface = LightText,
     inverseSurface = Color.White
 )
 
@@ -285,7 +257,6 @@ fun NidhamTheme(
         "red" -> if (darkTheme) RedDarkColorScheme else RedLightColorScheme
         "yellow" -> if (darkTheme) YellowDarkColorScheme else YellowLightColorScheme
         "purple" -> if (darkTheme) PurpleDarkColorScheme else PurpleLightColorScheme
-        "lime" -> if (darkTheme) LimeDarkColorScheme else LimeLightColorScheme
         else -> if (darkTheme) DarkColorScheme else LightColorScheme
     }
 

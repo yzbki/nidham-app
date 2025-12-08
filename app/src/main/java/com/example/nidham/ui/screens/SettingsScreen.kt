@@ -142,7 +142,7 @@ fun SettingsScreen(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     var colorSchemeExpanded by remember { mutableStateOf(false) }
-                    val colors = listOf("default", "red", "orange", "yellow", "green", "lime", "blue", "purple", "pink")
+                    val colors = listOf("default", "blue", "green", "red", "orange", "yellow", "purple", "pink")
                     var selectedColor by remember { mutableStateOf(colorVariant) }
 
                     Text(
