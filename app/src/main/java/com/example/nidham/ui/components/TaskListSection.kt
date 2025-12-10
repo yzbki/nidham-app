@@ -62,15 +62,11 @@ fun TaskListSection(
             .fillMaxWidth()
             .padding(end = 12.dp, bottom = 16.dp)
     ) {
-        var selectAll by remember { mutableStateOf(false) }
-
         Checkbox(
-            checked = selectAll,
+            checked = listData.selectAll.value,
             onCheckedChange = { isChecked ->
-                selectAll = isChecked
-                // Update all items' checked states
+                listData.selectAll.value = isChecked
                 listData.checkedStates.replaceAll { isChecked }
-                // Persist changes
                 scope.launch { dataStore.saveListData(listData) }
             },
             colors = CheckboxDefaults.colors(
@@ -114,6 +110,8 @@ fun TaskListSection(
                 listData.items.addAll(newItems)
                 listData.checkedStates.clear()
                 listData.checkedStates.addAll(newCheckedStates)
+                listData.selectAll.value = listData.checkedStates.isNotEmpty() &&
+                        listData.checkedStates.all { it }
 
                 scope.launch { dataStore.saveListData(listData) }
             },
@@ -146,8 +144,9 @@ fun TaskListSection(
                     // Checkbox
                     Checkbox(
                         checked = listData.checkedStates.getOrElse(index) { false },
-                        onCheckedChange = {
-                            listData.checkedStates[index] = it
+                        onCheckedChange = { checked ->
+                            listData.checkedStates[index] = checked
+                            if (!checked) listData.selectAll.value = false
                             scope.launch { dataStore.saveListData(listData) }
                         },
                         colors = CheckboxDefaults.colors(

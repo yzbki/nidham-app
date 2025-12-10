@@ -29,6 +29,7 @@ class ListData(val id: String = UUID.randomUUID().toString()) {
     val title = mutableStateOf("")
     val items = mutableStateListOf<ListItem>()
     val checkedStates = mutableStateListOf<Boolean>()
+    val selectAll = mutableStateOf(false)
 
     companion object {
         const val MAX_TITLE_LENGTH = 50
@@ -77,6 +78,7 @@ class ListData(val id: String = UUID.randomUUID().toString()) {
         return if (canAddTask()) {
             items.add(ListItem.TaskItem())
             checkedStates.add(false)
+            selectAll.value = false
             true
         } else {
             false
