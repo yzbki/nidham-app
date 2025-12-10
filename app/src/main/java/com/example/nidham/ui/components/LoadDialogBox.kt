@@ -15,7 +15,12 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -32,6 +37,8 @@ fun LoadDialogBox(
     snackbarHostState: SnackbarHostState,
     scope: CoroutineScope
 ) {
+    var listToDelete by remember { mutableStateOf<Pair<String, String>?>(null) }
+
     if (showDialog) {
         AlertDialog(
             containerColor = colorScheme.background,
@@ -71,11 +78,7 @@ fun LoadDialogBox(
                                 }
                                 IconButton(
                                     onClick = {
-                                        scope.launch {
-                                            onDelete(id) // delete by ID
-                                            snackbarHostState.currentSnackbarData?.dismiss()
-                                            snackbarHostState.showSnackbar("Deleted \"$title\"")
-                                        }
+                                        listToDelete = id to title
                                     },
                                     colors = IconButtonDefaults.iconButtonColors(
                                         contentColor = colorScheme.onBackground
@@ -91,6 +94,35 @@ fun LoadDialogBox(
                     }
                 }
             }
+        )
+    }
+
+    // Confirmation dialog for deletion
+    listToDelete?.let { (id, title) ->
+        AlertDialog(
+            onDismissRequest = { listToDelete = null },
+            title = { Text("Confirm Delete", color = colorScheme.onBackground) },
+            text = { Text("Are you sure you want to delete \"$title\"?", color = colorScheme.onSurface) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        scope.launch {
+                            onDelete(id)
+                            snackbarHostState.currentSnackbarData?.dismiss()
+                            snackbarHostState.showSnackbar("Deleted \"$title\"")
+                        }
+                        listToDelete = null
+                    }
+                ) {
+                    Text("Delete", color = colorScheme.error)
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { listToDelete = null }) {
+                    Text("Cancel", color = colorScheme.onBackground)
+                }
+            },
+            containerColor = colorScheme.background
         )
     }
 }
