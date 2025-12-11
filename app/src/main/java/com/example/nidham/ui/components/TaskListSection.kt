@@ -60,7 +60,7 @@ fun TaskListSection(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(end = 12.dp, bottom = 16.dp)
+            .padding(bottom = 16.dp, end = 12.dp)
     ) {
         Checkbox(
             checked = listData.selectAll.value,
@@ -137,7 +137,7 @@ fun TaskListSection(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(end = 12.dp, bottom = 8.dp)
+                        .padding(bottom = 8.dp, end = 12.dp)
                         .detectReorder(state),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -147,6 +147,7 @@ fun TaskListSection(
                         onCheckedChange = { checked ->
                             listData.checkedStates[index] = checked
                             if (!checked) listData.selectAll.value = false
+                            else if (listData.allChecked()) listData.selectAll.value = true
                             scope.launch { dataStore.saveListData(listData) }
                         },
                         colors = CheckboxDefaults.colors(

@@ -3,6 +3,7 @@ package com.example.nidham.data
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.structuralEqualityPolicy
 import java.util.UUID
 
 sealed class ListItem {
@@ -85,4 +86,7 @@ class ListData(val id: String = UUID.randomUUID().toString()) {
         }
     }
 
+    fun allChecked(): Boolean {
+        return checkedStates.all { it }
+    }
 }

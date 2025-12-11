@@ -73,6 +73,7 @@ fun TopBarSection(
             modifier = Modifier.align(Alignment.Center)
         )
 
+        /*
         // Undo button
         IconButton(
             onClick = {
@@ -82,6 +83,7 @@ fun TopBarSection(
         ) {
             Icon(Icons.Default.Refresh, contentDescription = "Undo")
         }
+        */
 
         // Menu
         Row(
