@@ -42,6 +42,7 @@ class ListData(val id: String = UUID.randomUUID().toString()) {
             checkedStates.clear()
             items.add(ListItem.TaskItem())
             checkedStates.add(false)
+            selectAll.value = false
         }
     }
 
@@ -51,6 +52,7 @@ class ListData(val id: String = UUID.randomUUID().toString()) {
         checkedStates.clear()
         items.add(ListItem.TaskItem())
         checkedStates.add(false)
+        selectAll.value = false
     }
 
     fun copyId(existingId: String): ListData = ListData(existingId).also {
@@ -87,6 +89,11 @@ class ListData(val id: String = UUID.randomUUID().toString()) {
     }
 
     fun allChecked(): Boolean {
-        return checkedStates.all { it }
+        if(items.isEmpty()) return false
+        else return checkedStates.all { it }
+    }
+
+    fun allEmpty(): Boolean {
+        return items.all { it.textState.value.isEmpty() }
     }
 }

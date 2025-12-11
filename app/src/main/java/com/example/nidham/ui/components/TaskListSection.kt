@@ -198,6 +198,7 @@ fun TaskListSection(
                             if (listData.checkedStates.size > index) {
                                 listData.checkedStates.removeAt(index)
                             }
+                            if (listData.allChecked()) listData.selectAll.value = true
                             scope.launch { dataStore.saveListData(listData) }
                         },
                         colors = IconButtonDefaults.iconButtonColors(contentColor = colorScheme.error)

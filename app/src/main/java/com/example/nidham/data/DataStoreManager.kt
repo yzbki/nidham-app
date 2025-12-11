@@ -20,12 +20,11 @@ class DataStoreManager(private val context: Context) {
     suspend fun saveListData(listData: ListData): Boolean {
         val title = listData.title.value
         if (!listData.isTitleValid(title, this, currentId = listData.id)) return false
+        if (listData.allEmpty()) return false
 
         val isNew = isNewList(listData.id)
         val existingCount = getSavedLists().size
-        if (isNew && existingCount >= MAX_LISTS) {
-            return false
-        }
+        if (isNew && existingCount >= MAX_LISTS) return false
 
         val tasksJson = gson.toJson(
             listData.items.filterIsInstance<ListItem.TaskItem>().map { it.textState.value }
