@@ -26,7 +26,7 @@ sealed class ListItem {
      */
 }
 
-class ListData(val id: String = UUID.randomUUID().toString()) {
+class ListData(var id: String = UUID.randomUUID().toString()) {
     val title = mutableStateOf("")
     val items = mutableStateListOf<ListItem>()
     val checkedStates = mutableStateListOf<Boolean>()
@@ -95,5 +95,32 @@ class ListData(val id: String = UUID.randomUUID().toString()) {
 
     fun allEmpty(): Boolean {
         return items.all { it.textState.value.isEmpty() }
+    }
+
+    fun deepCopy(): ListData {
+        val copy = ListData()
+        copy.id = this.id
+        copy.title.value = this.title.value
+
+        copy.items.clear()
+        this.items.forEach { item ->
+            when (item) {
+                is ListItem.TaskItem -> {
+                    copy.items.add(
+                        ListItem.TaskItem(
+                            id = item.id,
+                            textState = mutableStateOf(item.textState.value)
+                        )
+                    )
+                }
+            }
+        }
+
+        copy.checkedStates.clear()
+        copy.checkedStates.addAll(this.checkedStates)
+
+        copy.selectAll.value = this.selectAll.value
+
+        return copy
     }
 }

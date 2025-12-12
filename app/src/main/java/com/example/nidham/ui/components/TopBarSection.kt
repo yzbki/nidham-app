@@ -45,6 +45,7 @@ fun TopBarSection(
     snackbarHostState: SnackbarHostState,
     listData: ListData,
     dataStore: DataStoreManager,
+    onUndo: () -> Unit,
     menuExpanded: Boolean,
     onMenuExpandChange: (Boolean) -> Unit,
     onShowSaveDialog: () -> Unit,
@@ -73,17 +74,13 @@ fun TopBarSection(
             modifier = Modifier.align(Alignment.Center)
         )
 
-        /*
         // Undo button
         IconButton(
-            onClick = {
-                // TODO: Implement Undo Functionality
-            },
+            onClick = onUndo,
             modifier = Modifier.align(Alignment.CenterStart)
         ) {
             Icon(Icons.Default.Refresh, contentDescription = "Undo")
         }
-        */
 
         // Menu
         Row(

@@ -55,6 +55,7 @@ fun ToDoListScreen(
     val dataStore = remember { DataStoreManager(context) }
     var inputListName by remember { mutableStateOf("") }
     var currentListData by remember { mutableStateOf(ListData()) }
+    val undoStack = remember { ArrayDeque<ListData>() }
     var savedLists by remember { mutableStateOf(listOf<Pair<String, String>>()) }
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -67,6 +68,21 @@ fun ToDoListScreen(
     var showSettingsScreen by remember { mutableStateOf(false) }
     var showAboutScreen by remember { mutableStateOf(false) }
     var isRecording by remember { mutableStateOf(false) }
+
+    // Push undo state onto stack
+    fun pushUndoState() {
+        val snapshot = currentListData.deepCopy()
+        undoStack.addLast(snapshot)
+    }
+
+    // Undo button function
+    fun undo() {
+        if (undoStack.isNotEmpty()) {
+            val previous = undoStack.removeLast()
+            currentListData = previous
+            scope.launch { dataStore.saveListData(currentListData) }
+        }
+    }
 
     // Create a brand-new list
     fun createNewList() {
@@ -215,6 +231,7 @@ fun ToDoListScreen(
                         snackbarHostState = snackbarHostState,
                         listData = currentListData,
                         dataStore = dataStore,
+                        onUndo = { undo() },
                         menuExpanded = menuExpanded,
                         onMenuExpandChange = { menuExpanded = it },
                         onShowSaveDialog = { showSaveDialog = true },
@@ -230,7 +247,8 @@ fun ToDoListScreen(
                         listData = currentListData,
                         scope = scope,
                         dataStore = dataStore,
-                        state = state
+                        state = state,
+                        pushUndo = { pushUndoState() }
                     )
                 }
 

@@ -53,7 +53,8 @@ fun TaskListSection(
     listData: ListData,
     scope: CoroutineScope,
     dataStore: DataStoreManager,
-    state: ReorderableLazyListState
+    state: ReorderableLazyListState,
+    pushUndo: () -> Unit
 ) {
     // Title row
     Row(
@@ -65,9 +66,12 @@ fun TaskListSection(
         Checkbox(
             checked = listData.selectAll.value,
             onCheckedChange = { isChecked ->
+                pushUndo()
                 listData.selectAll.value = isChecked
                 listData.checkedStates.replaceAll { isChecked }
-                scope.launch { dataStore.saveListData(listData) }
+                scope.launch {
+                    dataStore.saveListData(listData)
+                }
             },
             colors = CheckboxDefaults.colors(
                 uncheckedColor = colorScheme.onBackground,
@@ -81,6 +85,7 @@ fun TaskListSection(
             value = listData.title.value,
             onValueChange = { newValue ->
                 if (newValue.length <= ListData.MAX_TITLE_LENGTH) {
+                    pushUndo()
                     listData.title.value = newValue
                 }
             },
@@ -100,6 +105,7 @@ fun TaskListSection(
         // Delete button (multiple)
         IconButton(
             onClick = {
+                pushUndo()
                 val newItems = listData.items.filterIsInstance<ListItem.TaskItem>()
                     .withIndex()
                     .filterNot { listData.checkedStates.getOrElse(it.index) { false } }
@@ -145,6 +151,7 @@ fun TaskListSection(
                     Checkbox(
                         checked = listData.checkedStates.getOrElse(index) { false },
                         onCheckedChange = { checked ->
+                            pushUndo()
                             listData.checkedStates[index] = checked
                             if (!checked) listData.selectAll.value = false
                             else if (listData.allChecked()) listData.selectAll.value = true
@@ -162,6 +169,7 @@ fun TaskListSection(
                         value = taskItem.textState.value,
                         onValueChange = { newValue ->
                             if (newValue.length <= ListData.MAX_TASK_LENGTH) {
+                                pushUndo()
                                 taskItem.textState.value = newValue
                                 scope.launch { dataStore.saveListData(listData) }
                             }
@@ -194,6 +202,7 @@ fun TaskListSection(
                     // Delete button (individual)
                     IconButton(
                         onClick = {
+                            pushUndo()
                             listData.items.remove(taskItem)
                             if (listData.checkedStates.size > index) {
                                 listData.checkedStates.removeAt(index)
