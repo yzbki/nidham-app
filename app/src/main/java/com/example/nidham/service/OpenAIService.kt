@@ -2,11 +2,15 @@ package com.example.nidham.service
 
 import com.example.nidham.data.ListData
 import com.example.nidham.data.ListItem
+import com.google.android.gms.tasks.Tasks
+import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
+import okhttp3.Request
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
@@ -38,7 +42,19 @@ object OpenAIService {
     // Replace with your Firebase function URL
     private const val BASE_URL = "https://chat-uyw75ruqmq-uc.a.run.app/"
 
-    private val client = OkHttpClient.Builder().build()
+    // Interceptor to add App Check token
+    private val client = OkHttpClient.Builder()
+        .addInterceptor { chain: Interceptor.Chain ->
+            val original: Request = chain.request()
+            val builder = original.newBuilder()
+
+            // Fetch App Check token synchronously (use Tasks.await)
+            val appCheckToken = Tasks.await(FirebaseAppCheck.getInstance().getAppCheckToken(false)).token
+            builder.header("X-Firebase-AppCheck", appCheckToken)
+
+            chain.proceed(builder.build())
+        }
+        .build()
 
     private val retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
@@ -47,7 +63,6 @@ object OpenAIService {
         .build()
 
     private val api: FirebaseOpenAIApi = retrofit.create(FirebaseOpenAIApi::class.java)
-
     private val gson = Gson()
 
     suspend fun generateListDataFromPrompt(
@@ -80,7 +95,6 @@ object OpenAIService {
             val cleanedJson = rawText.replace("```json", "").replace("```", "").trim()
             val listDataJson = gson.fromJson(cleanedJson, ListDataJson::class.java)
 
-            // Create proper ListData object
             val listData = ListData.newListData()
             listData.title.value = listDataJson.title.take(ListData.MAX_TITLE_LENGTH)
 

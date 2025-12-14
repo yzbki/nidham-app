@@ -11,11 +11,29 @@ import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import com.example.nidham.service.AdManager
 import com.example.nidham.ui.screens.ToDoListScreen
 import com.example.nidham.ui.theme.NidhamTheme
+import com.google.firebase.FirebaseApp
+import com.google.firebase.appcheck.FirebaseAppCheck
+import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
+import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         installSplashScreen()
         super.onCreate(savedInstanceState)
+
+        val firebaseAppCheck = FirebaseAppCheck.getInstance()
+        if (BuildConfig.DEBUG) {
+            firebaseAppCheck.installAppCheckProviderFactory(
+                DebugAppCheckProviderFactory.getInstance()
+            )
+        } else {
+            firebaseAppCheck.installAppCheckProviderFactory(
+                PlayIntegrityAppCheckProviderFactory.getInstance()
+            )
+        }
+        firebaseAppCheck.setTokenAutoRefreshEnabled(true)
+
+        // Initialize AdManager
         AdManager.initialize(this)
 
         setContent {
