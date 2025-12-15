@@ -124,13 +124,14 @@ fun AutoListDialogBox(
                         Button(
                             modifier = Modifier.weight(1f),
                             onClick = {
-                                AdManager.showInterstitial(context as Activity) {
-                                    scope.launch {
-                                        isLoading = true
-                                        errorMessage = null
+                                scope.launch {
+                                    isLoading = true
+                                    errorMessage = null
 
-                                        val result = OpenAIService.generateListDataFromPrompt(transcribedText.value)
-                                        if (result != null) {
+                                    val result = OpenAIService.generateListDataFromPrompt(transcribedText.value)
+                                    if (result != null) {
+                                        // Show ad only AFTER successfully generating the list
+                                        AdManager.showInterstitial(context as Activity) {
                                             val newList = ListData.newListData().apply {
                                                 title.value = result.title.value.take(ListData.MAX_TITLE_LENGTH)
                                                 items.clear()
@@ -149,16 +150,15 @@ fun AutoListDialogBox(
                                                     checkedStates.add(false)
                                                 }
                                             }
-
                                             onNewList(newList)
                                             transcribedText.value = ""
                                             onDismiss()
-                                        } else {
-                                            errorMessage = "Failed to generate response"
                                         }
-
-                                        isLoading = false
+                                    } else {
+                                        errorMessage = "Failed to generate response"
                                     }
+
+                                    isLoading = false
                                 }
                             },
                             enabled = transcribedText.value.isNotBlank() && !isLoading,
