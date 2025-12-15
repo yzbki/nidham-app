@@ -7,11 +7,11 @@ plugins {
 }
 
 android {
-    namespace = "com.example.nidham"
+    namespace = "com.youzbaki.nidham"
     compileSdk = 36
 
     defaultConfig {
-        applicationId = "com.example.nidham"
+        applicationId = "com.youzbaki.nidham"
         minSdk = 24
         targetSdk = 36
         versionCode = 1

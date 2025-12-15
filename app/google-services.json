@@ -7,15 +7,15 @@
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:905350152782:android:04ad0e30b9f7f9f42d791f",
+        "mobilesdk_app_id": "1:905350152782:android:e99209ddd9ebf2a72d791f",
         "android_client_info": {
-          "package_name": "com.example.nidham"
+          "package_name": "com.youzbaki.nidham"
         }
       },
       "oauth_client": [],
       "api_key": [
         {
-          "current_key": "AIzaSyAjyvxt0qWJhUUXx2phSkk1H9HmrYqlUCA"
+          "current_key": "AIzaSyCvqFmSo3Qjm8fU_zOcMGyUb_bkdpMq3u8"
         }
       ],
       "services": {
