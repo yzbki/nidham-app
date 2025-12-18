@@ -27,7 +27,7 @@ sealed class ListItem {
 
 class ListData(var id: String = UUID.randomUUID().toString()) {
     val title = mutableStateOf("")
-    val items = mutableStateListOf<ListItem>().apply { add(ListItem.TaskItem()) }
+    val items = mutableStateListOf<ListItem>()
     val checkedStates = mutableStateListOf<Boolean>()
     val selectAll = mutableStateOf(false)
 
