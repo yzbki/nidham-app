@@ -14,7 +14,7 @@
         android:theme="@style/Theme.Nidham">
         <meta-data
             android:name="com.google.android.gms.ads.APPLICATION_ID"
-            android:value="ca-app-pub-5646403037659023~5861513955" />
+            android:value="ca-app-pub-5646403037659023~3908833069" />
         <activity
             android:name=".MainActivity"
             android:exported="true"

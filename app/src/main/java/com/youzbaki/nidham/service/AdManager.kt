@@ -15,7 +15,7 @@ object AdManager {
     private var interstitialAd: InterstitialAd? = null
 
     // TEST ID: private const val INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-3940256099942544/1033173712"
-    private const val INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-5646403037659023/1995857921"
+    private const val INTERSTITIAL_AD_UNIT_ID = "ca-app-pub-5646403037659023/8418923717"
 
     fun initialize(context: Context) {
         // DEVICE ID: C8EDDFBF580246926A6ED0EC79A2C854
