@@ -29,6 +29,7 @@ fun BottomRowSection(
     onVoiceInputClick: () -> Unit,
     isRecording: Boolean,
     snackbarHostState: SnackbarHostState,
+    pushUndo: () -> Unit,
     scope: CoroutineScope
 ) {
 
@@ -73,6 +74,7 @@ fun BottomRowSection(
 
             Button(
                 onClick = {
+                    pushUndo()
                     val added = listData.addTask()
                     if (!added) {
                         scope.launch {

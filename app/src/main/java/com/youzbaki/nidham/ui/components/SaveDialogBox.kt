@@ -19,6 +19,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun SaveDialogBox(
     showDialog: Boolean,
+    showLabels: Boolean,
     onDismiss: () -> Unit,
     listData: ListData,
     inputListName: String,
@@ -36,7 +37,9 @@ fun SaveDialogBox(
                 TextField(
                     value = inputListName,
                     onValueChange = onInputChange,
-                    label = { Text("List Name", color = colorScheme.onBackground) },
+                    label = if (showLabels) {
+                        { Text("List Name", color = colorScheme.onBackground) }
+                    } else null,
                     colors = TextFieldDefaults.colors(
                         focusedTextColor = colorScheme.onSurface,
                         unfocusedTextColor = colorScheme.onSurface,

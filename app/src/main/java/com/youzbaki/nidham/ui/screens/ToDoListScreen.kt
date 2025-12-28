@@ -65,6 +65,8 @@ fun ToDoListScreen(
     var showAutoListDialog by remember { mutableStateOf(false) }
     var showImportDialog by remember { mutableStateOf(false) }
     var showExportDialog by remember { mutableStateOf(false) }
+    val showLabels = remember { mutableStateOf(true) }
+    val textFieldSquared = remember { mutableStateOf(true)}
     var showSettingsScreen by remember { mutableStateOf(false) }
     var showAboutScreen by remember { mutableStateOf(false) }
     var isRecording by remember { mutableStateOf(false) }
@@ -72,7 +74,9 @@ fun ToDoListScreen(
     // Push undo state onto stack
     fun pushUndoState() {
         val snapshot = currentListData.deepCopy()
-        undoStack.addLast(snapshot)
+        val lastSnapshot = undoStack.lastOrNull()
+        if (lastSnapshot == snapshot) return
+        else undoStack.addLast(snapshot)
     }
 
     // Undo button function
@@ -86,6 +90,7 @@ fun ToDoListScreen(
 
     // Create a brand-new list
     fun createNewList() {
+        undoStack.clear()
         currentListData = ListData.newListData()
     }
 
@@ -94,6 +99,8 @@ fun ToDoListScreen(
         val lastKey = dataStore.getLastOpenedKey()
         if (lastKey != null) {
             currentListData = dataStore.loadListData(lastKey)
+        } else {
+            createNewList()
         }
     }
 
@@ -101,7 +108,7 @@ fun ToDoListScreen(
     LaunchedEffect(Unit) {
         val savedTheme = dataStore.getThemeMode()
         val savedColor = dataStore.getColorVariant()
-
+        showLabels.value = dataStore.getShowLabels()
         onThemeChange(savedTheme, savedColor)
     }
 
@@ -112,7 +119,7 @@ fun ToDoListScreen(
         currentListData.checkedStates.toList(),
         savedLists
     ) {
-        delay(300) // debounce
+        delay(300)
         scope.launch {
             dataStore.saveListData(currentListData)
         }
@@ -149,6 +156,7 @@ fun ToDoListScreen(
             currentListData.checkedStates.add(to.index, currentListData.checkedStates.removeAt(from.index))
         },
         onDragEnd = { _, _ ->
+            pushUndoState()
             scope.launch {
                 dataStore.saveListData(currentListData)
             }
@@ -165,9 +173,24 @@ fun ToDoListScreen(
         SettingsScreen(
             themeMode = themeMode,
             colorVariant = colorVariant,
+            showLabels = showLabels.value,
+            textFieldSquared = textFieldSquared.value,
             onBackClick = { showSettingsScreen = false },
-            onThemeModeChange = { mode -> onThemeChange(mode, "") },
-            onColorVariantChange = { color -> onThemeChange("", color) }
+            onThemeModeChange = { mode ->
+                onThemeChange(mode, "")
+            },
+            onColorVariantChange = { color ->
+                onThemeChange("", color)
+            },
+            onShowLabelsChange = { enabled ->
+                showLabels.value = enabled
+                scope.launch {
+                    dataStore.saveShowLabels(enabled)
+                }
+            },
+            onShapeChange = { enabled ->
+                textFieldSquared.value = enabled
+            }
         )
     } else if (showAboutScreen) {
         AboutScreen(
@@ -209,6 +232,7 @@ fun ToDoListScreen(
                         },
                         isRecording = isRecording,
                         snackbarHostState = snackbarHostState,
+                        pushUndo = { pushUndoState() },
                         scope = scope
                     )
                 }
@@ -248,13 +272,16 @@ fun ToDoListScreen(
                         scope = scope,
                         dataStore = dataStore,
                         state = state,
-                        pushUndo = { pushUndoState() }
+                        pushUndo = { pushUndoState() },
+                        showLabels = showLabels.value,
+                        textFieldSquared = textFieldSquared.value
                     )
                 }
 
                 // AutoList Dialog
                 AutoListDialogBox(
                     showDialog = showAutoListDialog,
+                    showLabels = showLabels.value,
                     isRecording = isRecording,
                     onDismiss = {
                         showAutoListDialog = false
@@ -278,6 +305,7 @@ fun ToDoListScreen(
                     },
                     transcribedText = voiceResult,
                     onNewList = { newList ->
+                        undoStack.clear()
                         currentListData = newList
                     },
                     maxPromptLength = MAX_PROMPT_LENGTH
@@ -286,6 +314,7 @@ fun ToDoListScreen(
                 // Save Dialog
                 SaveDialogBox(
                     showDialog = showSaveDialog,
+                    showLabels = showLabels.value,
                     onDismiss = {
                         showSaveDialog = false
                         inputListName = ""

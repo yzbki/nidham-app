@@ -2,6 +2,7 @@ package com.youzbaki.nidham.data
 
 import android.content.Context
 import androidx.compose.runtime.mutableStateOf
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -16,6 +17,8 @@ class DataStoreManager(private val context: Context) {
     private val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
     private val COLOR_VARIANT_KEY = stringPreferencesKey("color_variant")
     private val MAX_LISTS = 10
+    private val SHOW_LABELS_KEY = booleanPreferencesKey("show_labels")
+    private val TEXT_FIELD_SQUARED = booleanPreferencesKey("text_field_squared")
 
     suspend fun saveListData(listData: ListData): Boolean {
         val title = listData.title.value
@@ -96,7 +99,7 @@ class DataStoreManager(private val context: Context) {
                     id to title
                 } else null
             }
-            .distinctBy { it.first } // avoid duplicates
+            .distinctBy { it.first }
     }
 
     suspend fun isTitleDuplicate(title: String, excludeId: String? = null): Boolean {
@@ -129,6 +132,18 @@ class DataStoreManager(private val context: Context) {
         }
     }
 
+    suspend fun saveShowLabels(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[SHOW_LABELS_KEY] = enabled
+        }
+    }
+
+    suspend fun saveTextFieldShape(enabled: Boolean) {
+        context.dataStore.edit { prefs ->
+            prefs[TEXT_FIELD_SQUARED] = enabled
+        }
+    }
+
     suspend fun getThemeMode(): String {
         val prefs = context.dataStore.data.first()
         return prefs[THEME_MODE_KEY] ?: "system"
@@ -137,6 +152,11 @@ class DataStoreManager(private val context: Context) {
     suspend fun getColorVariant(): String {
         val prefs = context.dataStore.data.first()
         return prefs[COLOR_VARIANT_KEY] ?: "default"
+    }
+
+    suspend fun getShowLabels(): Boolean {
+        val prefs = context.dataStore.data.first()
+        return prefs[SHOW_LABELS_KEY] ?: true
     }
 
     private suspend fun isNewList(listId: String): Boolean {

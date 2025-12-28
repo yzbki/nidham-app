@@ -1,6 +1,7 @@
 package com.youzbaki.nidham.ui.components
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -105,6 +106,7 @@ fun TopBarSection(
                         text = { Text("New", color = colorScheme.onSurface) },
                         leadingIcon = { Icon(Icons.Outlined.Create, contentDescription = null) },
                         onClick = {
+                            onMenuExpandChange(false)
                             scope.launch {
                                 if (dataStore.canAddNewList()) {
                                     onNewList()
@@ -114,7 +116,6 @@ fun TopBarSection(
                                     snackbarHostState.currentSnackbarData?.dismiss()
                                     snackbarHostState.showSnackbar("Maximum number of lists reached.")
                                 }
-                                onMenuExpandChange(false)
                             }
                         }
                     )

@@ -1,6 +1,8 @@
 package com.youzbaki.nidham.ui.components
 
 import android.app.Activity
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -16,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -35,6 +38,7 @@ import kotlinx.coroutines.launch
 @Composable
 fun AutoListDialogBox(
     showDialog: Boolean,
+    showLabels: Boolean,
     isRecording: Boolean,
     onDismiss: () -> Unit,
     onStartRecording: () -> Unit,
@@ -47,6 +51,24 @@ fun AutoListDialogBox(
     val context = LocalContext.current
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    var generatingText by remember { mutableStateOf("Generating") }
+
+    LaunchedEffect(isLoading) {
+        if (isLoading) {
+            while (true) {
+                generatingText = "Generating"
+                kotlinx.coroutines.delay(400)
+                generatingText = "Generating."
+                kotlinx.coroutines.delay(400)
+                generatingText = "Generating.."
+                kotlinx.coroutines.delay(400)
+                generatingText = "Generating..."
+                kotlinx.coroutines.delay(400)
+            }
+        } else {
+            generatingText = "Generate"
+        }
+    }
 
     if (showDialog) {
         AlertDialog(
@@ -62,7 +84,8 @@ fun AutoListDialogBox(
             text = {
                 Column {
                     Text(
-                        text = if (isRecording) "Listening..." else "Press the button below to start recording.",
+                        text = if (isRecording) "Listening..." else "Generate a list with a prompt!" +
+                                "\nRecord for voice transcription.",
                         style = MaterialTheme.typography.bodyMedium,
                         color = colorScheme.onBackground
                     )
@@ -74,7 +97,9 @@ fun AutoListDialogBox(
                                 transcribedText.value = newValue
                             }
                         },
-                        label = { Text("Transcribed Text") },
+                        label = if (showLabels) {
+                            { Text("Text Prompt") }
+                        } else null,
                         singleLine = false,
                         modifier = Modifier.fillMaxWidth(),
                         enabled = !isLoading,
@@ -87,6 +112,7 @@ fun AutoListDialogBox(
                             unfocusedTextColor = colorScheme.onSurface,
                             focusedIndicatorColor = colorScheme.background,
                             unfocusedIndicatorColor = colorScheme.background,
+                            cursorColor = colorScheme.onSurface
                         ),
                     )
                     errorMessage?.let {
@@ -117,7 +143,7 @@ fun AutoListDialogBox(
                                 contentColor = colorScheme.onSurface
                             )
                         ) {
-                            Text(if (isRecording) "Stop" else "Record Voice")
+                            Text(if (isRecording) "Stop" else "Record")
                         }
 
                         // Generate Auto-List Button
@@ -169,7 +195,7 @@ fun AutoListDialogBox(
                                 disabledContentColor = colorScheme.onSurface.copy(alpha = 0.4f)
                             )
                         ) {
-                            Text(if (isLoading) "Generating..." else "Generate")
+                            Text(generatingText)
                         }
                     }
 

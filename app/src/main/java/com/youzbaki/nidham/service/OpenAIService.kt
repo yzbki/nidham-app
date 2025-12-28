@@ -44,13 +44,19 @@ object OpenAIService {
 
     // Interceptor to add App Check token
     private val client = OkHttpClient.Builder()
-        .addInterceptor { chain: Interceptor.Chain ->
-            val original: Request = chain.request()
+        .addInterceptor { chain ->
+            val original = chain.request()
             val builder = original.newBuilder()
 
-            // Fetch App Check token synchronously (use Tasks.await)
-            val appCheckToken = Tasks.await(FirebaseAppCheck.getInstance().getAppCheckToken(false)).token
-            builder.header("X-Firebase-AppCheck", appCheckToken)
+            try {
+                val tokenResult = Tasks.await(
+                    FirebaseAppCheck.getInstance().getAppCheckToken(false)
+                )
+                builder.header("X-Firebase-AppCheck", tokenResult.token)
+            } catch (e: Exception) {
+                e.printStackTrace()
+                // Log.w("AppCheck", "Failed to get App Check token, proceeding without it")
+            }
 
             chain.proceed(builder.build())
         }

@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
@@ -26,6 +27,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
@@ -50,7 +52,9 @@ fun TaskListSection(
     scope: CoroutineScope,
     dataStore: DataStoreManager,
     state: ReorderableLazyListState,
-    pushUndo: () -> Unit
+    pushUndo: () -> Unit,
+    showLabels: Boolean,
+    textFieldSquared: Boolean
 ) {
     // Title row
     Row(
@@ -81,13 +85,18 @@ fun TaskListSection(
             value = listData.title.value,
             onValueChange = { newValue ->
                 if (newValue.length <= ListData.MAX_TITLE_LENGTH) {
-                    pushUndo()
                     listData.title.value = newValue
                 }
             },
-            label = { Text("List Title") },
-            modifier = Modifier.weight(1f),
+            label = if (showLabels) {
+                { Text("List Title") }
+            } else null,
+            modifier = Modifier
+                .weight(1f)
+                .onFocusChanged { _ -> pushUndo() },
             colors = TextFieldDefaults.colors(
+                focusedIndicatorColor = Color.Transparent,
+                unfocusedIndicatorColor = colorScheme.onBackground,
                 focusedLabelColor = colorScheme.onBackground,
                 unfocusedLabelColor = colorScheme.onBackground,
                 focusedContainerColor = colorScheme.surface.copy(alpha = 0.7f),
@@ -165,18 +174,21 @@ fun TaskListSection(
                         value = taskItem.textState.value,
                         onValueChange = { newValue ->
                             if (newValue.length <= ListData.MAX_TASK_LENGTH) {
-                                pushUndo()
                                 taskItem.textState.value = newValue
                                 scope.launch { dataStore.saveListData(listData) }
                             }
                         },
-                        modifier = Modifier.weight(1f),
-                        label = { Text("Task ${index + 1}") },
+                        modifier = Modifier
+                            .weight(1f)
+                            .onFocusChanged { _ -> pushUndo() },
+                        label = if (showLabels) {
+                            { Text("Task ${index + 1}") }
+                        } else null,
                         textStyle = MaterialTheme.typography.bodyLarge.copy(
                             color = if (listData.checkedStates.getOrElse(index) { false })
                                 colorScheme.onSurface.copy(alpha = 0.4f)
                             else
-                                colorScheme.onSurface.copy(alpha = 0.7f),
+                                colorScheme.onSurface,
                             textDecoration = if (listData.checkedStates.getOrElse(index) { false })
                                 TextDecoration.LineThrough else null
                         ),
@@ -191,6 +203,8 @@ fun TaskListSection(
                             unfocusedIndicatorColor = colorScheme.background,
                             cursorColor = colorScheme.onSurface,
                         ),
+                        shape = if(textFieldSquared) { TextFieldDefaults.shape }
+                        else {RoundedCornerShape(32.dp)},
                         keyboardOptions = KeyboardOptions.Default.copy(imeAction = ImeAction.Done),
                         keyboardActions = KeyboardActions(onDone = { })
                     )
