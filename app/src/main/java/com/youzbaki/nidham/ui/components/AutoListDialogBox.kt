@@ -181,7 +181,7 @@ fun AutoListDialogBox(
                                             onDismiss()
                                         }
                                     } else {
-                                        errorMessage = "Failed to generate response"
+                                        errorMessage = "Failed to generate response, try again."
                                     }
 
                                     isLoading = false

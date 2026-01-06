@@ -66,7 +66,7 @@ fun SettingsScreen(
     val dataStore = remember { DataStoreManager(context) }
     var showRestoreDefaultsConfirm by remember { mutableStateOf(false) }
 
-    // Defaults
+    // Default Settings
     val DEFAULT_THEME_MODE = "system"
     val DEFAULT_COLOR_VARIANT = "default"
     val DEFAULT_SHOW_LABELS = true
@@ -143,7 +143,10 @@ fun SettingsScreen(
                             value = selectedColor.replaceFirstChar { it.uppercase() },
                             onValueChange = {},
                             readOnly = true,
-                            label = { Text("Select Color Scheme", color = colorScheme.onSurface.copy(alpha = 0.7f)) },
+                            label = if (showLabels) {
+                                { Text("Select Color Scheme",
+                                    color = colorScheme.onSurface.copy(alpha = 0.7f)) }
+                            } else null,
                             trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = colorSchemeExpanded) },
                             colors = ExposedDropdownMenuDefaults.textFieldColors(
                                 focusedTextColor = colorScheme.onSurface,
@@ -328,6 +331,7 @@ fun SettingsScreen(
                                         onColorVariantChange("default")
                                         onShowLabelsChange(true)
                                         onShapeChange(true)
+                                        selectedColor = "default"
 
                                         // Persist
                                         scope.launch {

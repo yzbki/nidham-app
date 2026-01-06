@@ -92,7 +92,9 @@ fun AboutScreen(
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
                     Text(
-                        text = "Nidham is a versatile checklist management application designed to help you bring order to your daily life. Whether it's organizing your daily agenda, creating grocery lists, tracking workouts, or managing procedural tasks, Nidham offers a dynamic, intuitive experience to make list management effortless.",
+                        text = "Nidham is a versatile checklist management application designed to help you bring order to your daily life. " +
+                                "Whether it's organizing your daily agenda, creating grocery lists, tracking workouts, or managing procedural tasks, " +
+                                "Nidham offers a dynamic, intuitive experience to make list management effortless.",
                         style = typography.bodyMedium,
                         color = colorScheme.onSurface,
                         modifier = Modifier.padding(bottom = 16.dp)
@@ -123,7 +125,10 @@ fun AboutScreen(
                         modifier = Modifier.padding(vertical = 8.dp)
                     )
                     Text(
-                        text = "Nidham was developed by myself, Mustafa Al-Youzbaki, published under my personal brand, Youzbaki Co. I created this app during my final year of university to improve how I manage my own lists and daily routines. The name \"Nidham\" comes from the Arabic word for \"system\" or \"order\", reflecting the app’s mission to help users organize their lives efficiently.",
+                        text = "Nidham was developed by myself, Mustafa Al-Youzbaki, published under my brand Youzbaki Co. " +
+                                "I created this app during my final year of university to improve how I manage my own lists and daily routines. " +
+                                "The name \"Nidham\" comes from the Arabic word for \"system\" or \"order\", " +
+                                "reflecting the app’s mission to help users organize their lives efficiently.",
                         style = typography.bodyMedium,
                         color = colorScheme.onSurface,
                         modifier = Modifier.padding(bottom = 16.dp)
@@ -143,19 +148,6 @@ fun AboutScreen(
                         style = typography.bodyMedium,
                         color = colorScheme.onSurface,
                         modifier = Modifier.padding(bottom = 16.dp)
-                    )
-
-                    // Optional Donation Section
-                    Text(
-                        text = "Support Development",
-                        style = typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = colorScheme.onBackground,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
-                    Text(
-                        text = "If you enjoy using Nidham and want to support ongoing development, consider a donation in the future. Your support helps me continue improving the app and adding new features.",
-                        style = typography.bodyMedium,
-                        color = colorScheme.onSurface
                     )
                 }
             }

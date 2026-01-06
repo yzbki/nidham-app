@@ -109,6 +109,7 @@ fun ToDoListScreen(
         val savedTheme = dataStore.getThemeMode()
         val savedColor = dataStore.getColorVariant()
         showLabels.value = dataStore.getShowLabels()
+        textFieldSquared.value = dataStore.getTextFieldShape()
         onThemeChange(savedTheme, savedColor)
     }
 

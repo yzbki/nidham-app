@@ -159,6 +159,11 @@ class DataStoreManager(private val context: Context) {
         return prefs[SHOW_LABELS_KEY] ?: true
     }
 
+    suspend fun getTextFieldShape(): Boolean {
+        val prefs = context.dataStore.data.first()
+        return prefs[TEXT_FIELD_SQUARED] ?: true
+    }
+
     private suspend fun isNewList(listId: String): Boolean {
         val saved = getSavedLists().map { it.first }
         return listId !in saved

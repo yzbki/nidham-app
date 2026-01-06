@@ -19,31 +19,6 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
-    /*
-
-    signingConfigs {
-        create("release") {
-            storeFile = file("C:/Users/musal/AndroidKeystore/nidham-keystore")
-            storePassword = "CFXdtM07eT30f11z"
-            keyAlias = "key0"
-            keyPassword = "CFXdtM07eT30f11z"
-        }
-    }
-
-    buildTypes {
-        getByName("release") {
-            signingConfig = signingConfigs.getByName("release")
-            isMinifyEnabled = false
-            isDebuggable = false
-            proguardFiles(
-                getDefaultProguardFile("proguard-android-optimize.txt"),
-                "proguard-rules.pro"
-            )
-        }
-    }
-    
-     */
-
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_11
         targetCompatibility = JavaVersion.VERSION_11
