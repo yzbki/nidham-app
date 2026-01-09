@@ -4,9 +4,12 @@ import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -25,6 +28,8 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import com.youzbaki.nidham.BuildConfig
+
 
 @Composable
 fun AboutScreen(
@@ -85,12 +90,25 @@ fun AboutScreen(
                         .padding(bottom = 32.dp)
                 ) {
                     // About the App
-                    Text(
-                        text = "About Nidham",
-                        style = typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                        color = colorScheme.onBackground,
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(vertical = 8.dp)
-                    )
+                    ) {
+                        Text(
+                            text = "About Nidham",
+                            style = typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            color = colorScheme.onBackground
+                        )
+
+                        Spacer(modifier = Modifier.width(8.dp))
+
+                        Text(
+                            text = "v${BuildConfig.VERSION_NAME}",
+                            style = typography.bodySmall,
+                            color = colorScheme.onBackground.copy(alpha = 0.7f)
+                        )
+                    }
+
                     Text(
                         text = "Nidham is a versatile checklist management application designed to help you bring order to your daily life. " +
                                 "Whether it's organizing your daily agenda, creating grocery lists, tracking workouts, or managing projects, " +
