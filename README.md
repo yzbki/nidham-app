@@ -5,7 +5,12 @@ Nidham is a simple checklist management application for Android that helps users
 
 ## Screenshots
 
-![App Icon](assets/nidham.png)
+![App Icon](assets/icon.png)
+![Screenshot 1](assets/screenshot_1.png)
+![Screenshot 2](assets/screenshot_2.png)
+![Screenshot 3](assets/screenshot_3.png)
+![Screenshot 4](assets/screenshot_4.png)
+![Screenshot 5](assets/screenshot_5.png)
 
 ## Installation
 
