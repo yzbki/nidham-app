@@ -54,20 +54,18 @@ fun AutoListDialogBox(
     var generatingText by remember { mutableStateOf("Generating") }
 
     LaunchedEffect(isLoading) {
-        if (isLoading) {
-            while (true) {
-                generatingText = "Generating"
-                kotlinx.coroutines.delay(400)
-                generatingText = "Generating."
-                kotlinx.coroutines.delay(400)
-                generatingText = "Generating.."
-                kotlinx.coroutines.delay(400)
-                generatingText = "Generating..."
-                kotlinx.coroutines.delay(400)
-            }
-        } else {
-            generatingText = "Generate"
+        while (isLoading) {
+            generatingText = "Generating"
+            kotlinx.coroutines.delay(400)
+            generatingText = "Generating."
+            kotlinx.coroutines.delay(400)
+            generatingText = "Generating.."
+            kotlinx.coroutines.delay(400)
+            generatingText = "Generating..."
+            kotlinx.coroutines.delay(400)
         }
+
+        generatingText = "Generate"
     }
 
     if (showDialog) {

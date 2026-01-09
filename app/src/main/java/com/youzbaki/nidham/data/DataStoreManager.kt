@@ -156,12 +156,12 @@ class DataStoreManager(private val context: Context) {
 
     suspend fun getShowLabels(): Boolean {
         val prefs = context.dataStore.data.first()
-        return prefs[SHOW_LABELS_KEY] ?: true
+        return prefs[SHOW_LABELS_KEY] ?: false
     }
 
     suspend fun getTextFieldShape(): Boolean {
         val prefs = context.dataStore.data.first()
-        return prefs[TEXT_FIELD_SQUARED] ?: true
+        return prefs[TEXT_FIELD_SQUARED] ?: false
     }
 
     private suspend fun isNewList(listId: String): Boolean {

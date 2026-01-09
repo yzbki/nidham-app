@@ -93,7 +93,7 @@ fun AboutScreen(
                     )
                     Text(
                         text = "Nidham is a versatile checklist management application designed to help you bring order to your daily life. " +
-                                "Whether it's organizing your daily agenda, creating grocery lists, tracking workouts, or managing procedural tasks, " +
+                                "Whether it's organizing your daily agenda, creating grocery lists, tracking workouts, or managing projects, " +
                                 "Nidham offers a dynamic, intuitive experience to make list management effortless.",
                         style = typography.bodyMedium,
                         color = colorScheme.onSurface,
@@ -109,7 +109,7 @@ fun AboutScreen(
                     )
                     Text(
                         text = "• Dynamic Lists: Easily edit titles, tasks, and the order of items, with support for multi-delete.\n" +
-                                "• Autosave & Autoload: Never worry about losing your list, your last opened list loads automatically.\n" +
+                                "• Autosave & Autoload: Never lose track, your lists autosave and the last opened list loads automatically.\n" +
                                 "• AI List Generator: Generate lists from text prompts, from workouts and recipes to itineraries and more.\n" +
                                 "• Voice Input: Record and transcribe prompts for an even faster list creation experience.",
                         style = typography.bodyMedium,
@@ -126,7 +126,7 @@ fun AboutScreen(
                     )
                     Text(
                         text = "Nidham was developed by myself, Mustafa Al-Youzbaki, published under my brand Youzbaki Co. " +
-                                "I created this app during my final year of university to improve how I manage my own lists and daily routines. " +
+                                "I created this app during my final year of university to improve how I manage my own lists and daily routine. " +
                                 "The name \"Nidham\" comes from the Arabic word for \"system\" or \"order\", " +
                                 "reflecting the app’s mission to help users organize their lives efficiently.",
                         style = typography.bodyMedium,

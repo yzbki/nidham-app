@@ -69,8 +69,8 @@ fun SettingsScreen(
     // Default Settings
     val DEFAULT_THEME_MODE = "system"
     val DEFAULT_COLOR_VARIANT = "default"
-    val DEFAULT_SHOW_LABELS = true
-    val DEFAULT_TEXTFIELD_SQUARED = true
+    val DEFAULT_SHOW_LABELS = false
+    val DEFAULT_TEXTFIELD_SQUARED = false
 
     BackHandler {
         onBackClick()
@@ -232,7 +232,7 @@ fun SettingsScreen(
                     )
 
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        listOf(true to "Enabled", false to "Disabled").forEach { (value, label) ->
+                        listOf(false to "Disabled", true to "Enabled").forEach { (value, label) ->
                             Button(
                                 onClick = {
                                     onShowLabelsChange(value)
@@ -266,7 +266,7 @@ fun SettingsScreen(
                     )
 
                     Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
-                        listOf(true to "Squared", false to "Rounded").forEach { (value, label) ->
+                        listOf(false to "Rounded", true to "Squared").forEach { (value, label) ->
                             Button(
                                 onClick = {
                                     onShapeChange(value)
@@ -327,18 +327,18 @@ fun SettingsScreen(
                                 TextButton(
                                     onClick = {
                                         // Update UI state
-                                        onThemeModeChange("system")
-                                        onColorVariantChange("default")
-                                        onShowLabelsChange(true)
-                                        onShapeChange(true)
-                                        selectedColor = "default"
+                                        onThemeModeChange(DEFAULT_THEME_MODE)
+                                        onColorVariantChange(DEFAULT_COLOR_VARIANT)
+                                        onShowLabelsChange(DEFAULT_SHOW_LABELS)
+                                        onShapeChange(DEFAULT_TEXTFIELD_SQUARED)
+                                        selectedColor = DEFAULT_COLOR_VARIANT
 
                                         // Persist
                                         scope.launch {
-                                            dataStore.saveThemeMode("system")
-                                            dataStore.saveColorVariant("default")
-                                            dataStore.saveShowLabels(true)
-                                            dataStore.saveTextFieldShape(true)
+                                            dataStore.saveThemeMode(DEFAULT_THEME_MODE)
+                                            dataStore.saveColorVariant(DEFAULT_COLOR_VARIANT)
+                                            dataStore.saveShowLabels(DEFAULT_SHOW_LABELS)
+                                            dataStore.saveTextFieldShape(DEFAULT_TEXTFIELD_SQUARED)
                                         }
 
                                         showRestoreDefaultsConfirm = false

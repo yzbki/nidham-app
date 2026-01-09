@@ -48,7 +48,7 @@ fun ToDoListScreen(
     colorVariant: String,
     onThemeChange: (themeMode: String, colorVariant: String) -> Unit
 ) {
-    val MAX_PROMPT_LENGTH = 200
+    val maxPromptLength = 200
     val context = LocalContext.current
     val focusManager = LocalFocusManager.current
     val scope = rememberCoroutineScope()
@@ -65,8 +65,8 @@ fun ToDoListScreen(
     var showAutoListDialog by remember { mutableStateOf(false) }
     var showImportDialog by remember { mutableStateOf(false) }
     var showExportDialog by remember { mutableStateOf(false) }
-    val showLabels = remember { mutableStateOf(true) }
-    val textFieldSquared = remember { mutableStateOf(true)}
+    val showLabels = remember { mutableStateOf(false) }
+    val textFieldSquared = remember { mutableStateOf(false)}
     var showSettingsScreen by remember { mutableStateOf(false) }
     var showAboutScreen by remember { mutableStateOf(false) }
     var isRecording by remember { mutableStateOf(false) }
@@ -93,6 +93,23 @@ fun ToDoListScreen(
         undoStack.clear()
         currentListData = ListData.newListData()
     }
+
+    // Format voice transcription
+    fun formatTranscription(input: String): String {
+        val trimmed = input.trim()
+        if (trimmed.isEmpty()) return ""
+
+        val capitalized = trimmed.replaceFirstChar {
+            it.uppercaseChar()
+        }
+
+        return if (capitalized.last() in listOf('.', '!', '?')) {
+            capitalized
+        } else {
+            "$capitalized."
+        }
+    }
+
 
     // Load last opened list
     LaunchedEffect(Unit) {
@@ -292,7 +309,8 @@ fun ToDoListScreen(
                         isRecording = true
                         voiceManager.startListening(
                             onResult = { text ->
-                                voiceResult.value = text.take(MAX_PROMPT_LENGTH)
+                                val truncated = text.take(maxPromptLength)
+                                voiceResult.value = formatTranscription(truncated)
                                 isRecording = false
                             },
                             onError = { errorMsg ->
@@ -309,9 +327,10 @@ fun ToDoListScreen(
                         undoStack.clear()
                         currentListData = newList
                     },
-                    maxPromptLength = MAX_PROMPT_LENGTH
+                    maxPromptLength = maxPromptLength
                 )
 
+                /*
                 // Save Dialog
                 SaveDialogBox(
                     showDialog = showSaveDialog,
@@ -327,6 +346,7 @@ fun ToDoListScreen(
                     snackbarHostState = snackbarHostState,
                     scope = scope
                 )
+                 */
 
                 // Load Dialog
                 LoadDialogBox(

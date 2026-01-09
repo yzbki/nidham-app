@@ -33,6 +33,9 @@ class MainActivity : ComponentActivity() {
         }
         firebaseAppCheck.setTokenAutoRefreshEnabled(true)
 
+        // Warm up App Check token
+        firebaseAppCheck.getAppCheckToken(false)
+
         // Initialize AdManager
         AdManager.initialize(this)
 
