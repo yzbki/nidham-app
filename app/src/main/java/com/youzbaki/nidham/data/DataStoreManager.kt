@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
 import com.google.gson.Gson
 import kotlinx.coroutines.flow.first
+import java.util.UUID
 
 private val Context.dataStore by preferencesDataStore(name = "nidham_prefs")
 
@@ -172,5 +173,57 @@ class DataStoreManager(private val context: Context) {
     suspend fun canAddNewList(): Boolean {
         val saved = getSavedLists()
         return saved.size < MAX_LISTS
+    }
+
+    suspend fun exportListsAsJson(listIds: List<String>): String {
+        val prefs = context.dataStore.data.first()
+        val exported = listIds.mapNotNull { id ->
+            val title = prefs[stringPreferencesKey("${id}_title")] ?: return@mapNotNull null
+            val tasks = prefs[stringPreferencesKey("${id}_tasks")]?.let { json ->
+                gson.fromJson(json, Array<String>::class.java).toList()
+            } ?: emptyList()
+            val checks = prefs[stringPreferencesKey("${id}_checked")]?.let { json ->
+                gson.fromJson(json, Array<Boolean>::class.java).toList()
+            } ?: emptyList()
+            ExportedListData(title = title, tasks = tasks, checkedStates = checks)
+        }
+        return gson.toJson(exported)
+    }
+
+    suspend fun importListsFromJson(json: String): Pair<Int, Int> {
+        val lists: List<ExportedListData> = try {
+            gson.fromJson(json.trim(), Array<ExportedListData>::class.java)?.toList() ?: return 0 to 0
+        } catch (e: Exception) {
+            return 0 to 0
+        }
+
+        var imported = 0
+        var skipped = 0
+
+        for (exportedList in lists) {
+            val currentCount = getSavedLists().size
+            if (currentCount >= MAX_LISTS) { skipped++; continue }
+
+            val title = exportedList.title.trim().take(ListData.MAX_TITLE_LENGTH)
+            if (title.isEmpty() || isTitleDuplicate(title)) { skipped++; continue }
+
+            val tasks = exportedList.tasks
+                .take(ListData.MAX_TASKS)
+                .map { it.take(ListData.MAX_TASK_LENGTH) }
+            val effectiveTasks = tasks.ifEmpty { listOf("") }
+
+            val checks = exportedList.checkedStates.take(effectiveTasks.size).toMutableList()
+            while (checks.size < effectiveTasks.size) checks.add(false)
+
+            val id = UUID.randomUUID().toString()
+            context.dataStore.edit { prefs ->
+                prefs[stringPreferencesKey("${id}_tasks")] = gson.toJson(effectiveTasks)
+                prefs[stringPreferencesKey("${id}_checked")] = gson.toJson(checks)
+                prefs[stringPreferencesKey("${id}_title")] = title
+            }
+            imported++
+        }
+
+        return imported to skipped
     }
 }

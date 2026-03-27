@@ -5,6 +5,12 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import java.util.UUID
 
+data class ExportedListData(
+    val title: String,
+    val tasks: List<String>,
+    val checkedStates: List<Boolean>
+)
+
 sealed class ListItem {
     abstract val id: String
     abstract val textState: MutableState<String>

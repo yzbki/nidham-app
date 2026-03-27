@@ -1,7 +1,6 @@
 package com.youzbaki.nidham.ui.components
 
 import androidx.compose.foundation.background
-import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -14,6 +13,8 @@ import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Create
 import androidx.compose.material.icons.outlined.Info
+import androidx.compose.material.icons.outlined.KeyboardArrowDown
+import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.DropdownMenu
@@ -120,8 +121,6 @@ fun TopBarSection(
                         }
                     )
 
-
-                    /*
                     // Save List
                     DropdownMenuItem(
                         text = { Text("Save", color = colorScheme.onSurface) },
@@ -131,7 +130,6 @@ fun TopBarSection(
                             onMenuExpandChange(false)
                         }
                     )
-                     */
 
                     // Load List
                     DropdownMenuItem(
@@ -148,7 +146,6 @@ fun TopBarSection(
 
                     HorizontalDivider()
 
-                    /*
                     // Import List
                     DropdownMenuItem(
                         text = { Text("Import", color = colorScheme.onSurface) },
@@ -170,7 +167,6 @@ fun TopBarSection(
                     )
 
                     HorizontalDivider()
-                     */
 
                     // Settings
                     DropdownMenuItem(

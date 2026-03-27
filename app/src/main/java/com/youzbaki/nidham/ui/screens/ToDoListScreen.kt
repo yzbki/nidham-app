@@ -2,6 +2,10 @@ package com.youzbaki.nidham.ui.screens
 
 import android.app.Activity
 import android.content.pm.PackageManager
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -32,16 +36,19 @@ import com.youzbaki.nidham.data.DataStoreManager
 import com.youzbaki.nidham.data.ListData
 import com.youzbaki.nidham.data.ListItem
 import com.youzbaki.nidham.service.VoiceRecognitionManager
+import com.youzbaki.nidham.ui.components.AutoListDialogBox
 import com.youzbaki.nidham.ui.components.BottomRowSection
+import com.youzbaki.nidham.ui.components.ExportDialogBox
+import com.youzbaki.nidham.ui.components.ImportDialogBox
 import com.youzbaki.nidham.ui.components.LoadDialogBox
 import com.youzbaki.nidham.ui.components.SaveDialogBox
 import com.youzbaki.nidham.ui.components.TaskListSection
 import com.youzbaki.nidham.ui.components.TopBarSection
-import com.youzbaki.nidham.ui.components.AutoListDialogBox
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import org.burnoutcrew.reorderable.rememberReorderableLazyListState
 
+@RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun ToDoListScreen(
     themeMode: String,
@@ -66,10 +73,64 @@ fun ToDoListScreen(
     var showImportDialog by remember { mutableStateOf(false) }
     var showExportDialog by remember { mutableStateOf(false) }
     val showLabels = remember { mutableStateOf(false) }
-    val textFieldSquared = remember { mutableStateOf(false)}
+    val textFieldSquared = remember { mutableStateOf(false) }
     var showSettingsScreen by remember { mutableStateOf(false) }
     var showAboutScreen by remember { mutableStateOf(false) }
     var isRecording by remember { mutableStateOf(false) }
+
+    // Holds the list IDs queued for the next export launcher result
+    var pendingExportIds by remember { mutableStateOf<List<String>>(emptyList()) }
+
+    // Export function
+    val exportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("application/json")
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        val idsToExport = pendingExportIds
+        scope.launch {
+            try {
+                val json = dataStore.exportListsAsJson(idsToExport)
+                context.contentResolver.openOutputStream(uri)?.use { stream ->
+                    stream.write(json.toByteArray())
+                }
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar("Exported ${idsToExport.size} list(s) successfully")
+            } catch (e: Exception) {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar("Export failed: ${e.message}")
+            }
+            pendingExportIds = emptyList()
+        }
+    }
+
+    // Import function
+    val importLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        scope.launch {
+            try {
+                val json = context.contentResolver.openInputStream(uri)?.use { stream ->
+                    stream.bufferedReader().readText()
+                }
+                if (json == null) {
+                    snackbarHostState.showSnackbar("Failed to read file")
+                    return@launch
+                }
+                val (imported, skipped) = dataStore.importListsFromJson(json)
+                savedLists = dataStore.getSavedLists()
+                snackbarHostState.currentSnackbarData?.dismiss()
+                val msg = buildString {
+                    append("Imported $imported list(s)")
+                    if (skipped > 0) append(", skipped $skipped (limit or duplicates)")
+                }
+                snackbarHostState.showSnackbar(msg)
+            } catch (e: Exception) {
+                snackbarHostState.currentSnackbarData?.dismiss()
+                snackbarHostState.showSnackbar("Import failed: ${e.message}")
+            }
+        }
+    }
 
     // Push undo state onto stack
     fun pushUndoState() {
@@ -279,7 +340,10 @@ fun ToDoListScreen(
                         onShowSaveDialog = { showSaveDialog = true },
                         onShowLoadDialog = { showLoadDialog = true },
                         onShowImportDialog = { showImportDialog = true },
-                        onShowExportDialog = { showExportDialog = true },
+                        onShowExportDialog = {
+                            scope.launch { savedLists = dataStore.getSavedLists() }
+                            showExportDialog = true
+                        },
                         onShowSettings = { showSettingsScreen = true },
                         onShowAbout = { showAboutScreen = true },
                         updateSavedLists = { savedLists = it },
@@ -330,7 +394,6 @@ fun ToDoListScreen(
                     maxPromptLength = maxPromptLength
                 )
 
-                /*
                 // Save Dialog
                 SaveDialogBox(
                     showDialog = showSaveDialog,
@@ -346,7 +409,6 @@ fun ToDoListScreen(
                     snackbarHostState = snackbarHostState,
                     scope = scope
                 )
-                 */
 
                 // Load Dialog
                 LoadDialogBox(
@@ -369,29 +431,31 @@ fun ToDoListScreen(
                     scope = scope
                 )
 
-                /*
                 // Import Dialog
                 ImportDialogBox(
                     showDialog = showImportDialog,
                     onDismiss = { showImportDialog = false },
-                    onImport = {
-                        // TODO: Add your import functionality here
-                    },
-                    snackbarHostState = snackbarHostState,
-                    scope = scope
+                    onPickFile = {
+                        importLauncher.launch(arrayOf("application/json", "text/plain"))
+                    }
                 )
 
                 // Export Dialog
                 ExportDialogBox(
                     showDialog = showExportDialog,
                     onDismiss = { showExportDialog = false },
-                    onExport = {
-                        // TODO: Add your export functionality here
+                    savedLists = savedLists,
+                    onExportSelected = { ids ->
+                        pendingExportIds = ids
+                        val date = java.time.LocalDate.now().toString().replace("-", "")
+                        exportLauncher.launch("nidham_export_$date.json")
                     },
-                    snackbarHostState = snackbarHostState,
-                    scope = scope
+                    onExportAll = {
+                        pendingExportIds = savedLists.map { it.first }
+                        val date = java.time.LocalDate.now().toString().replace("-", "")
+                        exportLauncher.launch("nidham_export_all_$date.json")
+                    }
                 )
-                */
             }
         }
     }
