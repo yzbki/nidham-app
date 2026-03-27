@@ -17,6 +17,7 @@ class DataStoreManager(private val context: Context) {
     private val LAST_OPENED_LIST_KEY = stringPreferencesKey("last_opened_list")
     private val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
     private val COLOR_VARIANT_KEY = stringPreferencesKey("color_variant")
+    private val LIST_ORDER_KEY = stringPreferencesKey("saved_list_order") // NEW
     private val MAX_LISTS = 10
     private val SHOW_LABELS_KEY = booleanPreferencesKey("show_labels")
     private val TEXT_FIELD_SQUARED = booleanPreferencesKey("text_field_squared")
@@ -71,7 +72,6 @@ class DataStoreManager(private val context: Context) {
             listData.checkedStates.add(false)
         }
 
-        // Ensure at least one task exists
         if (listData.items.none { it is ListItem.TaskItem }) {
             listData.items.add(ListItem.TaskItem(textState = mutableStateOf("")))
             listData.checkedStates.add(false)
@@ -88,9 +88,18 @@ class DataStoreManager(private val context: Context) {
         }
     }
 
+    // NEW: persists the user-defined order
+    suspend fun saveListOrder(orderedIds: List<String>) {
+        context.dataStore.edit { prefs ->
+            prefs[LIST_ORDER_KEY] = gson.toJson(orderedIds)
+        }
+    }
+
+    // UPDATED: returns lists in saved order; unordered entries appended at the end
     suspend fun getSavedLists(): List<Pair<String, String>> {
         val prefs = context.dataStore.data.first()
-        return prefs.asMap()
+
+        val allLists = prefs.asMap()
             .keys
             .mapNotNull { it.name }
             .mapNotNull { name ->
@@ -101,6 +110,16 @@ class DataStoreManager(private val context: Context) {
                 } else null
             }
             .distinctBy { it.first }
+
+        val savedOrder = prefs[LIST_ORDER_KEY]?.let { json ->
+            gson.fromJson(json, Array<String>::class.java).toList()
+        } ?: emptyList()
+
+        val byId = allLists.associateBy { it.first }
+        val ordered = savedOrder.mapNotNull { byId[it] }
+        val remaining = allLists.filter { it.first !in savedOrder }
+
+        return ordered + remaining
     }
 
     suspend fun isTitleDuplicate(title: String, excludeId: String? = null): Boolean {

@@ -427,6 +427,10 @@ fun ToDoListScreen(
                             dataStore.saveLastOpenedKey(currentListData.id)
                         }
                     },
+                    onReorder = { orderedIds ->               // NEW
+                        savedLists = savedLists.sortedBy { orderedIds.indexOf(it.first) }
+                        scope.launch { dataStore.saveListOrder(orderedIds) }
+                    },
                     snackbarHostState = snackbarHostState,
                     scope = scope
                 )
