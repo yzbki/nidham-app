@@ -1,5 +1,15 @@
 package com.youzbaki.nidham.ui.components
 
+import android.Manifest
+import android.content.Context
+import android.media.AudioManager
+import android.media.ToneGenerator
+import android.os.Build
+import android.os.VibrationEffect
+import android.os.Vibrator
+import androidx.annotation.RequiresPermission
+import androidx.compose.animation.core.tween
+import androidx.compose.runtime.remember
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -32,6 +42,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
@@ -145,22 +156,31 @@ fun TaskListSection(
 
         itemsIndexed(taskItems, key = { _, item -> item.id }) { index, taskItem ->
             ReorderableItem(state, key = taskItem.id) {
+                val scale = remember { androidx.compose.animation.core.Animatable(1f) }
+                val context = androidx.compose.ui.platform.LocalContext.current
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp, end = 12.dp)
-                        .detectReorder(state),
+                        .detectReorder(state)
+                        .graphicsLayer { scaleX = scale.value; scaleY = scale.value },
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Checkbox
                     Checkbox(
                         checked = listData.checkedStates.getOrElse(index) { false },
-                        onCheckedChange = { checked ->
+                        onCheckedChange = @androidx.annotation.RequiresPermission(android.Manifest.permission.VIBRATE) { checked ->
                             pushUndo()
                             listData.checkedStates[index] = checked
                             if (!checked) listData.selectAll.value = false
                             else if (listData.allChecked()) listData.selectAll.value = true
                             scope.launch { dataStore.saveListData(listData) }
+                            scope.launch {
+                                scale.animateTo(0.95f, animationSpec = tween(60))
+                                scale.animateTo(1f, animationSpec = tween(80))
+                            }
+                            performCheckFeedback(context)
                         },
                         colors = CheckboxDefaults.colors(
                             uncheckedColor = colorScheme.onBackground,
@@ -270,4 +290,27 @@ fun Modifier.drawVerticalScrollbar(
         size = Size(width.toPx(), thumbHeight),
         cornerRadius = CornerRadius(cornerRadius.toPx(), cornerRadius.toPx())
     )
+}
+
+@RequiresPermission(Manifest.permission.VIBRATE)
+fun performCheckFeedback(context: Context) {
+    val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+    when (audioManager.ringerMode) {
+        AudioManager.RINGER_MODE_NORMAL -> {
+            try {
+                ToneGenerator(AudioManager.STREAM_NOTIFICATION, 60)
+                    .startTone(ToneGenerator.TONE_PROP_BEEP, 80)
+            } catch (e: Exception) { /* ignore */ }
+        }
+        AudioManager.RINGER_MODE_VIBRATE -> {
+            val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                vibrator.vibrate(VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE))
+            } else {
+                @Suppress("DEPRECATION")
+                vibrator.vibrate(40)
+            }
+        }
+        // RINGER_MODE_SILENT: do nothing
+    }
 }
