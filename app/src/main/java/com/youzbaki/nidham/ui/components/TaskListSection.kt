@@ -67,6 +67,8 @@ fun TaskListSection(
     showLabels: Boolean,
     textFieldSquared: Boolean
 ) {
+    val context = androidx.compose.ui.platform.LocalContext.current
+
     // Title row
     Row(
         verticalAlignment = Alignment.CenterVertically,
@@ -83,6 +85,7 @@ fun TaskListSection(
                 scope.launch {
                     dataStore.saveListData(listData)
                 }
+                performCheckFeedback(context)
             },
             colors = CheckboxDefaults.colors(
                 uncheckedColor = colorScheme.onBackground,
