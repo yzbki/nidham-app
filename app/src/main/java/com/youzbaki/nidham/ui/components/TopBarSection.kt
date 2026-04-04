@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.AccountCircle
@@ -26,6 +27,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontFamily
@@ -44,8 +49,9 @@ fun TopBarSection(
     snackbarHostState: SnackbarHostState,
     listData: ListData,
     dataStore: DataStoreManager,
-    onUndo: () -> Unit,
     menuExpanded: Boolean,
+    sortMode: String,
+    onSortModeChange: (String) -> Unit,
     onMenuExpandChange: (Boolean) -> Unit,
     onShowSaveDialog: () -> Unit,
     onShowLoadDialog: suspend () -> Unit,
@@ -53,9 +59,12 @@ fun TopBarSection(
     onShowExportDialog: () -> Unit,
     onShowSettings: () -> Unit,
     onShowAbout: () -> Unit,
+    onUndo: () -> Unit,
     updateSavedLists: (List<Pair<String, String>>) -> Unit,
     onNewList: () -> Unit
 ) {
+    var sortExpanded by remember { mutableStateOf(false) }
+
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -86,6 +95,35 @@ fun TopBarSection(
             modifier = Modifier.align(Alignment.CenterEnd),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            Box(modifier = Modifier.wrapContentSize(Alignment.TopEnd)) {
+                IconButton(onClick = { sortExpanded = true }) {
+                    Icon(
+                        imageVector = Icons.Default.ArrowDropDown,
+                        contentDescription = "Sort",
+                        tint = if (sortMode != "custom") colorScheme.primary else colorScheme.onBackground
+                    )
+                }
+                DropdownMenu(
+                    expanded = sortExpanded,
+                    onDismissRequest = { sortExpanded = false },
+                    modifier = Modifier.background(colorScheme.surface)
+                ) {
+                    listOf(
+                        "custom" to "Custom",
+                        "unchecked" to "Unchecked",
+                        "checked" to "Checked"
+                    ).forEach { (mode, label) ->
+                        DropdownMenuItem(
+                            text = { Text(if (sortMode == mode) "$label <" else label) },
+                            onClick = {
+                                onSortModeChange(mode)
+                                sortExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+
             Box(
                 modifier = Modifier.wrapContentSize(Alignment.TopEnd),
                 contentAlignment = Alignment.TopEnd

@@ -9,8 +9,8 @@ import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.annotation.RequiresPermission
 import androidx.compose.animation.core.tween
-import androidx.compose.runtime.remember
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -34,6 +34,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawBehind
@@ -63,6 +64,7 @@ fun TaskListSection(
     scope: CoroutineScope,
     dataStore: DataStoreManager,
     state: ReorderableLazyListState,
+    sortMode: String,
     pushUndo: () -> Unit,
     showLabels: Boolean,
     textFieldSquared: Boolean
@@ -146,6 +148,20 @@ fun TaskListSection(
         }
     }
 
+    val taskItems = listData.items.filterIsInstance<ListItem.TaskItem>()
+
+    // Produce a list of (originalIndex, taskItem) sorted by mode
+    val displayItems: List<Pair<Int, ListItem.TaskItem>> = remember(
+        taskItems.size, sortMode, listData.checkedStates.toList()
+    ) {
+        val indexed = taskItems.mapIndexed { i, item -> i to item }
+        when (sortMode) {
+            "checked"   -> indexed.sortedByDescending { listData.checkedStates.getOrElse(it.first) { false } }
+            "unchecked" -> indexed.sortedBy           { listData.checkedStates.getOrElse(it.first) { false } }
+            else        -> indexed
+        }
+    }
+
     // Task list
     LazyColumn(
         state = state.listState,
@@ -155,10 +171,8 @@ fun TaskListSection(
             .background(colorScheme.background)
             .drawVerticalScrollbar(state.listState)
     ) {
-        val taskItems = listData.items.filterIsInstance<ListItem.TaskItem>()
-
-        itemsIndexed(taskItems, key = { _, item -> item.id }) { index, taskItem ->
-            ReorderableItem(state, key = taskItem.id) {
+        itemsIndexed(displayItems, key = { _, pair -> pair.second.id }) { _, (originalIndex, taskItem) ->
+        ReorderableItem(state, key = taskItem.id) {
                 val scale = remember { androidx.compose.animation.core.Animatable(1f) }
                 val context = androidx.compose.ui.platform.LocalContext.current
 
@@ -166,16 +180,15 @@ fun TaskListSection(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 8.dp, end = 12.dp)
-                        .detectReorder(state)
-                        .graphicsLayer { scaleX = scale.value; scaleY = scale.value },
+                        .then(if (sortMode == "custom") Modifier.detectReorder(state) else Modifier),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Checkbox
                     Checkbox(
-                        checked = listData.checkedStates.getOrElse(index) { false },
+                        checked = listData.checkedStates.getOrElse(originalIndex) { false },
                         onCheckedChange = @androidx.annotation.RequiresPermission(android.Manifest.permission.VIBRATE) { checked ->
                             pushUndo()
-                            listData.checkedStates[index] = checked
+                            listData.checkedStates[originalIndex] = checked
                             if (!checked) listData.selectAll.value = false
                             else if (listData.allChecked()) listData.selectAll.value = true
                             scope.launch { dataStore.saveListData(listData) }
@@ -205,14 +218,14 @@ fun TaskListSection(
                             .weight(1f)
                             .onFocusChanged { _ -> pushUndo() },
                         label = if (showLabels) {
-                            { Text("Task ${index + 1}") }
+                            { Text("Task ${originalIndex + 1}") }
                         } else null,
                         textStyle = MaterialTheme.typography.bodyLarge.copy(
-                            color = if (listData.checkedStates.getOrElse(index) { false })
+                            color = if (listData.checkedStates.getOrElse(originalIndex) { false })
                                 colorScheme.onSurface.copy(alpha = 0.4f)
                             else
                                 colorScheme.onSurface,
-                            textDecoration = if (listData.checkedStates.getOrElse(index) { false })
+                            textDecoration = if (listData.checkedStates.getOrElse(originalIndex) { false })
                                 TextDecoration.LineThrough else null
                         ),
                         colors = TextFieldDefaults.colors(
@@ -237,8 +250,8 @@ fun TaskListSection(
                         onClick = {
                             pushUndo()
                             listData.items.remove(taskItem)
-                            if (listData.checkedStates.size > index) {
-                                listData.checkedStates.removeAt(index)
+                            if (listData.checkedStates.size > originalIndex) {
+                                listData.checkedStates.removeAt(originalIndex)
                             }
                             if (listData.allChecked()) listData.selectAll.value = true
                             scope.launch { dataStore.saveListData(listData) }

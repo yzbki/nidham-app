@@ -164,6 +164,17 @@ class DataStoreManager(private val context: Context) {
         }
     }
 
+    suspend fun saveSortMode(listId: String, mode: String) {
+        context.dataStore.edit { prefs ->
+            prefs[stringPreferencesKey("${listId}_sort")] = mode
+        }
+    }
+
+    suspend fun getSortMode(listId: String): String {
+        val prefs = context.dataStore.data.first()
+        return prefs[stringPreferencesKey("${listId}_sort")] ?: "custom"
+    }
+
     suspend fun getThemeMode(): String {
         val prefs = context.dataStore.data.first()
         return prefs[THEME_MODE_KEY] ?: "system"

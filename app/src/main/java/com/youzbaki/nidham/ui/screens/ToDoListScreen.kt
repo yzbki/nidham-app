@@ -65,6 +65,7 @@ fun ToDoListScreen(
     val undoStack = remember { ArrayDeque<ListData>() }
     var savedLists by remember { mutableStateOf(listOf<Pair<String, String>>()) }
     val snackbarHostState = remember { SnackbarHostState() }
+    var sortMode by remember { mutableStateOf("custom") }
 
     var menuExpanded by remember { mutableStateOf(false) }
     var showSaveDialog by remember { mutableStateOf(false) }
@@ -153,6 +154,7 @@ fun ToDoListScreen(
     fun createNewList() {
         undoStack.clear()
         currentListData = ListData.newListData()
+        sortMode = "custom"
     }
 
     // Format voice transcription
@@ -177,6 +179,7 @@ fun ToDoListScreen(
         val lastKey = dataStore.getLastOpenedKey()
         if (lastKey != null) {
             currentListData = dataStore.loadListData(lastKey)
+            sortMode = dataStore.getSortMode(lastKey)
         } else {
             createNewList()
         }
@@ -334,8 +337,13 @@ fun ToDoListScreen(
                         snackbarHostState = snackbarHostState,
                         listData = currentListData,
                         dataStore = dataStore,
-                        onUndo = { undo() },
+
                         menuExpanded = menuExpanded,
+                        sortMode = sortMode,
+                        onSortModeChange = { mode ->
+                            sortMode = mode
+                            scope.launch { dataStore.saveSortMode(currentListData.id, mode) }
+                        },
                         onMenuExpandChange = { menuExpanded = it },
                         onShowSaveDialog = { showSaveDialog = true },
                         onShowLoadDialog = { showLoadDialog = true },
@@ -346,14 +354,16 @@ fun ToDoListScreen(
                         },
                         onShowSettings = { showSettingsScreen = true },
                         onShowAbout = { showAboutScreen = true },
-                        updateSavedLists = { savedLists = it },
-                        onNewList = { createNewList() }
+                        onNewList = { createNewList() },
+                        onUndo = { undo() },
+                        updateSavedLists = { savedLists = it }
                     )
                     TaskListSection(
                         listData = currentListData,
                         scope = scope,
                         dataStore = dataStore,
                         state = state,
+                        sortMode = sortMode,
                         pushUndo = { pushUndoState() },
                         showLabels = showLabels.value,
                         textFieldSquared = textFieldSquared.value
@@ -417,6 +427,7 @@ fun ToDoListScreen(
                     savedLists = savedLists,
                     onLoad = { id ->
                         currentListData = dataStore.loadListData(id)
+                        sortMode = dataStore.getSortMode(id)
                         scope.launch { dataStore.saveLastOpenedKey(id) }
                     },
                     onDelete = { id ->
