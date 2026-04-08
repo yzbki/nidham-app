@@ -18,8 +18,8 @@ class DataStoreManager(private val context: Context) {
     private val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
     private val COLOR_VARIANT_KEY = stringPreferencesKey("color_variant")
     private val LIST_ORDER_KEY = stringPreferencesKey("saved_list_order") // NEW
-    private val MAX_LISTS = 10
     private val SHOW_LABELS_KEY = booleanPreferencesKey("show_labels")
+    private val MAX_LISTS = 10
     private val TEXT_FIELD_SQUARED = booleanPreferencesKey("text_field_squared")
 
     suspend fun saveListData(listData: ListData): Boolean {

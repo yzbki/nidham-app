@@ -33,6 +33,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -90,17 +91,17 @@ fun TopBarSection(
             Icon(Icons.Default.Refresh, contentDescription = "Undo")
         }
 
-        // Menu
         Row(
             modifier = Modifier.align(Alignment.CenterEnd),
             verticalAlignment = Alignment.CenterVertically
         ) {
+            // Sort Menu
             Box(modifier = Modifier.wrapContentSize(Alignment.TopEnd)) {
                 IconButton(onClick = { sortExpanded = true }) {
                     Icon(
                         imageVector = Icons.Default.ArrowDropDown,
                         contentDescription = "Sort",
-                        tint = if (sortMode != "custom") colorScheme.primary else colorScheme.onBackground
+                        tint = colorScheme.onBackground
                     )
                 }
                 DropdownMenu(
@@ -114,7 +115,11 @@ fun TopBarSection(
                         "checked" to "Checked"
                     ).forEach { (mode, label) ->
                         DropdownMenuItem(
-                            text = { Text(if (sortMode == mode) "$label <" else label) },
+                            text = { Text(label, color = colorScheme.onSurface) },
+                            modifier = Modifier.background(
+                                if (sortMode == mode) colorScheme.onBackground.copy(alpha = 0.1f)
+                                else Color.Transparent
+                            ),
                             onClick = {
                                 onSortModeChange(mode)
                                 sortExpanded = false
@@ -124,6 +129,7 @@ fun TopBarSection(
                 }
             }
 
+            // Menu
             Box(
                 modifier = Modifier.wrapContentSize(Alignment.TopEnd),
                 contentAlignment = Alignment.TopEnd

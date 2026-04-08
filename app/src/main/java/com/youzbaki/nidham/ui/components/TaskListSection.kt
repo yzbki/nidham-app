@@ -150,10 +150,8 @@ fun TaskListSection(
 
     val taskItems = listData.items.filterIsInstance<ListItem.TaskItem>()
 
-    // Produce a list of (originalIndex, taskItem) sorted by mode
-    val displayItems: List<Pair<Int, ListItem.TaskItem>> = remember(
-        taskItems.size, sortMode, listData.checkedStates.toList()
-    ) {
+    // Produce a list of items sorted by mode
+    val displayItems: List<Pair<Int, ListItem.TaskItem>> = run {
         val indexed = taskItems.mapIndexed { i, item -> i to item }
         when (sortMode) {
             "checked"   -> indexed.sortedByDescending { listData.checkedStates.getOrElse(it.first) { false } }
@@ -186,7 +184,7 @@ fun TaskListSection(
                     // Checkbox
                     Checkbox(
                         checked = listData.checkedStates.getOrElse(originalIndex) { false },
-                        onCheckedChange = @androidx.annotation.RequiresPermission(android.Manifest.permission.VIBRATE) { checked ->
+                        onCheckedChange = { checked ->
                             pushUndo()
                             listData.checkedStates[originalIndex] = checked
                             if (!checked) listData.selectAll.value = false
