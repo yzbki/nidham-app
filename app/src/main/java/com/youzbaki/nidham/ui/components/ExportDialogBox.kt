@@ -22,7 +22,9 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.youzbaki.nidham.service.SoundManager
 
 @Composable
 fun ExportDialogBox(
@@ -32,6 +34,7 @@ fun ExportDialogBox(
     onExportSelected: (List<String>) -> Unit,
     onExportAll: () -> Unit
 ) {
+    val context = LocalContext.current
     val selectedIds = remember { mutableStateListOf<String>() }
 
     LaunchedEffect(showDialog) {
@@ -67,6 +70,7 @@ fun ExportDialogBox(
                                     Checkbox(
                                         checked = id in selectedIds,
                                         onCheckedChange = { checked ->
+                                            SoundManager.playCheck(context)
                                             if (checked) selectedIds.add(id)
                                             else selectedIds.remove(id)
                                         },
@@ -89,6 +93,7 @@ fun ExportDialogBox(
 
                         Button(
                             onClick = {
+                                SoundManager.playButton(context)
                                 onExportSelected(selectedIds.toList())
                                 onDismiss()
                             },
@@ -108,6 +113,7 @@ fun ExportDialogBox(
 
                         Button(
                             onClick = {
+                                SoundManager.playButton(context)
                                 onExportAll()
                                 onDismiss()
                             },

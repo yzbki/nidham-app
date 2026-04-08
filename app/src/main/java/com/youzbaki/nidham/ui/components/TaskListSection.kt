@@ -3,14 +3,12 @@ package com.youzbaki.nidham.ui.components
 import android.Manifest
 import android.content.Context
 import android.media.AudioManager
-import android.media.ToneGenerator
 import android.os.Build
 import android.os.VibrationEffect
 import android.os.Vibrator
 import androidx.annotation.RequiresPermission
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -43,7 +41,6 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
@@ -51,6 +48,7 @@ import androidx.compose.ui.unit.dp
 import com.youzbaki.nidham.data.DataStoreManager
 import com.youzbaki.nidham.data.ListData
 import com.youzbaki.nidham.data.ListItem
+import com.youzbaki.nidham.service.SoundManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.burnoutcrew.reorderable.ReorderableItem
@@ -81,13 +79,13 @@ fun TaskListSection(
         Checkbox(
             checked = listData.selectAll.value,
             onCheckedChange = { isChecked ->
+                SoundManager.playButton(context)
                 pushUndo()
                 listData.selectAll.value = isChecked
                 listData.checkedStates.replaceAll { isChecked }
                 scope.launch {
                     dataStore.saveListData(listData)
                 }
-                performCheckFeedback(context)
             },
             colors = CheckboxDefaults.colors(
                 uncheckedColor = colorScheme.onBackground,
@@ -126,6 +124,7 @@ fun TaskListSection(
         // Delete button (multiple)
         IconButton(
             onClick = {
+                SoundManager.playDelete(context)
                 pushUndo()
                 val newItems = listData.items.filterIsInstance<ListItem.TaskItem>()
                     .withIndex()
@@ -194,7 +193,7 @@ fun TaskListSection(
                                 scale.animateTo(0.95f, animationSpec = tween(60))
                                 scale.animateTo(1f, animationSpec = tween(80))
                             }
-                            performCheckFeedback(context)
+                            SoundManager.playCheck(context)
                         },
                         colors = CheckboxDefaults.colors(
                             uncheckedColor = colorScheme.onBackground,
@@ -246,6 +245,7 @@ fun TaskListSection(
                     // Delete button (individual)
                     IconButton(
                         onClick = {
+                            SoundManager.playDelete(context)
                             pushUndo()
                             listData.items.remove(taskItem)
                             if (listData.checkedStates.size > originalIndex) {
@@ -304,27 +304,4 @@ fun Modifier.drawVerticalScrollbar(
         size = Size(width.toPx(), thumbHeight),
         cornerRadius = CornerRadius(cornerRadius.toPx(), cornerRadius.toPx())
     )
-}
-
-@RequiresPermission(Manifest.permission.VIBRATE)
-fun performCheckFeedback(context: Context) {
-    val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
-    when (audioManager.ringerMode) {
-        AudioManager.RINGER_MODE_NORMAL -> {
-            try {
-                ToneGenerator(AudioManager.STREAM_NOTIFICATION, 60)
-                    .startTone(ToneGenerator.TONE_PROP_BEEP, 80)
-            } catch (e: Exception) { /* ignore */ }
-        }
-        AudioManager.RINGER_MODE_VIBRATE -> {
-            val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as Vibrator
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                vibrator.vibrate(VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE))
-            } else {
-                @Suppress("DEPRECATION")
-                vibrator.vibrate(40)
-            }
-        }
-        // RINGER_MODE_SILENT: do nothing
-    }
 }

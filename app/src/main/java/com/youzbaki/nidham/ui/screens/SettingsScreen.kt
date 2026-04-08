@@ -46,6 +46,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.youzbaki.nidham.data.DataStoreManager
+import com.youzbaki.nidham.service.SoundManager
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -97,7 +98,9 @@ fun SettingsScreen(
                         .padding(bottom = 16.dp)
                 ) {
                     IconButton(
-                        onClick = onBackClick,
+                        onClick = {
+                            SoundManager.playButton(context)
+                            onBackClick() },
                         modifier = Modifier.align(Alignment.CenterStart)
                     ) {
                         Icon(
@@ -180,6 +183,7 @@ fun SettingsScreen(
                                         )
                                     },
                                     onClick = {
+                                        SoundManager.playButton(context)
                                         selectedColor = colorName
                                         onColorVariantChange(colorName)
                                         scope.launch {
@@ -205,6 +209,7 @@ fun SettingsScreen(
                         listOf("system", "dark", "light").forEach { mode ->
                             Button(
                                 onClick = {
+                                    SoundManager.playButton(context)
                                     onThemeModeChange(mode)
                                     scope.launch {
                                         dataStore.saveThemeMode(mode)
@@ -235,6 +240,7 @@ fun SettingsScreen(
                         listOf(false to "Disabled", true to "Enabled").forEach { (value, label) ->
                             Button(
                                 onClick = {
+                                    SoundManager.playButton(context)
                                     onShowLabelsChange(value)
                                     scope.launch {
                                         dataStore.saveShowLabels(value)
@@ -269,6 +275,7 @@ fun SettingsScreen(
                         listOf(false to "Rounded", true to "Squared").forEach { (value, label) ->
                             Button(
                                 onClick = {
+                                    SoundManager.playButton(context)
                                     onShapeChange(value)
                                     scope.launch {
                                         dataStore.saveTextFieldShape(value)
@@ -293,7 +300,9 @@ fun SettingsScreen(
                     Spacer(modifier = Modifier.height(24.dp))
 
                     Button(
-                        onClick = { showRestoreDefaultsConfirm = true },
+                        onClick = {
+                            SoundManager.playButton(context)
+                            showRestoreDefaultsConfirm = true },
                         modifier = Modifier
                             .fillMaxWidth(),
                         colors = ButtonDefaults.buttonColors(
@@ -310,7 +319,9 @@ fun SettingsScreen(
 
                     if (showRestoreDefaultsConfirm) {
                         AlertDialog(
-                            onDismissRequest = { showRestoreDefaultsConfirm = false },
+                            onDismissRequest = {
+                                SoundManager.playButton(context)
+                                showRestoreDefaultsConfirm = false },
                             title = {
                                 Text(
                                     text = "Restore Defaults",
@@ -326,6 +337,8 @@ fun SettingsScreen(
                             confirmButton = {
                                 TextButton(
                                     onClick = {
+                                        SoundManager.playButton(context)
+
                                         // Update UI state
                                         onThemeModeChange(DEFAULT_THEME_MODE)
                                         onColorVariantChange(DEFAULT_COLOR_VARIANT)
@@ -349,7 +362,9 @@ fun SettingsScreen(
                             },
                             dismissButton = {
                                 TextButton(
-                                    onClick = { showRestoreDefaultsConfirm = false }
+                                    onClick = {
+                                        SoundManager.playButton(context)
+                                        showRestoreDefaultsConfirm = false }
                                 ) {
                                     Text("Cancel", color = colorScheme.onBackground)
                                 }

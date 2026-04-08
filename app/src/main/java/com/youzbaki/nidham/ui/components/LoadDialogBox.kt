@@ -28,7 +28,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.youzbaki.nidham.service.SoundManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.burnoutcrew.reorderable.ReorderableItem
@@ -47,6 +49,7 @@ fun LoadDialogBox(
     snackbarHostState: SnackbarHostState,
     scope: CoroutineScope
 ) {
+    val context = LocalContext.current
     var listToDelete by remember { mutableStateOf<Pair<String, String>?>(null) }
     val localItems = remember { mutableStateListOf<Pair<String, String>>() }
 
@@ -67,8 +70,11 @@ fun LoadDialogBox(
     if (showDialog) {
         AlertDialog(
             containerColor = colorScheme.background,
-            onDismissRequest = onDismiss,
-            confirmButton = {},
+            onDismissRequest = {
+                SoundManager.playButton(context)
+                onDismiss()
+            },
+            confirmButton = { SoundManager.playButton(context) },
             title = { Text("Load List", color = colorScheme.onBackground) },
             text = {
                 Column {
@@ -92,6 +98,7 @@ fun LoadDialogBox(
                                     ) {
                                         Button(
                                             onClick = {
+                                                SoundManager.playButton(context)
                                                 scope.launch {
                                                     onLoad(id)
                                                     snackbarHostState.currentSnackbarData?.dismiss()
@@ -110,7 +117,9 @@ fun LoadDialogBox(
                                             Text(title, color = colorScheme.onSurface)
                                         }
                                         IconButton(
-                                            onClick = { listToDelete = id to title },
+                                            onClick = {
+                                                SoundManager.playButton(context)
+                                                listToDelete = id to title },
                                             colors = IconButtonDefaults.iconButtonColors(
                                                 contentColor = colorScheme.onBackground
                                             )
@@ -139,6 +148,7 @@ fun LoadDialogBox(
             confirmButton = {
                 TextButton(
                     onClick = {
+                        SoundManager.playButton(context)
                         scope.launch {
                             onDelete(id)
                             snackbarHostState.currentSnackbarData?.dismiss()
@@ -151,7 +161,9 @@ fun LoadDialogBox(
                 }
             },
             dismissButton = {
-                TextButton(onClick = { listToDelete = null }) {
+                TextButton(onClick = {
+                    SoundManager.playButton(context)
+                    listToDelete = null }) {
                     Text("Cancel", color = colorScheme.onBackground)
                 }
             },

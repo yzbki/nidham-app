@@ -11,7 +11,9 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import com.youzbaki.nidham.service.SoundManager
 
 @Composable
 fun ImportDialogBox(
@@ -19,11 +21,15 @@ fun ImportDialogBox(
     onDismiss: () -> Unit,
     onPickFile: () -> Unit
 ) {
+    val context = LocalContext.current
+
     if (showDialog) {
         AlertDialog(
             containerColor = colorScheme.background,
-            onDismissRequest = onDismiss,
-            confirmButton = {},
+            onDismissRequest = {
+                SoundManager.playButton(context)
+                onDismiss() },
+            confirmButton = { SoundManager.playButton(context) },
             title = { Text("Import Lists", color = colorScheme.onBackground) },
             text = {
                 Column {
@@ -34,6 +40,7 @@ fun ImportDialogBox(
                     Spacer(modifier = Modifier.height(16.dp))
                     Button(
                         onClick = {
+                            SoundManager.playButton(context)
                             onPickFile()
                             onDismiss()
                         },

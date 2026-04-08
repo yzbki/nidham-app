@@ -14,6 +14,7 @@ import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.firebase.appcheck.debug.DebugAppCheckProviderFactory
 import com.google.firebase.appcheck.playintegrity.PlayIntegrityAppCheckProviderFactory
 import com.youzbaki.nidham.service.AdManager
+import com.youzbaki.nidham.service.SoundManager
 import com.youzbaki.nidham.ui.screens.ToDoListScreen
 import com.youzbaki.nidham.ui.theme.NidhamTheme
 
@@ -42,6 +43,9 @@ class MainActivity : ComponentActivity() {
         // Initialize AdManager
         AdManager.initialize(this)
 
+        // Initialize SoundManager
+        SoundManager.init(this)
+
         setContent {
             var themeMode by remember { mutableStateOf("system") }
             var colorVariant by remember { mutableStateOf("default") }
@@ -60,5 +64,10 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        SoundManager.release()
     }
 }

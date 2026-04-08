@@ -34,12 +34,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import com.youzbaki.nidham.data.DataStoreManager
 import com.youzbaki.nidham.data.ListData
+import com.youzbaki.nidham.service.SoundManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -64,6 +66,7 @@ fun TopBarSection(
     updateSavedLists: (List<Pair<String, String>>) -> Unit,
     onNewList: () -> Unit
 ) {
+    val context = LocalContext.current
     var sortExpanded by remember { mutableStateOf(false) }
 
     Box(
@@ -85,7 +88,9 @@ fun TopBarSection(
 
         // Undo button
         IconButton(
-            onClick = onUndo,
+            onClick = {
+                SoundManager.playButton(context)
+                onUndo() },
             modifier = Modifier.align(Alignment.CenterStart)
         ) {
             Icon(Icons.Default.Refresh, contentDescription = "Undo")
@@ -97,7 +102,9 @@ fun TopBarSection(
         ) {
             // Sort Menu
             Box(modifier = Modifier.wrapContentSize(Alignment.TopEnd)) {
-                IconButton(onClick = { sortExpanded = true }) {
+                IconButton(onClick = {
+                    SoundManager.playButton(context)
+                    sortExpanded = true }) {
                     Icon(
                         imageVector = Icons.Default.ArrowDropDown,
                         contentDescription = "Sort",
@@ -121,6 +128,7 @@ fun TopBarSection(
                                 else Color.Transparent
                             ),
                             onClick = {
+                                SoundManager.playButton(context)
                                 onSortModeChange(mode)
                                 sortExpanded = false
                             }
@@ -134,7 +142,9 @@ fun TopBarSection(
                 modifier = Modifier.wrapContentSize(Alignment.TopEnd),
                 contentAlignment = Alignment.TopEnd
             ) {
-                IconButton(onClick = { onMenuExpandChange(true) }) {
+                IconButton(onClick = {
+                    SoundManager.playButton(context)
+                    onMenuExpandChange(true) }) {
                     Icon(
                         imageVector = Icons.Default.Menu,
                         contentDescription = "Menu",
@@ -151,6 +161,7 @@ fun TopBarSection(
                         text = { Text("New", color = colorScheme.onSurface) },
                         leadingIcon = { Icon(Icons.Outlined.Create, contentDescription = null) },
                         onClick = {
+                            SoundManager.playButton(context)
                             onMenuExpandChange(false)
                             scope.launch {
                                 if (dataStore.canAddNewList()) {
@@ -170,6 +181,7 @@ fun TopBarSection(
                         text = { Text("Save", color = colorScheme.onSurface) },
                         leadingIcon = { Icon(Icons.Outlined.CheckCircle, contentDescription = null) },
                         onClick = {
+                            SoundManager.playButton(context)
                             onShowSaveDialog()
                             onMenuExpandChange(false)
                         }
@@ -180,6 +192,7 @@ fun TopBarSection(
                         text = { Text("Load", color = colorScheme.onSurface) },
                         leadingIcon = { Icon(Icons.Outlined.AccountCircle, contentDescription = null) },
                         onClick = {
+                            SoundManager.playButton(context)
                             scope.launch {
                                 updateSavedLists(dataStore.getSavedLists())
                                 onShowLoadDialog()
@@ -195,6 +208,7 @@ fun TopBarSection(
                         text = { Text("Import", color = colorScheme.onSurface) },
                         leadingIcon = { Icon(Icons.Outlined.KeyboardArrowDown, contentDescription = null) },
                         onClick = {
+                            SoundManager.playButton(context)
                             onShowImportDialog()
                             onMenuExpandChange(false)
                         }
@@ -205,6 +219,7 @@ fun TopBarSection(
                         text = { Text("Export", color = colorScheme.onSurface) },
                         leadingIcon = { Icon(Icons.Outlined.KeyboardArrowUp, contentDescription = null) },
                         onClick = {
+                            SoundManager.playButton(context)
                             onShowExportDialog()
                             onMenuExpandChange(false)
                         }
@@ -217,6 +232,7 @@ fun TopBarSection(
                         text = { Text("Settings", color = colorScheme.onSurface) },
                         leadingIcon = { Icon(Icons.Outlined.Settings, contentDescription = null) },
                         onClick = {
+                            SoundManager.playButton(context)
                             onShowSettings()
                             onMenuExpandChange(false)
                         }
@@ -227,6 +243,7 @@ fun TopBarSection(
                         text = { Text("About", color = colorScheme.onSurface) },
                         leadingIcon = { Icon(Icons.Outlined.Info, contentDescription = null) },
                         onClick = {
+                            SoundManager.playButton(context)
                             onShowAbout()
                             onMenuExpandChange(false)
                         }

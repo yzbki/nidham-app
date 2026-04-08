@@ -11,8 +11,10 @@ import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import com.youzbaki.nidham.data.DataStoreManager
 import com.youzbaki.nidham.data.ListData
+import com.youzbaki.nidham.service.SoundManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -28,10 +30,14 @@ fun SaveDialogBox(
     snackbarHostState: SnackbarHostState,
     scope: CoroutineScope
 ) {
+    val context = LocalContext.current
     if (showDialog) {
         AlertDialog(
             containerColor = colorScheme.background,
-            onDismissRequest = onDismiss,
+            onDismissRequest = {
+                SoundManager.playButton(context)
+                onDismiss()
+            },
             title = { Text("Save List", color = colorScheme.onBackground) },
             text = {
                 TextField(
@@ -53,6 +59,7 @@ fun SaveDialogBox(
             confirmButton = {
                 Button(
                     onClick = {
+                        SoundManager.playButton(context)
                         scope.launch {
                             if (listData.isTitleValid(inputListName, dataStore)) {
                                 listData.title.value = inputListName
@@ -78,7 +85,9 @@ fun SaveDialogBox(
             },
             dismissButton = {
                 Button(
-                    onClick = { onDismiss() },
+                    onClick = {
+                        SoundManager.playButton(context)
+                        onDismiss() },
                     colors = ButtonDefaults.buttonColors(
                         containerColor = colorScheme.surface,
                         contentColor = colorScheme.onSurface

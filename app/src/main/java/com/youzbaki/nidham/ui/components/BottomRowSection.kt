@@ -17,8 +17,10 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.youzbaki.nidham.data.ListData
+import com.youzbaki.nidham.service.SoundManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 
@@ -32,6 +34,7 @@ fun BottomRowSection(
     pushUndo: () -> Unit,
     scope: CoroutineScope
 ) {
+    val context = LocalContext.current
 
     Column(
         modifier = Modifier
@@ -61,8 +64,12 @@ fun BottomRowSection(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            // Auto-List Button
             Button(
-                onClick = onVoiceInputClick,
+                onClick = {
+                    SoundManager.playButton(context)
+                    onVoiceInputClick()
+                },
                 modifier = Modifier.weight(1f),
                 colors = ButtonDefaults.buttonColors(
                     containerColor = colorScheme.surface.copy(alpha = 0.7f),
@@ -72,8 +79,10 @@ fun BottomRowSection(
                 Text("Auto-List")
             }
 
+            // Add Task Button
             Button(
                 onClick = {
+                    SoundManager.playButton(context)
                     pushUndo()
                     val added = listData.addTask()
                     if (!added) {
