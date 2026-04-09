@@ -19,11 +19,11 @@ object SoundManager {
         buttonSound = MediaPlayer.create(context, R.raw.click).apply { setVolume(0.3f, 0.3f) }
     }
 
-    fun playCheck(context: Context) = play(context, checkSound)
-    fun playDelete(context: Context) = play(context, deleteSound)
-    fun playButton(context: Context) = play(context, buttonSound)
+    fun playCheck(context: Context) = play(context, checkSound, true)
+    fun playDelete(context: Context) = play(context, deleteSound, true)
+    fun playButton(context: Context) = play(context, buttonSound, false)
 
-    private fun play(context: Context, player: MediaPlayer?) {
+    private fun play(context: Context, player: MediaPlayer?, vibrate: Boolean) {
         val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
         when (audioManager.ringerMode) {
             AudioManager.RINGER_MODE_NORMAL -> {
@@ -33,12 +33,14 @@ object SoundManager {
                 }
             }
             AudioManager.RINGER_MODE_VIBRATE -> {
-                val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    vibrator.vibrate(VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE))
-                } else {
-                    @Suppress("DEPRECATION")
-                    vibrator.vibrate(40)
+                if (vibrate) {
+                    val vibrator = context.getSystemService(Context.VIBRATOR_SERVICE) as android.os.Vibrator
+                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                        vibrator.vibrate(VibrationEffect.createOneShot(40, VibrationEffect.DEFAULT_AMPLITUDE))
+                    } else {
+                        @Suppress("DEPRECATION")
+                        vibrator.vibrate(40)
+                    }
                 }
             }
             // RINGER_MODE_SILENT: do nothing
