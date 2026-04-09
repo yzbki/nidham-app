@@ -75,52 +75,59 @@ object OpenAIService {
         prompt: String,
         onRawResponse: ((String) -> Unit)? = null
     ): ListData? = withContext(Dispatchers.IO) {
-        try {
-            val request = ChatRequest(
-                model = "gpt-4o-mini",
-                messages = listOf(
-                    Message(
-                        "system",
-                        "You are an assistant that outputs only raw JSON (no markdown or code blocks). " +
-                                "Format: { title: String, tasks: [{ id: String, text: String }], checkedStates: [Boolean] }. " +
-                                "The title must be at most ${ListData.MAX_TITLE_LENGTH} characters. " +
-                                "Each task must be at most ${ListData.MAX_TASK_LENGTH} characters. " +
-                                "The list must have at most ${ListData.MAX_TASKS} tasks. " +
-                                "Always generate a list within these limits."
+        val maxAttempts = 3
+        var lastError: Exception? = null
+
+        repeat(maxAttempts) {
+            try {
+                val request = ChatRequest(
+                    model = "gpt-4o-mini",
+                    messages = listOf(
+                        Message(
+                            "system",
+                            "You are an assistant that outputs only raw JSON (no markdown or code blocks). " +
+                                    "Format: { title: String, tasks: [{ id: String, text: String }], checkedStates: [Boolean] }. " +
+                                    "The title must be at most ${ListData.MAX_TITLE_LENGTH} characters. " +
+                                    "Each task must be at most ${ListData.MAX_TASK_LENGTH} characters. " +
+                                    "The list must have at most ${ListData.MAX_TASKS} tasks. " +
+                                    "Always generate a list within these limits."
+                        ),
+                        Message("user", prompt)
                     ),
-                    Message("user", prompt)
-                ),
-                temperature = 0.7
-            )
+                    temperature = 0.7
+                )
 
-            val response = api.getChatCompletion(request)
-            val rawText = response.choices.firstOrNull()?.message?.content ?: return@withContext null
+                val response = api.getChatCompletion(request)
+                val rawText = response.choices.firstOrNull()?.message?.content ?: return@repeat
 
-            onRawResponse?.invoke(rawText)
+                onRawResponse?.invoke(rawText)
 
-            val cleanedJson = rawText.replace("```json", "").replace("```", "").trim()
-            val listDataJson = gson.fromJson(cleanedJson, ListDataJson::class.java)
+                val cleanedJson = rawText.replace("```json", "").replace("```", "").trim()
+                val listDataJson = gson.fromJson(cleanedJson, ListDataJson::class.java)
 
-            val listData = ListData.newListData()
-            listData.title.value = listDataJson.title.take(ListData.MAX_TITLE_LENGTH)
+                val listData = ListData.newListData()
+                listData.title.value = listDataJson.title.take(ListData.MAX_TITLE_LENGTH)
 
-            listData.items.clear()
-            listData.items.addAll(listDataJson.tasks.map {
-                ListItem.TaskItem().apply { textState.value = it.text }
-            })
+                listData.items.clear()
+                listData.items.addAll(listDataJson.tasks.map {
+                    ListItem.TaskItem().apply { textState.value = it.text }
+                })
 
-            listData.checkedStates.clear()
-            val checks = listDataJson.checkedStates.take(listData.items.size)
-            listData.checkedStates.addAll(checks)
-            while (listData.checkedStates.size < listData.items.size) {
-                listData.checkedStates.add(false)
+                listData.checkedStates.clear()
+                val checks = listDataJson.checkedStates.take(listData.items.size)
+                listData.checkedStates.addAll(checks)
+                while (listData.checkedStates.size < listData.items.size) {
+                    listData.checkedStates.add(false)
+                }
+
+                return@withContext listData
+            } catch (e: Exception) {
+                lastError = e
+                e.printStackTrace()
             }
-
-            return@withContext listData
-        } catch (e: Exception) {
-            onRawResponse?.invoke("ERROR: ${e.message ?: "Unknown error"}")
-            e.printStackTrace()
-            return@withContext null
         }
+
+        onRawResponse?.invoke("ERROR: ${lastError?.message ?: "Unknown error"}")
+        return@withContext null
     }
 }
