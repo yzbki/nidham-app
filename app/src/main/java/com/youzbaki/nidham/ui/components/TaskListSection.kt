@@ -1,12 +1,5 @@
 package com.youzbaki.nidham.ui.components
 
-import android.Manifest
-import android.content.Context
-import android.media.AudioManager
-import android.os.Build
-import android.os.VibrationEffect
-import android.os.Vibrator
-import androidx.annotation.RequiresPermission
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Row
@@ -41,6 +34,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.Dp
@@ -188,10 +182,10 @@ fun TaskListSection(
                             listData.checkedStates[originalIndex] = checked
                             if (!checked) listData.selectAll.value = false
                             else if (listData.allChecked()) listData.selectAll.value = true
-                            scope.launch { dataStore.saveListData(listData) }
                             scope.launch {
+                                dataStore.saveListData(listData)
                                 scale.animateTo(0.95f, animationSpec = tween(60))
-                                scale.animateTo(1f, animationSpec = tween(80))
+                                scale.animateTo(1f, animationSpec = tween(60))
                             }
                             SoundManager.playCheck(context)
                         },
@@ -213,6 +207,7 @@ fun TaskListSection(
                         },
                         modifier = Modifier
                             .weight(1f)
+                            .graphicsLayer { scaleX = scale.value; scaleY = scale.value }
                             .onFocusChanged { _ -> pushUndo() },
                         label = if (showLabels) {
                             { Text("Task ${originalIndex + 1}") }
