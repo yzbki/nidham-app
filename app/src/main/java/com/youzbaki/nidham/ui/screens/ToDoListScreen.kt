@@ -35,6 +35,7 @@ import androidx.core.content.ContextCompat
 import com.youzbaki.nidham.data.DataStoreManager
 import com.youzbaki.nidham.data.ListData
 import com.youzbaki.nidham.data.ListItem
+import com.youzbaki.nidham.service.SoundManager
 import com.youzbaki.nidham.service.VoiceRecognitionManager
 import com.youzbaki.nidham.ui.components.AutoListDialogBox
 import com.youzbaki.nidham.ui.components.BottomRowSection
@@ -66,6 +67,7 @@ fun ToDoListScreen(
     var savedLists by remember { mutableStateOf(listOf<Pair<String, String>>()) }
     val snackbarHostState = remember { SnackbarHostState() }
     var sortMode by remember { mutableStateOf("custom") }
+    var soundMode by remember { mutableStateOf("system") }
 
     var menuExpanded by remember { mutableStateOf(false) }
     var showSaveDialog by remember { mutableStateOf(false) }
@@ -192,6 +194,8 @@ fun ToDoListScreen(
         showLabels.value = dataStore.getShowLabels()
         textFieldSquared.value = dataStore.getTextFieldShape()
         onThemeChange(savedTheme, savedColor)
+        soundMode = dataStore.getSoundMode()
+        SoundManager.soundMode = soundMode
     }
 
     // Auto-save every change
@@ -254,6 +258,12 @@ fun ToDoListScreen(
     if (showSettingsScreen) {
         SettingsScreen(
             themeMode = themeMode,
+            soundMode = soundMode,
+            onSoundModeChange = { mode ->
+                soundMode = mode
+                SoundManager.soundMode = mode
+                scope.launch { dataStore.saveSoundMode(mode) }
+            },
             colorVariant = colorVariant,
             showLabels = showLabels.value,
             textFieldSquared = textFieldSquared.value,

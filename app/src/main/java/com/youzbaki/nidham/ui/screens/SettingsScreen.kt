@@ -57,6 +57,8 @@ fun SettingsScreen(
     colorVariant: String,
     showLabels: Boolean,
     textFieldSquared: Boolean,
+    soundMode: String,
+    onSoundModeChange: (String) -> Unit,
     onThemeModeChange: (String) -> Unit,
     onColorVariantChange: (String) -> Unit,
     onShowLabelsChange: (Boolean) -> Unit,
@@ -69,6 +71,7 @@ fun SettingsScreen(
 
     // Default Settings
     val DEFAULT_THEME_MODE = "system"
+    val DEFAULT_SOUND_MODE = "system"
     val DEFAULT_COLOR_VARIANT = "default"
     val DEFAULT_SHOW_LABELS = false
     val DEFAULT_TEXTFIELD_SQUARED = false
@@ -215,6 +218,7 @@ fun SettingsScreen(
                                         dataStore.saveThemeMode(mode)
                                     }
                                 },
+                                modifier = Modifier.weight(1f),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor = if (themeMode == mode) colorScheme.onSurfaceVariant
                                     else colorScheme.surface,
@@ -246,6 +250,7 @@ fun SettingsScreen(
                                         dataStore.saveShowLabels(value)
                                     }
                                 },
+                                modifier = Modifier.weight(1f),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor =
                                         if (showLabels == value)
@@ -281,6 +286,7 @@ fun SettingsScreen(
                                         dataStore.saveTextFieldShape(value)
                                     }
                                 },
+                                modifier = Modifier.weight(1f),
                                 colors = ButtonDefaults.buttonColors(
                                     containerColor =
                                         if (textFieldSquared == value)
@@ -293,6 +299,43 @@ fun SettingsScreen(
                                 )
                             ) {
                                 Text(label)
+                            }
+                        }
+                    }
+
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    Text(
+                        text = "Sound & Haptics",
+                        style = typography.titleMedium,
+                        color = colorScheme.onBackground,
+                        modifier = Modifier.padding(top = 8.dp, bottom = 4.dp)
+                    )
+
+                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                        listOf(
+                            listOf("system" to "System", "off" to "Off"),
+                            listOf("sound" to "Sound", "vibrate" to "Vibrate")
+                        ).forEach { rowItems ->
+                            Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                                rowItems.forEach { (value, label) ->
+                                    Button(
+                                        onClick = {
+                                            SoundManager.playButton(context)
+                                            onSoundModeChange(value)
+                                            scope.launch { dataStore.saveSoundMode(value) }
+                                        },
+                                        modifier = Modifier.weight(1f),
+                                        colors = ButtonDefaults.buttonColors(
+                                            containerColor = if (soundMode == value) colorScheme.onSurfaceVariant
+                                            else colorScheme.surface,
+                                            contentColor   = if (soundMode == value) colorScheme.surfaceVariant
+                                            else colorScheme.onSurface
+                                        )
+                                    ) {
+                                        Text(label)
+                                    }
+                                }
                             }
                         }
                     }
@@ -341,14 +384,17 @@ fun SettingsScreen(
 
                                         // Update UI state
                                         onThemeModeChange(DEFAULT_THEME_MODE)
+                                        onSoundModeChange(DEFAULT_SOUND_MODE)
                                         onColorVariantChange(DEFAULT_COLOR_VARIANT)
                                         onShowLabelsChange(DEFAULT_SHOW_LABELS)
                                         onShapeChange(DEFAULT_TEXTFIELD_SQUARED)
                                         selectedColor = DEFAULT_COLOR_VARIANT
+                                        SoundManager.soundMode = DEFAULT_SOUND_MODE
 
                                         // Persist
                                         scope.launch {
                                             dataStore.saveThemeMode(DEFAULT_THEME_MODE)
+                                            dataStore.saveSoundMode(DEFAULT_SOUND_MODE)
                                             dataStore.saveColorVariant(DEFAULT_COLOR_VARIANT)
                                             dataStore.saveShowLabels(DEFAULT_SHOW_LABELS)
                                             dataStore.saveTextFieldShape(DEFAULT_TEXTFIELD_SQUARED)

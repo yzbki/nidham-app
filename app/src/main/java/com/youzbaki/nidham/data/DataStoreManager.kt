@@ -16,6 +16,7 @@ class DataStoreManager(private val context: Context) {
     private val gson = Gson()
     private val LAST_OPENED_LIST_KEY = stringPreferencesKey("last_opened_list")
     private val THEME_MODE_KEY = stringPreferencesKey("theme_mode")
+    private val SOUND_MODE_KEY = stringPreferencesKey("sound_mode")
     private val COLOR_VARIANT_KEY = stringPreferencesKey("color_variant")
     private val LIST_ORDER_KEY = stringPreferencesKey("saved_list_order") // NEW
     private val SHOW_LABELS_KEY = booleanPreferencesKey("show_labels")
@@ -166,6 +167,17 @@ class DataStoreManager(private val context: Context) {
         context.dataStore.edit { prefs ->
             prefs[stringPreferencesKey("${listId}_sort")] = mode
         }
+    }
+
+    suspend fun saveSoundMode(mode: String) {
+        context.dataStore.edit { prefs ->
+            prefs[SOUND_MODE_KEY] = mode
+        }
+    }
+
+    suspend fun getSoundMode(): String {
+        val prefs = context.dataStore.data.first()
+        return prefs[SOUND_MODE_KEY] ?: "system"
     }
 
     suspend fun getSortMode(listId: String): String {
