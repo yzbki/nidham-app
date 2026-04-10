@@ -88,14 +88,12 @@ class DataStoreManager(private val context: Context) {
         }
     }
 
-    // NEW: persists the user-defined order
     suspend fun saveListOrder(orderedIds: List<String>) {
         context.dataStore.edit { prefs ->
             prefs[LIST_ORDER_KEY] = gson.toJson(orderedIds)
         }
     }
 
-    // UPDATED: returns lists in saved order; unordered entries appended at the end
     suspend fun getSavedLists(): List<Pair<String, String>> {
         val prefs = context.dataStore.data.first()
 

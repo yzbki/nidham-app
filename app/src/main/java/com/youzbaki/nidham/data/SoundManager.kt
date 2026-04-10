@@ -15,8 +15,8 @@ object SoundManager {
 
     fun init(context: Context) {
         checkSound = MediaPlayer.create(context, R.raw.check).apply { setVolume(0.2f, 0.2f) }
-        deleteSound = MediaPlayer.create(context, R.raw.delete).apply { setVolume(0.4f, 0.4f) }
-        buttonSound = MediaPlayer.create(context, R.raw.click).apply { setVolume(0.3f, 0.3f) }
+        deleteSound = MediaPlayer.create(context, R.raw.delete).apply { setVolume(0.3f, 0.3f) }
+        buttonSound = MediaPlayer.create(context, R.raw.click).apply { setVolume(0.2f, 0.2f) }
     }
 
     fun playCheck(context: Context) = play(context, checkSound, true)

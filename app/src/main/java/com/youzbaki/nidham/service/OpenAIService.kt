@@ -1,16 +1,14 @@
 package com.youzbaki.nidham.service
 
-import com.youzbaki.nidham.data.ListData
-import com.youzbaki.nidham.data.ListItem
 import com.google.android.gms.tasks.Tasks
 import com.google.firebase.appcheck.FirebaseAppCheck
 import com.google.gson.Gson
 import com.google.gson.annotations.SerializedName
+import com.youzbaki.nidham.data.ListData
+import com.youzbaki.nidham.data.ListItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import okhttp3.Interceptor
 import okhttp3.OkHttpClient
-import okhttp3.Request
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import retrofit2.http.Body
