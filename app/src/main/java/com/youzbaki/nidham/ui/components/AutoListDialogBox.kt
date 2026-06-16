@@ -33,6 +33,7 @@ import com.youzbaki.nidham.data.ListData
 import com.youzbaki.nidham.data.ListItem
 import com.youzbaki.nidham.service.AdManager
 import com.youzbaki.nidham.service.OpenAIService
+import com.youzbaki.nidham.service.SoundManager
 import kotlinx.coroutines.launch
 
 @Composable
@@ -129,6 +130,7 @@ fun AutoListDialogBox(
                         Button(
                             modifier = Modifier.weight(1f),
                             onClick = {
+                                SoundManager.playButton(context)
                                 if (isRecording) {
                                     onStopRecording()
                                 } else {
@@ -148,6 +150,7 @@ fun AutoListDialogBox(
                         Button(
                             modifier = Modifier.weight(1f),
                             onClick = {
+                                SoundManager.playButton(context)
                                 scope.launch {
                                     isLoading = true
                                     errorMessage = null
@@ -203,6 +206,7 @@ fun AutoListDialogBox(
                     Button(
                         modifier = Modifier.fillMaxWidth(),
                         onClick = {
+                            SoundManager.playButton(context)
                             onDismiss()
                             onStopRecording()
                             transcribedText.value = ""

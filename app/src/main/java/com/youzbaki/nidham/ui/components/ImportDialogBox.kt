@@ -29,7 +29,7 @@ fun ImportDialogBox(
             onDismissRequest = {
                 SoundManager.playButton(context)
                 onDismiss() },
-            confirmButton = { SoundManager.playButton(context) },
+            confirmButton = { },
             title = { Text("Import Lists", color = colorScheme.onBackground) },
             text = {
                 Column {

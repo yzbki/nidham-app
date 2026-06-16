@@ -74,7 +74,7 @@ fun LoadDialogBox(
                 SoundManager.playButton(context)
                 onDismiss()
             },
-            confirmButton = { SoundManager.playButton(context) },
+            confirmButton = { },
             title = { Text("Load List", color = colorScheme.onBackground) },
             text = {
                 Column {

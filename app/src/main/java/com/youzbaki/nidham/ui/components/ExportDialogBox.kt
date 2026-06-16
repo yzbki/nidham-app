@@ -45,7 +45,7 @@ fun ExportDialogBox(
         AlertDialog(
             containerColor = colorScheme.background,
             onDismissRequest = onDismiss,
-            confirmButton = {},
+            confirmButton = { },
             title = { Text("Export Lists", color = colorScheme.onBackground) },
             text = {
                 Column {

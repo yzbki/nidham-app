@@ -73,7 +73,7 @@ fun TaskListSection(
         Checkbox(
             checked = listData.selectAll.value,
             onCheckedChange = { isChecked ->
-                SoundManager.playButton(context)
+                SoundManager.playCheck(context)
                 pushUndo()
                 listData.selectAll.value = isChecked
                 listData.checkedStates.replaceAll { isChecked }
@@ -102,6 +102,8 @@ fun TaskListSection(
             modifier = Modifier
                 .weight(1f)
                 .onFocusChanged { _ -> pushUndo() },
+            shape = if(textFieldSquared) { TextFieldDefaults.shape }
+            else {RoundedCornerShape(32.dp)},
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = colorScheme.onBackground,
