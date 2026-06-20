@@ -177,6 +177,7 @@ fun TopBarSection(
                     )
 
                     // Save List
+                    /*
                     DropdownMenuItem(
                         text = { Text("Save", color = colorScheme.onSurface) },
                         leadingIcon = { Icon(Icons.Outlined.CheckCircle, contentDescription = null) },
@@ -186,6 +187,7 @@ fun TopBarSection(
                             onMenuExpandChange(false)
                         }
                     )
+                    */
 
                     // Load List
                     DropdownMenuItem(
