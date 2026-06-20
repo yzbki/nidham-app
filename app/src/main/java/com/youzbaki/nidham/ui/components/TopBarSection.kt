@@ -7,9 +7,13 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Sort
+import androidx.compose.material.icons.automirrored.filled.Undo
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.filled.Sort
+import androidx.compose.material.icons.filled.Undo
 import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.CheckCircle
 import androidx.compose.material.icons.outlined.Create
@@ -93,7 +97,7 @@ fun TopBarSection(
                 onUndo() },
             modifier = Modifier.align(Alignment.CenterStart)
         ) {
-            Icon(Icons.Default.Refresh, contentDescription = "Undo")
+            Icon(Icons.AutoMirrored.Filled.Undo, contentDescription = "Undo")
         }
 
         Row(
@@ -106,7 +110,7 @@ fun TopBarSection(
                     SoundManager.playButton(context)
                     sortExpanded = true }) {
                     Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
+                        imageVector = Icons.AutoMirrored.Filled.Sort,
                         contentDescription = "Sort",
                         tint = colorScheme.onBackground
                     )
@@ -159,7 +163,7 @@ fun TopBarSection(
                     // New List
                     DropdownMenuItem(
                         text = { Text("New", color = colorScheme.onSurface) },
-                        leadingIcon = { Icon(Icons.Outlined.Create, contentDescription = null) },
+                        leadingIcon = { Icon(Icons.Outlined.Create, contentDescription = "New") },
                         onClick = {
                             SoundManager.playButton(context)
                             onMenuExpandChange(false)
@@ -192,7 +196,7 @@ fun TopBarSection(
                     // Load List
                     DropdownMenuItem(
                         text = { Text("Load", color = colorScheme.onSurface) },
-                        leadingIcon = { Icon(Icons.Outlined.AccountCircle, contentDescription = null) },
+                        leadingIcon = { Icon(Icons.Outlined.AccountCircle, contentDescription = "Load") },
                         onClick = {
                             SoundManager.playButton(context)
                             scope.launch {
@@ -208,7 +212,7 @@ fun TopBarSection(
                     // Import List
                     DropdownMenuItem(
                         text = { Text("Import", color = colorScheme.onSurface) },
-                        leadingIcon = { Icon(Icons.Outlined.KeyboardArrowDown, contentDescription = null) },
+                        leadingIcon = { Icon(Icons.Outlined.KeyboardArrowDown, contentDescription = "Import") },
                         onClick = {
                             SoundManager.playButton(context)
                             onShowImportDialog()
@@ -219,7 +223,7 @@ fun TopBarSection(
                     // Export List
                     DropdownMenuItem(
                         text = { Text("Export", color = colorScheme.onSurface) },
-                        leadingIcon = { Icon(Icons.Outlined.KeyboardArrowUp, contentDescription = null) },
+                        leadingIcon = { Icon(Icons.Outlined.KeyboardArrowUp, contentDescription = "Export") },
                         onClick = {
                             SoundManager.playButton(context)
                             onShowExportDialog()
@@ -232,7 +236,7 @@ fun TopBarSection(
                     // Settings
                     DropdownMenuItem(
                         text = { Text("Settings", color = colorScheme.onSurface) },
-                        leadingIcon = { Icon(Icons.Outlined.Settings, contentDescription = null) },
+                        leadingIcon = { Icon(Icons.Outlined.Settings, contentDescription = "Settings") },
                         onClick = {
                             SoundManager.playButton(context)
                             onShowSettings()
@@ -243,7 +247,7 @@ fun TopBarSection(
                     // About
                     DropdownMenuItem(
                         text = { Text("About", color = colorScheme.onSurface) },
-                        leadingIcon = { Icon(Icons.Outlined.Info, contentDescription = null) },
+                        leadingIcon = { Icon(Icons.Outlined.Info, contentDescription = "About") },
                         onClick = {
                             SoundManager.playButton(context)
                             onShowAbout()
