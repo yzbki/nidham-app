@@ -174,8 +174,8 @@ fun AboutScreen(
                     // Developer description
                     AboutSection(title = "About the Developer") {
                         Text(
-                            text = "Nidham was developed by myself, Mustafa Al-Youzbaki, and published under " +
-                                    "my brand, Youzbaki Co. I built this app during my final year of university " +
+                            text = "Nidham was developed by Mustafa Al-Youzbaki, and published under " +
+                                    "Youzbaki Co. I built this app during my final year of university " +
                                     "to better manage my own lists and daily routine. The name \"Nidham\" comes " +
                                     "from the Arabic word for \"system\" or \"order\", reflecting the app's " +
                                     "mission to help you organize your life efficiently.",
@@ -282,7 +282,7 @@ private fun ContactRow(
         Icon(
             imageVector = icon,
             contentDescription = null,
-            tint = colorScheme.primary,
+            tint = colorScheme.onBackground,
             modifier = Modifier.width(24.dp)
         )
         Spacer(modifier = Modifier.width(12.dp))
