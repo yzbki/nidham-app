@@ -182,6 +182,7 @@ fun ToDoListScreen(
         if (lastKey != null) {
             currentListData = dataStore.loadListData(lastKey)
             sortMode = dataStore.getSortMode(lastKey)
+            if (currentListData.allChecked()) currentListData.selectAll.value = true
         } else {
             createNewList()
         }

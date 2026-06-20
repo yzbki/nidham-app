@@ -70,6 +70,7 @@ fun TaskListSection(
             .fillMaxWidth()
             .padding(bottom = 16.dp, end = 12.dp)
     ) {
+        // Select-all checkbox
         Checkbox(
             checked = listData.selectAll.value,
             onCheckedChange = { isChecked ->
