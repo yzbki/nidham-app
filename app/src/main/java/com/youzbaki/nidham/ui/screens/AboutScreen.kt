@@ -2,29 +2,43 @@ package com.youzbaki.nidham.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Link
+import androidx.compose.material.icons.filled.PhotoCamera
+import androidx.compose.material.icons.filled.Security
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.MaterialTheme.shapes
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
@@ -32,12 +46,12 @@ import androidx.compose.ui.unit.dp
 import com.youzbaki.nidham.BuildConfig
 import com.youzbaki.nidham.service.SoundManager
 
-
 @Composable
 fun AboutScreen(
     onBackClick: () -> Unit
 ) {
     val context = LocalContext.current
+    val uriHandler = LocalUriHandler.current
 
     BackHandler {
         onBackClick()
@@ -58,15 +72,17 @@ fun AboutScreen(
                     .padding(innerPadding)
                     .padding(horizontal = 16.dp)
             ) {
+                // Header
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 16.dp)
+                        .padding(vertical = 8.dp)
                 ) {
                     IconButton(
                         onClick = {
                             SoundManager.playButton(context)
-                            onBackClick() },
+                            onBackClick()
+                        },
                         modifier = Modifier.align(Alignment.CenterStart)
                     ) {
                         Icon(
@@ -88,93 +104,192 @@ fun AboutScreen(
                     )
                 }
 
-                // About Page Content
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .verticalScroll(rememberScrollState())
-                        .padding(bottom = 32.dp)
+                        .padding(top = 8.dp, bottom = 32.dp),
+                    verticalArrangement = Arrangement.spacedBy(20.dp)
                 ) {
-                    // About the App
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(vertical = 8.dp)
+                    // App name
+                    Column(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Text(
-                            text = "About Nidham",
-                            style = typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                            text = "Nidham",
+                            style = typography.headlineSmall.copy(
+                                fontFamily = FontFamily.Cursive,
+                                fontWeight = FontWeight.Bold),
                             color = colorScheme.onBackground
                         )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Surface(
+                            shape = RoundedCornerShape(50),
+                            color = colorScheme.secondaryContainer
+                        ) {
+                            Text(
+                                text = "Version ${BuildConfig.VERSION_NAME}",
+                                style = typography.labelMedium,
+                                color = colorScheme.onSecondaryContainer,
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
+                            )
+                        }
+                    }
 
-                        Spacer(modifier = Modifier.width(8.dp))
+                    HorizontalDivider(color = colorScheme.outlineVariant)
 
+                    // App description
+                    AboutSection(title = "About Nidham") {
                         Text(
-                            text = "v${BuildConfig.VERSION_NAME}",
-                            style = typography.bodySmall,
-                            color = colorScheme.onBackground.copy(alpha = 0.7f)
+                            text = "Nidham is a checklist management app designed to bring " +
+                                    "order to your daily life. Whether you're organizing your agenda, " +
+                                    "creating grocery lists, tracking workouts, or managing projects, " +
+                                    "Nidham makes list management dynamic, intuitive, and effortless.",
+                            style = typography.bodyMedium,
+                            color = colorScheme.onSurface
                         )
                     }
 
-                    Text(
-                        text = "Nidham is a versatile checklist management application designed to help you bring order to your daily life. " +
-                                "Whether it's organizing your daily agenda, creating grocery lists, tracking workouts, or managing projects, " +
-                                "Nidham offers a dynamic, intuitive experience to make list management effortless.",
-                        style = typography.bodyMedium,
-                        color = colorScheme.onSurface,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
+                    // Feature list
+                    AboutSection(title = "Features") {
+                        FeatureRow(
+                            title = "Dynamic Lists",
+                            description = "Easily edit titles, tasks, and item order, with support for multi-delete."
+                        )
+                        FeatureRow(
+                            title = "Autosave & Autoload",
+                            description = "Your lists save automatically, and the last list you opened loads right back up."
+                        )
+                        FeatureRow(
+                            title = "AI List Generator",
+                            description = "Generate lists from text prompts — from workouts and recipes to itineraries and more."
+                        )
+                        FeatureRow(
+                            title = "Voice Input",
+                            description = "Record and transcribe prompts for an even faster list creation experience."
+                        )
+                    }
 
-                    // Features
-                    Text(
-                        text = "Features",
-                        style = typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = colorScheme.onBackground,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
-                    Text(
-                        text = "• Dynamic Lists: Easily edit titles, tasks, and the order of items, with support for multi-delete.\n" +
-                                "• Autosave & Autoload: Never lose track, your lists autosave and the last opened list loads automatically.\n" +
-                                "• AI List Generator: Generate lists from text prompts, from workouts and recipes to itineraries and more.\n" +
-                                "• Voice Input: Record and transcribe prompts for an even faster list creation experience.",
-                        style = typography.bodyMedium,
-                        color = colorScheme.onSurface,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
+                    // Developer description
+                    AboutSection(title = "About the Developer") {
+                        Text(
+                            text = "Nidham was developed by myself, Mustafa Al-Youzbaki, and published under " +
+                                    "my brand, Youzbaki Co. I built this app during my final year of university " +
+                                    "to better manage my own lists and daily routine. The name \"Nidham\" comes " +
+                                    "from the Arabic word for \"system\" or \"order\", reflecting the app's " +
+                                    "mission to help you organize your life efficiently.",
+                            style = typography.bodyMedium,
+                            color = colorScheme.onSurface
+                        )
+                    }
 
-                    // About the Developer
-                    Text(
-                        text = "About the Developer",
-                        style = typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = colorScheme.onBackground,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
-                    Text(
-                        text = "Nidham was developed by myself, Mustafa Al-Youzbaki, published under my brand Youzbaki Co. " +
-                                "I created this app during my final year of university to improve how I manage my own lists and daily routine. " +
-                                "The name \"Nidham\" comes from the Arabic word for \"system\" or \"order\", " +
-                                "reflecting the app’s mission to help users organize their lives efficiently.",
-                        style = typography.bodyMedium,
-                        color = colorScheme.onSurface,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
+                    // Contact section
+                    AboutSection(title = "Connect with Me") {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            ContactRow(
+                                icon = Icons.Default.Language,
+                                label = "www.yzbki.com",
+                                onClick = { uriHandler.openUri("https://www.yzbki.com") }
+                            )
+                            ContactRow(
+                                icon = Icons.Default.PhotoCamera,
+                                label = "@musalyouzbaki",
+                                onClick = { uriHandler.openUri("https://www.instagram.com/musalyouzbaki") }
+                            )
+                            ContactRow(
+                                icon = Icons.Default.Link,
+                                label = "linkedin.com/in/mus-alyouzbaki",
+                                onClick = { uriHandler.openUri("https://www.linkedin.com/in/mus-alyouzbaki/") }
+                            )
+                        }
+                    }
 
-                    // Connect with the Developer
-                    Text(
-                        text = "Connect with Me",
-                        style = typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
-                        color = colorScheme.onBackground,
-                        modifier = Modifier.padding(vertical = 8.dp)
-                    )
-                    Text(
-                        text = "• Website: www.yzbki.com\n" +
-                                "• Instagram: @musalyouzbaki\n" +
-                                "• LinkedIn: www.linkedin.com/in/mus-alyouzbaki/",
-                        style = typography.bodyMedium,
-                        color = colorScheme.onSurface,
-                        modifier = Modifier.padding(bottom = 16.dp)
-                    )
+                    // Privacy policy
+                    AboutSection(title = "Privacy Policy") {
+                        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                            ContactRow(
+                                icon = Icons.Default.Security,
+                                label = "Click here to view the privacy policy.",
+                                onClick = { uriHandler.openUri("https://www.yzbki.com/nidham-privacy-policy") }
+                            )
+                        }
+                    }
                 }
             }
         }
+    }
+}
+
+/**
+ * A titled section used to group related content on the About screen.
+ */
+@Composable
+private fun AboutSection(
+    title: String,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        Text(
+            text = title,
+            style = typography.titleMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = colorScheme.onBackground
+        )
+        Column(content = content)
+    }
+}
+
+/**
+ * A single bolded feature title with a description underneath
+ */
+@Composable
+private fun FeatureRow(
+    title: String,
+    description: String
+) {
+    Column(modifier = Modifier.padding(bottom = 8.dp)) {
+        Text(
+            text = title,
+            style = typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+            color = colorScheme.onSurface
+        )
+        Text(
+            text = description,
+            style = typography.bodyMedium,
+            color = colorScheme.onSurface.copy(alpha = 0.8f)
+        )
+    }
+}
+
+/**
+ * A tappable row with an icon and label, used for the developer's
+ * website and social links. Opens the link in the browser/app on click.
+ */
+@Composable
+private fun ContactRow(
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
+    label: String,
+    onClick: () -> Unit
+) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(shapes.small)
+            .clickable(onClick = onClick)
+            .padding(vertical = 8.dp)
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = colorScheme.primary,
+            modifier = Modifier.width(24.dp)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = label,
+            style = typography.bodyMedium,
+            color = colorScheme.onSurface
+        )
     }
 }
