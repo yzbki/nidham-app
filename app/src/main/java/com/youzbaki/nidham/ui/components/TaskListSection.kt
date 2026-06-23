@@ -43,8 +43,10 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.platform.ViewConfiguration
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import com.youzbaki.nidham.data.DataStoreManager
@@ -179,6 +181,7 @@ fun TaskListSection(
                 val viewConfig = LocalViewConfiguration.current
                 val focusRequester = remember { FocusRequester() }
                 var isFocused by remember { mutableStateOf(false) }
+                var textFieldValue by remember { mutableStateOf(TextFieldValue(taskItem.textState.value)) }
 
                 // Drag animation scale
                 val dragScale by animateFloatAsState(
@@ -238,10 +241,11 @@ fun TaskListSection(
                                 .graphicsLayer { scaleX = checkScale.value; scaleY = checkScale.value }
                         ) {
                             TextField(
-                                value = taskItem.textState.value,
+                                value = textFieldValue,
                                 onValueChange = { newValue ->
-                                    if (newValue.length <= ListData.MAX_TASK_LENGTH) {
-                                        taskItem.textState.value = newValue
+                                    textFieldValue = newValue
+                                    if (newValue.text.length <= ListData.MAX_TASK_LENGTH) {
+                                        taskItem.textState.value = newValue.text
                                         scope.launch { dataStore.saveListData(listData) }
                                     }
                                 },
@@ -292,7 +296,13 @@ fun TaskListSection(
                                         .matchParentSize()
                                         .detectReorderAfterLongPress(state)
                                         .pointerInput(Unit) {
-                                            detectTapGestures(onTap = { focusRequester.requestFocus() })
+                                            detectTapGestures(onTap = {
+                                                textFieldValue = TextFieldValue(
+                                                    text = taskItem.textState.value,
+                                                    selection = TextRange(taskItem.textState.value.length)
+                                                )
+                                                focusRequester.requestFocus()
+                                            })
                                         }
                                 )
                             }
