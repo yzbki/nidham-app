@@ -1,13 +1,15 @@
 package com.youzbaki.nidham.ui.components
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
@@ -25,21 +27,25 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalViewConfiguration
+import androidx.compose.ui.platform.ViewConfiguration
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.youzbaki.nidham.data.DataStoreManager
 import com.youzbaki.nidham.data.ListData
@@ -49,7 +55,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import org.burnoutcrew.reorderable.ReorderableItem
 import org.burnoutcrew.reorderable.ReorderableLazyListState
-import org.burnoutcrew.reorderable.detectReorder
+import org.burnoutcrew.reorderable.detectReorderAfterLongPress
 import org.burnoutcrew.reorderable.reorderable
 
 @Composable
@@ -71,7 +77,7 @@ fun TaskListSection(
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(bottom = 16.dp, end = 12.dp)
+            .padding(bottom = 16.dp)
     ) {
         // Select-all checkbox
         Checkbox(
@@ -106,8 +112,7 @@ fun TaskListSection(
             modifier = Modifier
                 .weight(1f)
                 .onFocusChanged { _ -> pushUndo() },
-            shape = if(textFieldSquared) { TextFieldDefaults.shape }
-            else {RoundedCornerShape(32.dp)},
+            shape = if (textFieldSquared) TextFieldDefaults.shape else RoundedCornerShape(32.dp),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = colorScheme.onBackground,
@@ -166,149 +171,156 @@ fun TaskListSection(
             .fillMaxSize()
             .reorderable(state)
             .background(colorScheme.background)
-            .drawVerticalScrollbar(state.listState)
     ) {
         itemsIndexed(displayItems, key = { _, pair -> pair.second.id }) { _, (originalIndex, taskItem) ->
-        ReorderableItem(state, key = taskItem.id) {
-                val scale = remember { androidx.compose.animation.core.Animatable(1f) }
+            ReorderableItem(state, key = taskItem.id) { isDragging ->
+                val checkScale = remember { androidx.compose.animation.core.Animatable(1f) }
                 val context = androidx.compose.ui.platform.LocalContext.current
+                val viewConfig = LocalViewConfiguration.current
+                val focusRequester = remember { FocusRequester() }
+                var isFocused by remember { mutableStateOf(false) }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp, end = 12.dp)
-                        .then(if (sortMode == "custom") Modifier.detectReorder(state) else Modifier),
-                    verticalAlignment = Alignment.CenterVertically
+                // Drag animation scale
+                val dragScale by animateFloatAsState(
+                    targetValue = if (isDragging) 1.07f else 1f,
+                    animationSpec = tween(durationMillis = 150),
+                    label = "dragScale"
+                )
+
+                CompositionLocalProvider(
+                    LocalViewConfiguration provides object : ViewConfiguration by viewConfig {
+                        override val longPressTimeoutMillis get() = 200L
+                    }
                 ) {
-                    // Checkbox
-                    Checkbox(
-                        checked = listData.checkedStates.getOrElse(originalIndex) { false },
-                        onCheckedChange = { checked ->
-                            pushUndo()
-                            listData.checkedStates[originalIndex] = checked
-                            if (!checked) listData.selectAll.value = false
-                            else if (listData.allChecked()) listData.selectAll.value = true
-                            scope.launch {
-                                dataStore.saveListData(listData)
-                                scale.animateTo(0.95f, animationSpec = tween(60))
-                                scale.animateTo(1f, animationSpec = tween(60))
-                            }
-                            SoundManager.playCheck(context)
-                        },
-                        colors = CheckboxDefaults.colors(
-                            uncheckedColor = colorScheme.onBackground,
-                            checkedColor = colorScheme.background,
-                            checkmarkColor = colorScheme.onSurface
-                        )
-                    )
-
-                    // Task text field
-                    TextField(
-                        value = taskItem.textState.value,
-                        onValueChange = { newValue ->
-                            if (newValue.length <= ListData.MAX_TASK_LENGTH) {
-                                taskItem.textState.value = newValue
-                                scope.launch { dataStore.saveListData(listData) }
-                            }
-                        },
+                    Row(
                         modifier = Modifier
-                            .weight(1f)
-                            .graphicsLayer { scaleX = scale.value; scaleY = scale.value }
-                            .onFocusChanged { _ -> pushUndo() },
-                        label = if (showLabels) {
-                            { Text("Task ${originalIndex + 1}") }
-                        } else null,
-                        textStyle = MaterialTheme.typography.bodyLarge.copy(
-                            color = if (listData.checkedStates.getOrElse(originalIndex) { false })
-                                colorScheme.onSurface.copy(alpha = 0.4f)
-                            else
-                                colorScheme.onSurface,
-                            textDecoration = if (listData.checkedStates.getOrElse(originalIndex) { false })
-                                TextDecoration.LineThrough else null
-                        ),
-                        colors = TextFieldDefaults.colors(
-                            focusedContainerColor = colorScheme.surface,
-                            unfocusedContainerColor = colorScheme.surface,
-                            focusedLabelColor = colorScheme.onBackground.copy(alpha = 0.7f),
-                            unfocusedLabelColor = colorScheme.onBackground.copy(alpha = 0.7f),
-                            focusedTextColor = colorScheme.onSurface,
-                            unfocusedTextColor = colorScheme.onSurface,
-                            focusedIndicatorColor = colorScheme.background,
-                            unfocusedIndicatorColor = colorScheme.background,
-                            cursorColor = colorScheme.onSurface,
-                        ),
-                        shape = if(textFieldSquared) { TextFieldDefaults.shape }
-                        else {RoundedCornerShape(32.dp)},
-                        keyboardOptions = KeyboardOptions(
-                            capitalization = KeyboardCapitalization.Sentences,
-                            autoCorrect = true,
-                            imeAction = ImeAction.Done
-                        ),
-                        keyboardActions = KeyboardActions(onDone = {
-                            focusManager.clearFocus()
-                        })
-                    )
-
-                    // Delete button (individual)
-                    IconButton(
-                        onClick = {
-                            SoundManager.playDelete(context)
-                            pushUndo()
-                            listData.items.remove(taskItem)
-                            if (listData.checkedStates.size > originalIndex) {
-                                listData.checkedStates.removeAt(originalIndex)
-                            }
-                            if (listData.allChecked()) listData.selectAll.value = true
-                            scope.launch { dataStore.saveListData(listData) }
-                        },
-                        colors = IconButtonDefaults.iconButtonColors(contentColor = colorScheme.error)
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                            // Long-press to drag item; swipe to scroll
+                            .then(
+                                if (sortMode == "custom")
+                                    Modifier.detectReorderAfterLongPress(state)
+                                else
+                                    Modifier
+                            )
+                            // Lift animation
+                            .graphicsLayer {
+                                scaleX = dragScale
+                                scaleY = dragScale
+                            },
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete Task",
-                            tint = colorScheme.onBackground
+                        // Checkbox
+                        Checkbox(
+                            checked = listData.checkedStates.getOrElse(originalIndex) { false },
+                            onCheckedChange = { checked ->
+                                pushUndo()
+                                listData.checkedStates[originalIndex] = checked
+                                if (!checked) listData.selectAll.value = false
+                                else if (listData.allChecked()) listData.selectAll.value = true
+                                scope.launch {
+                                    dataStore.saveListData(listData)
+                                    checkScale.animateTo(0.95f, animationSpec = tween(60))
+                                    checkScale.animateTo(1f, animationSpec = tween(60))
+                                }
+                                SoundManager.playCheck(context)
+                            },
+                            colors = CheckboxDefaults.colors(
+                                uncheckedColor = colorScheme.onBackground,
+                                checkedColor = colorScheme.background,
+                                checkmarkColor = colorScheme.onSurface
+                            )
                         )
+
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .graphicsLayer { scaleX = checkScale.value; scaleY = checkScale.value }
+                        ) {
+                            TextField(
+                                value = taskItem.textState.value,
+                                onValueChange = { newValue ->
+                                    if (newValue.length <= ListData.MAX_TASK_LENGTH) {
+                                        taskItem.textState.value = newValue
+                                        scope.launch { dataStore.saveListData(listData) }
+                                    }
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .focusRequester(focusRequester)
+                                    .onFocusChanged { state ->
+                                        isFocused = state.isFocused
+                                        pushUndo()
+                                    },
+                                label = if (showLabels) {
+                                    { Text("Task ${originalIndex + 1}") }
+                                } else null,
+                                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                    color = if (listData.checkedStates.getOrElse(originalIndex) { false })
+                                        colorScheme.onSurface.copy(alpha = 0.4f)
+                                    else
+                                        colorScheme.onSurface,
+                                    textDecoration = if (listData.checkedStates.getOrElse(originalIndex) { false })
+                                        TextDecoration.LineThrough else null
+                                ),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = colorScheme.surface,
+                                    unfocusedContainerColor = colorScheme.surface,
+                                    focusedLabelColor = colorScheme.onBackground.copy(alpha = 0.7f),
+                                    unfocusedLabelColor = colorScheme.onBackground.copy(alpha = 0.7f),
+                                    focusedTextColor = colorScheme.onSurface,
+                                    unfocusedTextColor = colorScheme.onSurface,
+                                    focusedIndicatorColor = colorScheme.background,
+                                    unfocusedIndicatorColor = colorScheme.background,
+                                    cursorColor = colorScheme.onSurface,
+                                ),
+                                shape = if (textFieldSquared) TextFieldDefaults.shape else RoundedCornerShape(32.dp),
+                                keyboardOptions = KeyboardOptions(
+                                    capitalization = KeyboardCapitalization.Sentences,
+                                    autoCorrect = true,
+                                    imeAction = ImeAction.Done
+                                ),
+                                keyboardActions = KeyboardActions(onDone = {
+                                    focusManager.clearFocus()
+                                })
+                            )
+
+                            // Textfield tap detection
+                            if (!isFocused && sortMode == "custom") {
+                                Box(
+                                    modifier = Modifier
+                                        .matchParentSize()
+                                        .detectReorderAfterLongPress(state)
+                                        .pointerInput(Unit) {
+                                            detectTapGestures(onTap = { focusRequester.requestFocus() })
+                                        }
+                                )
+                            }
+                        }
+
+                        // Delete button (individual)
+                        IconButton(
+                            onClick = {
+                                SoundManager.playDelete(context)
+                                pushUndo()
+                                listData.items.remove(taskItem)
+                                if (listData.checkedStates.size > originalIndex) {
+                                    listData.checkedStates.removeAt(originalIndex)
+                                }
+                                if (listData.allChecked()) listData.selectAll.value = true
+                                scope.launch { dataStore.saveListData(listData) }
+                            },
+                            colors = IconButtonDefaults.iconButtonColors(contentColor = colorScheme.error)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Delete Task",
+                                tint = colorScheme.onBackground
+                            )
+                        }
                     }
                 }
             }
         }
     }
-}
-
-// Scrollbar modifier
-@Composable
-fun Modifier.drawVerticalScrollbar(
-    state: LazyListState,
-    width: Dp = 4.dp,
-    trackColor: Color = colorScheme.surface,         // Full-length track
-    thumbColor: Color = colorScheme.onSurface,       // Scroll indicator
-    cornerRadius: Dp = 2.dp                          // Rounded edges for both
-): Modifier = this.drawBehind {
-
-    val totalItems = state.layoutInfo.totalItemsCount
-    val visibleCount = state.layoutInfo.visibleItemsInfo.size
-    if (totalItems == 0 || visibleCount == 0) return@drawBehind
-
-    // Draw the full-height track
-    drawRoundRect(
-        color = trackColor,
-        topLeft = Offset(size.width - width.toPx(), 0f),
-        size = Size(width.toPx(), size.height),
-        cornerRadius = CornerRadius(cornerRadius.toPx(), cornerRadius.toPx())
-    )
-
-    // Calculate the thumb size & position
-    val proportion = visibleCount.toFloat() / totalItems
-    val thumbHeight = size.height * proportion
-    val scrollFraction = state.firstVisibleItemIndex.toFloat() /
-            (totalItems - visibleCount).coerceAtLeast(1)
-    val thumbOffsetY = (size.height - thumbHeight) * scrollFraction
-
-    // Draw the scroll thumb
-    drawRoundRect(
-        color = thumbColor.copy(alpha = 0.2f),
-        topLeft = Offset(size.width - width.toPx(), thumbOffsetY),
-        size = Size(width.toPx(), thumbHeight),
-        cornerRadius = CornerRadius(cornerRadius.toPx(), cornerRadius.toPx())
-    )
 }
