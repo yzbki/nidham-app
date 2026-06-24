@@ -231,22 +231,12 @@ fun ToDoListScreen(
     // Handle dynamic reordering
     val state = rememberReorderableLazyListState(
         onMove = { from, to ->
-            val tasks = currentListData.items.filterIsInstance<ListItem.TaskItem>().toMutableList()
-            val movedTask = tasks.removeAt(from.index)
-            tasks.add(to.index, movedTask)
-
-            var taskIndex = 0
-            currentListData.items.replaceAll { item ->
-                if (item is ListItem.TaskItem) tasks[taskIndex++] else item
-            }
-
+            currentListData.items.add(to.index, currentListData.items.removeAt(from.index))
             currentListData.checkedStates.add(to.index, currentListData.checkedStates.removeAt(from.index))
         },
         onDragEnd = { _, _ ->
             pushUndoState()
-            scope.launch {
-                dataStore.saveListData(currentListData)
-            }
+            scope.launch { dataStore.saveListData(currentListData) }
         }
     )
 
