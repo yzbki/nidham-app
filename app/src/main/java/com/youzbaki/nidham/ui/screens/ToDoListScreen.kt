@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
@@ -47,7 +48,6 @@ import com.youzbaki.nidham.ui.components.TaskListSection
 import com.youzbaki.nidham.ui.components.TopBarSection
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import androidx.compose.foundation.lazy.rememberLazyListState
 import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @RequiresApi(Build.VERSION_CODES.O)
