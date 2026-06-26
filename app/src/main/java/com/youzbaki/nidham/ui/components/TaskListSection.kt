@@ -280,6 +280,22 @@ fun TaskListSection(
                                 focusManager.clearFocus()
                             })
                         )
+
+                        if (!isFocused) {
+                            Box(
+                                modifier = Modifier
+                                    .matchParentSize()
+                                    .pointerInput(Unit) {
+                                        detectTapGestures(onTap = {
+                                            textFieldValue = TextFieldValue(
+                                                text = taskItem.textState.value,
+                                                selection = TextRange(taskItem.textState.value.length)
+                                            )
+                                            focusRequester.requestFocus()
+                                        })
+                                    }
+                            )
+                        }
                     }
 
                     IconButton(
