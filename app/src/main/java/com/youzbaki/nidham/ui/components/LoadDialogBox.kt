@@ -33,10 +33,9 @@ import androidx.compose.ui.unit.dp
 import com.youzbaki.nidham.service.SoundManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import org.burnoutcrew.reorderable.ReorderableItem
-import org.burnoutcrew.reorderable.detectReorder
-import org.burnoutcrew.reorderable.rememberReorderableLazyListState
-import org.burnoutcrew.reorderable.reorderable
+import androidx.compose.foundation.lazy.rememberLazyListState
+import sh.calvin.reorderable.ReorderableItem
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @Composable
 fun LoadDialogBox(
@@ -45,7 +44,7 @@ fun LoadDialogBox(
     savedLists: List<Pair<String, String>>,
     onLoad: suspend (String) -> Unit,
     onDelete: suspend (String) -> Unit,
-    onReorder: (List<String>) -> Unit, // NEW
+    onReorder: (List<String>) -> Unit,
     snackbarHostState: SnackbarHostState,
     scope: CoroutineScope
 ) {
@@ -58,14 +57,11 @@ fun LoadDialogBox(
         localItems.addAll(savedLists)
     }
 
-    val reorderState = rememberReorderableLazyListState(
-        onMove = { from, to ->
-            localItems.add(to.index, localItems.removeAt(from.index))
-        },
-        onDragEnd = { _, _ ->
-            onReorder(localItems.map { it.first })
-        }
-    )
+    val lazyListState = rememberLazyListState()
+    val reorderState = rememberReorderableLazyListState(lazyListState) { from, to ->
+        localItems.add(to.index, localItems.removeAt(from.index))
+        onReorder(localItems.map { it.first })
+    }
 
     if (showDialog) {
         AlertDialog(
@@ -82,20 +78,19 @@ fun LoadDialogBox(
                         Text("No saved lists found.", color = colorScheme.onSurface)
                     } else {
                         LazyColumn(
-                            state = reorderState.listState,
+                            state = lazyListState,
                             modifier = Modifier
                                 .heightIn(max = 320.dp)
-                                .reorderable(reorderState)
                         ) {
                             itemsIndexed(localItems, key = { _, item -> item.first }) { _, (id, title) ->
-                                ReorderableItem(reorderState, key = id) {
+                                ReorderableItem(reorderState, key = id) { _ ->
                                     Row(
                                         modifier = Modifier
                                             .fillMaxWidth()
-                                            .padding(vertical = 4.dp)
-                                            .detectReorder(reorderState),
+                                            .padding(vertical = 4.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
+
                                         Button(
                                             onClick = {
                                                 SoundManager.playButton(context)
@@ -108,7 +103,8 @@ fun LoadDialogBox(
                                             },
                                             modifier = Modifier
                                                 .weight(1f)
-                                                .padding(end = 8.dp),
+                                                .padding(end = 8.dp)
+                                                .draggableHandle(),
                                             colors = ButtonDefaults.buttonColors(
                                                 containerColor = colorScheme.surface,
                                                 contentColor = colorScheme.onSurface
@@ -116,10 +112,12 @@ fun LoadDialogBox(
                                         ) {
                                             Text(title, color = colorScheme.onSurface)
                                         }
+
                                         IconButton(
                                             onClick = {
                                                 SoundManager.playButton(context)
-                                                listToDelete = id to title },
+                                                listToDelete = id to title
+                                            },
                                             colors = IconButtonDefaults.iconButtonColors(
                                                 contentColor = colorScheme.onBackground
                                             )

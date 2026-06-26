@@ -47,7 +47,8 @@ import com.youzbaki.nidham.ui.components.TaskListSection
 import com.youzbaki.nidham.ui.components.TopBarSection
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import org.burnoutcrew.reorderable.rememberReorderableLazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import sh.calvin.reorderable.rememberReorderableLazyListState
 
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
@@ -229,16 +230,13 @@ fun ToDoListScreen(
     }
 
     // Handle dynamic reordering
-    val state = rememberReorderableLazyListState(
-        onMove = { from, to ->
-            currentListData.items.add(to.index, currentListData.items.removeAt(from.index))
-            currentListData.checkedStates.add(to.index, currentListData.checkedStates.removeAt(from.index))
-        },
-        onDragEnd = { _, _ ->
-            pushUndoState()
-            scope.launch { dataStore.saveListData(currentListData) }
-        }
-    )
+    val lazyListState = rememberLazyListState()
+    val state = rememberReorderableLazyListState(lazyListState) { from, to ->
+        currentListData.items.add(to.index, currentListData.items.removeAt(from.index))
+        currentListData.checkedStates.add(to.index, currentListData.checkedStates.removeAt(from.index))
+        pushUndoState()
+        scope.launch { dataStore.saveListData(currentListData) }
+    }
 
     // Voice manager
     val activity = LocalContext.current as Activity
@@ -363,7 +361,8 @@ fun ToDoListScreen(
                         listData = currentListData,
                         scope = scope,
                         dataStore = dataStore,
-                        state = state,
+                        lazyListState = lazyListState,
+                        reorderableState = state,
                         sortMode = sortMode,
                         pushUndo = { pushUndoState() },
                         showLabels = showLabels.value,
@@ -439,7 +438,7 @@ fun ToDoListScreen(
                             dataStore.saveLastOpenedKey(currentListData.id)
                         }
                     },
-                    onReorder = { orderedIds ->               // NEW
+                    onReorder = { orderedIds ->
                         savedLists = savedLists.sortedBy { orderedIds.indexOf(it.first) }
                         scope.launch { dataStore.saveListOrder(orderedIds) }
                     },
