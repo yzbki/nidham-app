@@ -112,6 +112,11 @@ fun TaskListSection(
                 .weight(1f)
                 .onFocusChanged { _ -> pushUndo() },
             shape = if (textFieldSquared) TextFieldDefaults.shape else RoundedCornerShape(32.dp),
+            keyboardOptions = KeyboardOptions(
+                capitalization = KeyboardCapitalization.Sentences,
+                autoCorrect = true,
+                imeAction = ImeAction.Done
+            ),
             colors = TextFieldDefaults.colors(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = colorScheme.onBackground,
