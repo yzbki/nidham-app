@@ -9,6 +9,7 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -17,6 +18,8 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
@@ -37,7 +40,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.unit.dp
 import com.youzbaki.nidham.data.ListData
 import com.youzbaki.nidham.data.ListItem
@@ -60,9 +67,52 @@ fun AutoListDialogBox(
 ) {
     val scope = rememberCoroutineScope()
     val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     var isLoading by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
-    
+
+    val isEnabled = transcribedText.value.isNotBlank() && !isLoading
+
+    // Extracted generate logic, called from both the button and keyboard action
+    val onGenerate = {
+        SoundManager.playButton(context)
+        scope.launch {
+            isLoading = true
+            errorMessage = null
+
+            val result = OpenAIService.generateListDataFromPrompt(transcribedText.value)
+            if (result != null) {
+                AdManager.showInterstitial(context as Activity) {
+                    val newList = ListData.newListData().apply {
+                        title.value = result.title.value.take(ListData.MAX_TITLE_LENGTH)
+                        items.clear()
+                        items.addAll(result.items.mapNotNull { li ->
+                            if (li is ListItem.TaskItem) {
+                                ListItem.TaskItem(
+                                    id = li.id,
+                                    textState = mutableStateOf(li.textState.value)
+                                )
+                            } else null
+                        })
+                        checkedStates.clear()
+                        val checks = result.checkedStates.take(items.filterIsInstance<ListItem.TaskItem>().size)
+                        checkedStates.addAll(checks)
+                        while (checkedStates.size < items.filterIsInstance<ListItem.TaskItem>().size) {
+                            checkedStates.add(false)
+                        }
+                    }
+                    onNewList(newList)
+                    transcribedText.value = ""
+                    onDismiss()
+                }
+            } else {
+                errorMessage = "Failed to generate response, try again."
+            }
+
+            isLoading = false
+        }
+    }
+
     if (showDialog) {
         AlertDialog(
             containerColor = colorScheme.background,
@@ -75,7 +125,11 @@ fun AutoListDialogBox(
                 Text("Auto-List", color = colorScheme.onBackground)
             },
             text = {
-                Column {
+                Column(
+                    modifier = Modifier.pointerInput(Unit) {
+                        detectTapGestures(onTap = { focusManager.clearFocus() })
+                    }
+                ) {
                     Text(
                         text = if (isRecording) "Listening..." else "Generate a list with a prompt!" +
                                 "\nRecord for voice transcription.",
@@ -96,6 +150,15 @@ fun AutoListDialogBox(
                         singleLine = false,
                         modifier = Modifier.fillMaxWidth(),
                         enabled = !isLoading,
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Sentences,
+                            autoCorrect = true,
+                            imeAction = ImeAction.Done
+                        ),
+                        keyboardActions = KeyboardActions(onDone = {
+                            if (isEnabled) onGenerate()
+                            else focusManager.clearFocus()
+                        }),
                         colors = TextFieldDefaults.colors(
                             focusedContainerColor = colorScheme.surface,
                             unfocusedContainerColor = colorScheme.surface,
@@ -159,8 +222,6 @@ fun AutoListDialogBox(
                             androidx.compose.ui.graphics.lerp(Color(0xFF9B30FF), Color(0xFF7B2FBE), gradientOffset)
                         ) else listOf(colorScheme.surface, colorScheme.surface)
 
-                        val isEnabled = transcribedText.value.isNotBlank() && !isLoading
-
                         // Generate Auto-List button
                         Box(
                             modifier = Modifier
@@ -177,44 +238,7 @@ fun AutoListDialogBox(
                                     )
                                 )
                                 .then(
-                                    if (isEnabled) Modifier.clickable {
-                                        SoundManager.playButton(context)
-                                        scope.launch {
-                                            isLoading = true
-                                            errorMessage = null
-
-                                            val result = OpenAIService.generateListDataFromPrompt(transcribedText.value)
-                                            if (result != null) {
-                                                AdManager.showInterstitial(context as Activity) {
-                                                    val newList = ListData.newListData().apply {
-                                                        title.value = result.title.value.take(ListData.MAX_TITLE_LENGTH)
-                                                        items.clear()
-                                                        items.addAll(result.items.mapNotNull { li ->
-                                                            if (li is ListItem.TaskItem) {
-                                                                ListItem.TaskItem(
-                                                                    id = li.id,
-                                                                    textState = mutableStateOf(li.textState.value)
-                                                                )
-                                                            } else null
-                                                        })
-                                                        checkedStates.clear()
-                                                        val checks = result.checkedStates.take(items.filterIsInstance<ListItem.TaskItem>().size)
-                                                        checkedStates.addAll(checks)
-                                                        while (checkedStates.size < items.filterIsInstance<ListItem.TaskItem>().size) {
-                                                            checkedStates.add(false)
-                                                        }
-                                                    }
-                                                    onNewList(newList)
-                                                    transcribedText.value = ""
-                                                    onDismiss()
-                                                }
-                                            } else {
-                                                errorMessage = "Failed to generate response, try again."
-                                            }
-
-                                            isLoading = false
-                                        }
-                                    } else Modifier
+                                    if (isEnabled) Modifier.clickable { onGenerate() } else Modifier
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
