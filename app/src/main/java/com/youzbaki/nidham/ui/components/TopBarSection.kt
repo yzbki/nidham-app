@@ -269,7 +269,7 @@ fun TopBarSection(
                             }
                             try {
                                 context.startActivity(intent)
-                            } catch (e: android.content.ActivityNotFoundException) {
+                            } catch (_: android.content.ActivityNotFoundException) {
                                 // Play Store not installed, fall back to browser
                                 context.startActivity(
                                     android.content.Intent(
