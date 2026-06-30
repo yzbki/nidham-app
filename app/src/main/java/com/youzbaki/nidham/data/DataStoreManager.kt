@@ -81,6 +81,14 @@ class DataStoreManager(private val context: Context) {
         return listData.copyId(listId)
     }
 
+    suspend fun uniqueTitle(title: String, excludeId: String): String {
+        val existing = getSavedLists().filter { it.first != excludeId }.map { it.second }
+        if (title !in existing) return title
+        var counter = 1
+        while ("$title ($counter)" in existing) counter++
+        return "$title ($counter)"
+    }
+
     suspend fun deleteListById(listId: String) {
         context.dataStore.edit { prefs ->
             prefs.remove(stringPreferencesKey("${listId}_tasks"))

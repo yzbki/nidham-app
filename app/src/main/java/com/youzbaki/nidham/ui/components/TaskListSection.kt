@@ -110,7 +110,16 @@ fun TaskListSection(
             } else null,
             modifier = Modifier
                 .weight(1f)
-                .onFocusChanged { _ -> pushUndo() },
+                .onFocusChanged { focusState ->
+                    pushUndo()
+                    if (!focusState.isFocused) {
+                        scope.launch {
+                            val resolved = dataStore.uniqueTitle(listData.title.value, listData.id)
+                            listData.title.value = resolved
+                            dataStore.saveListData(listData)
+                        }
+                    }
+                },
             shape = if (textFieldSquared) TextFieldDefaults.shape else RoundedCornerShape(32.dp),
             keyboardOptions = KeyboardOptions(
                 capitalization = KeyboardCapitalization.Sentences,
@@ -185,12 +194,12 @@ fun TaskListSection(
                         override val longPressTimeoutMillis get() = 200L
                     }
                 }
-
                 val dragScale by animateFloatAsState(
                     targetValue = if (isDragging) 1.07f else 1f,
                     animationSpec = tween(durationMillis = 150),
                     label = "dragScale"
                 )
+
                 CompositionLocalProvider(LocalViewConfiguration provides customViewConfig) {
                     Row(
                         modifier = Modifier
