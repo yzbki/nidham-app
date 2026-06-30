@@ -188,18 +188,13 @@ fun AboutScreen(
                     AboutSection(title = "Connect with Me") {
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             ContactRow(
-                                icon = Icons.Default.Language,
-                                label = "www.yzbki.com",
+                                icon = Icons.Default.Link,
+                                label = "Website: www.yzbki.com",
                                 onClick = { uriHandler.openUri("https://www.yzbki.com") }
                             )
                             ContactRow(
-                                icon = Icons.Default.PhotoCamera,
-                                label = "@musalyouzbaki",
-                                onClick = { uriHandler.openUri("https://www.instagram.com/musalyouzbaki") }
-                            )
-                            ContactRow(
                                 icon = Icons.Default.Link,
-                                label = "linkedin.com/in/mus-alyouzbaki",
+                                label = "LinkedIn: /in/mus-alyouzbaki",
                                 onClick = { uriHandler.openUri("https://www.linkedin.com/in/mus-alyouzbaki/") }
                             )
                         }
