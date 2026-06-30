@@ -21,6 +21,7 @@ import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -29,7 +30,10 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalViewConfiguration
+import androidx.compose.ui.platform.ViewConfiguration
 import androidx.compose.ui.unit.dp
 import com.youzbaki.nidham.service.SoundManager
 import kotlinx.coroutines.CoroutineScope
@@ -83,49 +87,66 @@ fun LoadDialogBox(
                                 .heightIn(max = 320.dp)
                         ) {
                             itemsIndexed(localItems, key = { _, item -> item.first }) { _, (id, title) ->
-                                ReorderableItem(reorderState, key = id) { _ ->
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(vertical = 4.dp),
-                                        verticalAlignment = Alignment.CenterVertically
-                                    ) {
-
-                                        Button(
-                                            onClick = {
-                                                SoundManager.playButton(context)
-                                                scope.launch {
-                                                    onLoad(id)
-                                                    snackbarHostState.currentSnackbarData?.dismiss()
-                                                    snackbarHostState.showSnackbar("Loaded \"$title\"")
-                                                }
-                                                onDismiss()
-                                            },
-                                            modifier = Modifier
-                                                .weight(1f)
-                                                .padding(end = 8.dp)
-                                                .draggableHandle(),
-                                            colors = ButtonDefaults.buttonColors(
-                                                containerColor = colorScheme.surface,
-                                                contentColor = colorScheme.onSurface
-                                            )
-                                        ) {
-                                            Text(title, color = colorScheme.onSurface)
+                                ReorderableItem(reorderState, key = id) { isDragging ->
+                                    val viewConfig = LocalViewConfiguration.current
+                                    val customViewConfig = remember(viewConfig) {
+                                        object : ViewConfiguration by viewConfig {
+                                            override val longPressTimeoutMillis get() = 200L
                                         }
+                                    }
 
-                                        IconButton(
-                                            onClick = {
-                                                SoundManager.playButton(context)
-                                                listToDelete = id to title
-                                            },
-                                            colors = IconButtonDefaults.iconButtonColors(
-                                                contentColor = colorScheme.onBackground
-                                            )
+                                    val dragScale by androidx.compose.animation.core.animateFloatAsState(
+                                        targetValue = if (isDragging) 1.07f else 1f,
+                                        animationSpec = androidx.compose.animation.core.tween(durationMillis = 150),
+                                        label = "dragScale"
+                                    )
+
+                                    CompositionLocalProvider(LocalViewConfiguration provides customViewConfig) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(vertical = 4.dp)
+                                                .longPressDraggableHandle()
+                                                .graphicsLayer {
+                                                    scaleX = dragScale; scaleY = dragScale
+                                                },
+                                            verticalAlignment = Alignment.CenterVertically
                                         ) {
-                                            Icon(
-                                                imageVector = Icons.Default.Delete,
-                                                contentDescription = "Delete $title"
-                                            )
+                                            Button(
+                                                onClick = {
+                                                    SoundManager.playButton(context)
+                                                    scope.launch {
+                                                        onLoad(id)
+                                                        snackbarHostState.currentSnackbarData?.dismiss()
+                                                        snackbarHostState.showSnackbar("Loaded \"$title\"")
+                                                    }
+                                                    onDismiss()
+                                                },
+                                                modifier = Modifier
+                                                    .weight(1f)
+                                                    .padding(end = 8.dp),
+                                                colors = ButtonDefaults.buttonColors(
+                                                    containerColor = colorScheme.surface,
+                                                    contentColor = colorScheme.onSurface
+                                                )
+                                            ) {
+                                                Text(title, color = colorScheme.onSurface)
+                                            }
+
+                                            IconButton(
+                                                onClick = {
+                                                    SoundManager.playButton(context)
+                                                    listToDelete = id to title
+                                                },
+                                                colors = IconButtonDefaults.iconButtonColors(
+                                                    contentColor = colorScheme.onBackground
+                                                )
+                                            ) {
+                                                Icon(
+                                                    imageVector = Icons.Default.Delete,
+                                                    contentDescription = "Delete $title"
+                                                )
+                                            }
                                         }
                                     }
                                 }

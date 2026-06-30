@@ -28,6 +28,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -43,6 +44,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalViewConfiguration
+import androidx.compose.ui.platform.ViewConfiguration
 import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardCapitalization
@@ -173,144 +175,149 @@ fun TaskListSection(
                 var isFocused by remember { mutableStateOf(false) }
                 var textFieldValue by remember { mutableStateOf(TextFieldValue(taskItem.textState.value)) }
                 val viewConfig = LocalViewConfiguration.current
+                val customViewConfig = remember(viewConfig) {
+                    object : ViewConfiguration by viewConfig {
+                        override val longPressTimeoutMillis get() = 200L
+                    }
+                }
 
                 val dragScale by animateFloatAsState(
                     targetValue = if (isDragging) 1.07f else 1f,
                     animationSpec = tween(durationMillis = 150),
                     label = "dragScale"
                 )
-
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 8.dp)
-                        .then(
-                            if (sortMode == "custom")
-                                Modifier.longPressDraggableHandle(onDragStarted = { pushUndo() })
-                            else
-                                Modifier
-                        )
-                        .graphicsLayer { scaleX = dragScale; scaleY = dragScale },
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Checkbox(
-                        checked = listData.checkedStates.getOrElse(originalIndex) { false },
-                        onCheckedChange = { checked ->
-                            pushUndo()
-                            listData.checkedStates[originalIndex] = checked
-                            if (!checked) listData.selectAll.value = false
-                            else if (listData.allChecked()) listData.selectAll.value = true
-                            scope.launch {
-                                dataStore.saveListData(listData)
-                                checkScale.animateTo(0.95f, animationSpec = tween(60))
-                                checkScale.animateTo(1f, animationSpec = tween(60))
-                            }
-                            SoundManager.playCheck(context)
-                        },
-                        colors = CheckboxDefaults.colors(
-                            uncheckedColor = colorScheme.onBackground,
-                            checkedColor = colorScheme.background,
-                            checkmarkColor = colorScheme.onSurface
-                        )
-                    )
-
-                    Box(
+                CompositionLocalProvider(LocalViewConfiguration provides customViewConfig) {
+                    Row(
                         modifier = Modifier
-                            .weight(1f)
-                            .graphicsLayer {
-                                scaleX = checkScale.value; scaleY = checkScale.value
-                            }
-                    ) {
-                        TextField(
-                            value = textFieldValue,
-                            onValueChange = { newValue ->
-                                textFieldValue = newValue
-                                if (newValue.text.length <= ListData.MAX_TASK_LENGTH) {
-                                    taskItem.textState.value = newValue.text
-                                    scope.launch { dataStore.saveListData(listData) }
-                                }
-                            },
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .focusRequester(focusRequester)
-                                .onFocusChanged { state ->
-                                    isFocused = state.isFocused
-                                    pushUndo()
-                                },
-                            label = if (showLabels) {
-                                { Text("Task ${originalIndex + 1}") }
-                            } else null,
-                            textStyle = MaterialTheme.typography.bodyLarge.copy(
-                                color = if (listData.checkedStates.getOrElse(originalIndex) { false })
-                                    colorScheme.onSurface.copy(alpha = 0.4f)
+                            .fillMaxWidth()
+                            .padding(bottom = 8.dp)
+                            .then(
+                                if (sortMode == "custom")
+                                    Modifier.longPressDraggableHandle(onDragStarted = { pushUndo() })
                                 else
-                                    colorScheme.onSurface,
-                                textDecoration = if (listData.checkedStates.getOrElse(
-                                        originalIndex
-                                    ) { false }
-                                )
-                                    TextDecoration.LineThrough else null
-                            ),
-                            colors = TextFieldDefaults.colors(
-                                focusedContainerColor = colorScheme.surface,
-                                unfocusedContainerColor = colorScheme.surface,
-                                focusedLabelColor = colorScheme.onBackground.copy(alpha = 0.7f),
-                                unfocusedLabelColor = colorScheme.onBackground.copy(alpha = 0.7f),
-                                focusedTextColor = colorScheme.onSurface,
-                                unfocusedTextColor = colorScheme.onSurface,
-                                focusedIndicatorColor = Color.Transparent,
-                                unfocusedIndicatorColor = Color.Transparent,
-                                cursorColor = colorScheme.onSurface,
-                            ),
-                            shape = if (textFieldSquared) TextFieldDefaults.shape else RoundedCornerShape(
-                                32.dp
-                            ),
-                            keyboardOptions = KeyboardOptions(
-                                capitalization = KeyboardCapitalization.Sentences,
-                                autoCorrect = true,
-                                imeAction = ImeAction.Done
-                            ),
-                            keyboardActions = KeyboardActions(onDone = {
-                                focusManager.clearFocus()
-                            })
+                                    Modifier
+                            )
+                            .graphicsLayer { scaleX = dragScale; scaleY = dragScale },
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Checkbox(
+                            checked = listData.checkedStates.getOrElse(originalIndex) { false },
+                            onCheckedChange = { checked ->
+                                pushUndo()
+                                listData.checkedStates[originalIndex] = checked
+                                if (!checked) listData.selectAll.value = false
+                                else if (listData.allChecked()) listData.selectAll.value = true
+                                scope.launch {
+                                    dataStore.saveListData(listData)
+                                    checkScale.animateTo(0.95f, animationSpec = tween(60))
+                                    checkScale.animateTo(1f, animationSpec = tween(60))
+                                }
+                                SoundManager.playCheck(context)
+                            },
+                            colors = CheckboxDefaults.colors(
+                                uncheckedColor = colorScheme.onBackground,
+                                checkedColor = colorScheme.background,
+                                checkmarkColor = colorScheme.onSurface
+                            )
                         )
 
-                        if (!isFocused) {
-                            Box(
-                                modifier = Modifier
-                                    .matchParentSize()
-                                    .pointerInput(Unit) {
-                                        detectTapGestures(onTap = {
-                                            textFieldValue = TextFieldValue(
-                                                text = taskItem.textState.value,
-                                                selection = TextRange(taskItem.textState.value.length)
-                                            )
-                                            focusRequester.requestFocus()
-                                        })
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .graphicsLayer {
+                                    scaleX = checkScale.value; scaleY = checkScale.value
+                                }
+                        ) {
+                            TextField(
+                                value = textFieldValue,
+                                onValueChange = { newValue ->
+                                    textFieldValue = newValue
+                                    if (newValue.text.length <= ListData.MAX_TASK_LENGTH) {
+                                        taskItem.textState.value = newValue.text
+                                        scope.launch { dataStore.saveListData(listData) }
                                     }
+                                },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .focusRequester(focusRequester)
+                                    .onFocusChanged { state ->
+                                        isFocused = state.isFocused
+                                        pushUndo()
+                                    },
+                                label = if (showLabels) {
+                                    { Text("Task ${originalIndex + 1}") }
+                                } else null,
+                                textStyle = MaterialTheme.typography.bodyLarge.copy(
+                                    color = if (listData.checkedStates.getOrElse(originalIndex) { false })
+                                        colorScheme.onSurface.copy(alpha = 0.4f)
+                                    else
+                                        colorScheme.onSurface,
+                                    textDecoration = if (listData.checkedStates.getOrElse(
+                                            originalIndex
+                                        ) { false }
+                                    )
+                                        TextDecoration.LineThrough else null
+                                ),
+                                colors = TextFieldDefaults.colors(
+                                    focusedContainerColor = colorScheme.surface,
+                                    unfocusedContainerColor = colorScheme.surface,
+                                    focusedLabelColor = colorScheme.onBackground.copy(alpha = 0.7f),
+                                    unfocusedLabelColor = colorScheme.onBackground.copy(alpha = 0.7f),
+                                    focusedTextColor = colorScheme.onSurface,
+                                    unfocusedTextColor = colorScheme.onSurface,
+                                    focusedIndicatorColor = Color.Transparent,
+                                    unfocusedIndicatorColor = Color.Transparent,
+                                    cursorColor = colorScheme.onSurface,
+                                ),
+                                shape = if (textFieldSquared) TextFieldDefaults.shape else RoundedCornerShape(
+                                    32.dp
+                                ),
+                                keyboardOptions = KeyboardOptions(
+                                    capitalization = KeyboardCapitalization.Sentences,
+                                    autoCorrect = true,
+                                    imeAction = ImeAction.Done
+                                ),
+                                keyboardActions = KeyboardActions(onDone = {
+                                    focusManager.clearFocus()
+                                })
+                            )
+
+                            if (!isFocused) {
+                                Box(
+                                    modifier = Modifier
+                                        .matchParentSize()
+                                        .pointerInput(Unit) {
+                                            detectTapGestures(onTap = {
+                                                textFieldValue = TextFieldValue(
+                                                    text = taskItem.textState.value,
+                                                    selection = TextRange(taskItem.textState.value.length)
+                                                )
+                                                focusRequester.requestFocus()
+                                            })
+                                        }
+                                )
+                            }
+                        }
+
+                        IconButton(
+                            onClick = {
+                                SoundManager.playDelete(context)
+                                pushUndo()
+                                listData.items.remove(taskItem)
+                                if (listData.checkedStates.size > originalIndex) {
+                                    listData.checkedStates.removeAt(originalIndex)
+                                }
+                                if (listData.allChecked()) listData.selectAll.value = true
+                                scope.launch { dataStore.saveListData(listData) }
+                            },
+                            colors = IconButtonDefaults.iconButtonColors(contentColor = colorScheme.error)
+                        ) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Delete Task",
+                                tint = colorScheme.onBackground
                             )
                         }
-                    }
-
-                    IconButton(
-                        onClick = {
-                            SoundManager.playDelete(context)
-                            pushUndo()
-                            listData.items.remove(taskItem)
-                            if (listData.checkedStates.size > originalIndex) {
-                                listData.checkedStates.removeAt(originalIndex)
-                            }
-                            if (listData.allChecked()) listData.selectAll.value = true
-                            scope.launch { dataStore.saveListData(listData) }
-                        },
-                        colors = IconButtonDefaults.iconButtonColors(contentColor = colorScheme.error)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Delete,
-                            contentDescription = "Delete Task",
-                            tint = colorScheme.onBackground
-                        )
                     }
                 }
             }
