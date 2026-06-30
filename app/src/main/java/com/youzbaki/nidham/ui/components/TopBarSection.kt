@@ -16,6 +16,7 @@ import androidx.compose.material.icons.outlined.Info
 import androidx.compose.material.icons.outlined.KeyboardArrowDown
 import androidx.compose.material.icons.outlined.KeyboardArrowUp
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.ColorScheme
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -43,6 +44,7 @@ import com.youzbaki.nidham.data.ListData
 import com.youzbaki.nidham.service.SoundManager
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import androidx.core.net.toUri
 
 @Composable
 fun TopBarSection(
@@ -247,6 +249,35 @@ fun TopBarSection(
                             SoundManager.playButton(context)
                             onShowAbout()
                             onMenuExpandChange(false)
+                        }
+                    )
+
+                    HorizontalDivider()
+
+                    // Rate
+                    DropdownMenuItem(
+                        text = { Text("Rate", color = colorScheme.onSurface) },
+                        leadingIcon = { Icon(Icons.Outlined.Star, contentDescription = "Rate") },
+                        onClick = {
+                            SoundManager.playButton(context)
+                            onMenuExpandChange(false)
+                            val uri = "market://details?id=${context.packageName}".toUri()
+                            val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, uri).apply {
+                                addFlags(android.content.Intent.FLAG_ACTIVITY_NO_HISTORY or
+                                        android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT or
+                                        android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
+                            }
+                            try {
+                                context.startActivity(intent)
+                            } catch (e: android.content.ActivityNotFoundException) {
+                                // Play Store not installed, fall back to browser
+                                context.startActivity(
+                                    android.content.Intent(
+                                        android.content.Intent.ACTION_VIEW,
+                                        "https://play.google.com/store/apps/details?id=${context.packageName}".toUri()
+                                    )
+                                )
+                            }
                         }
                     )
                 }
