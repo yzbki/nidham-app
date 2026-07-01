@@ -126,12 +126,12 @@ fun AboutScreen(
                         Spacer(modifier = Modifier.height(4.dp))
                         Surface(
                             shape = RoundedCornerShape(50),
-                            color = colorScheme.secondaryContainer
+                            color = colorScheme.surface
                         ) {
                             Text(
                                 text = "Version ${BuildConfig.VERSION_NAME}",
                                 style = typography.labelMedium,
-                                color = colorScheme.onSecondaryContainer,
+                                color = colorScheme.onSurface,
                                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp)
                             )
                         }
