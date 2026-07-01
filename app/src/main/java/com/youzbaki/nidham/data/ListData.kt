@@ -39,7 +39,7 @@ class ListData(var id: String = UUID.randomUUID().toString()) {
 
     companion object {
         const val MAX_TITLE_LENGTH = 50
-        const val MAX_TASKS = 100
+        const val MAX_TASKS = 1000
         const val MAX_TASK_LENGTH = 200
 
         fun newListData(): ListData = ListData().apply {
