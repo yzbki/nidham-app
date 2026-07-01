@@ -18,10 +18,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Link
-import androidx.compose.material.icons.filled.PhotoCamera
 import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -155,7 +155,7 @@ fun AboutScreen(
                     AboutSection(title = "Features") {
                         FeatureRow(
                             title = "Dynamic Lists",
-                            description = "Easily edit titles, tasks, and item order, with support for multi-delete."
+                            description = "Reorder tasks with a long press, check off items, and multi-delete with ease."
                         )
                         FeatureRow(
                             title = "Autosave & Autoload",
@@ -163,7 +163,7 @@ fun AboutScreen(
                         )
                         FeatureRow(
                             title = "AI List Generator",
-                            description = "Generate lists from text prompts — from workouts and recipes to itineraries and more."
+                            description = "Generate lists from text prompts, from workouts and recipes to itineraries and more."
                         )
                         FeatureRow(
                             title = "Voice Input",
@@ -175,8 +175,8 @@ fun AboutScreen(
                     AboutSection(title = "About the Developer") {
                         Text(
                             text = "Nidham was developed by Mustafa Al-Youzbaki, and published under " +
-                                    "Youzbaki Co. I built this app during my final year of university " +
-                                    "to better manage my own lists and daily routine. The name \"Nidham\" comes " +
+                                    "Youzbaki Co. I built this app in my final year of university " +
+                                    "to better manage my tasks and daily routine. The name \"Nidham\" comes " +
                                     "from the Arabic word for \"system\" or \"order\", reflecting the app's " +
                                     "mission to help you organize your life efficiently.",
                             style = typography.bodyMedium,
@@ -188,13 +188,18 @@ fun AboutScreen(
                     AboutSection(title = "Connect with Me") {
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             ContactRow(
-                                icon = Icons.Default.Link,
-                                label = "Website: www.yzbki.com",
+                                icon = Icons.Default.Language,
+                                label = "yzbki.com",
                                 onClick = { uriHandler.openUri("https://www.yzbki.com") }
                             )
                             ContactRow(
+                                icon = Icons.Default.Code,
+                                label = "github.com/yzbki",
+                                onClick = { uriHandler.openUri("https://github.com/yzbki") }
+                            )
+                            ContactRow(
                                 icon = Icons.Default.Link,
-                                label = "LinkedIn: /in/mus-alyouzbaki",
+                                label = "linkedin.com/in/mus-alyouzbaki",
                                 onClick = { uriHandler.openUri("https://www.linkedin.com/in/mus-alyouzbaki/") }
                             )
                         }
@@ -205,7 +210,7 @@ fun AboutScreen(
                         Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
                             ContactRow(
                                 icon = Icons.Default.Security,
-                                label = "Click here to view the privacy policy.",
+                                label = "View Privacy Policy",
                                 onClick = { uriHandler.openUri("https://www.yzbki.com/nidham-privacy-policy") }
                             )
                         }
