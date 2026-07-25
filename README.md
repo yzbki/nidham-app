@@ -6,12 +6,12 @@ Nidham is a simple checklist management application for Android that helps users
 
 <!-- Screenshots side by side -->
 <p>
-  <img src="assets/screenshot_1.png" width="220" alt="Screenshot 1" style="margin-right:10px;" />
-  <img src="assets/screenshot_2.png" width="220" alt="Screenshot 2" style="margin-right:10px;" />
-  <img src="assets/screenshot_3.png" width="220" alt="Screenshot 3" style="margin-right:10px;" />
-  <img src="assets/screenshot_4.png" width="220" alt="Screenshot 4" style="margin-right:10px;" />
-  <img src="assets/screenshot_5.png" width="220" alt="Screenshot 5" style="margin-right:10px;" />
-  <img src="assets/screenshot_6.png" width="220" alt="Screenshot 6" />
+  <img src="assets/psl_01.png" width="220" alt="Screenshot 1" style="margin-right:10px;" />
+  <img src="assets/psl_02.png" width="220" alt="Screenshot 2" style="margin-right:10px;" />
+  <img src="assets/psl_03.png" width="220" alt="Screenshot 3" style="margin-right:10px;" />
+  <img src="assets/psl_04.png" width="220" alt="Screenshot 4" style="margin-right:10px;" />
+  <img src="assets/psl_05.png" width="220" alt="Screenshot 5" style="margin-right:10px;" />
+  <img src="assets/psl_06.png" width="220" alt="Screenshot 6" />
 </p>
 
 ## Installation
